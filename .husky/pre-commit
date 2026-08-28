@@ -1,0 +1,2 @@
+# Runs ESLint on the whole project before each commit
+npm run lint
