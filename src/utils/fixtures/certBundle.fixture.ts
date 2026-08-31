@@ -1,0 +1,39 @@
+import type { CertBundle } from '../../types'
+
+export const validCertBundle: CertBundle = {
+  version: 2,
+  exam: {
+    name: 'Fixture Certification',
+    code: 'FIX-001',
+    totalQuestions: 2,
+    timeLimitMinutes: 60,
+    passingScore: { passingScore: 700, scale: 1000 },
+    weights: { Security: 60, Deployment: 40 },
+    instructions: 'Answer all questions.',
+  },
+  themes: {
+    services: ['lambda', 's3'],
+    concepts: ['encryption'],
+  },
+  questions: [
+    {
+      id: 'q1',
+      question: 'Single-select fixture question?',
+      options: ['Option A', 'Option B', 'Option C'],
+      answers: 'B',
+      topic: 'Security',
+      themes: { services: ['lambda'], concepts: ['encryption'] },
+    },
+    {
+      id: 'q2',
+      question: 'Multi-select fixture question?',
+      options: ['Option A', 'Option B', 'Option C', 'Option D'],
+      answers: ['A', 'C'],
+      topic: 'Deployment',
+    },
+  ],
+}
+
+export function cloneBundle(bundle: CertBundle = validCertBundle): CertBundle {
+  return JSON.parse(JSON.stringify(bundle)) as CertBundle
+}
