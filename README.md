@@ -10,7 +10,7 @@ Built with **Vue 3 + TypeScript + Vite**. Fully static, hostable anywhere, local
 - **DVA-C02 included** — 555 real exam questions, tagged by topic, services, concepts, and question types.
 - **Want another certification?** — open a GitHub issue to request it. A maintainer or contributor converts the exam using `SKILL.md` and ships it as a new built-in bundle.
 - **Local-first progress** — quiz history, wrong answers, and flagged questions are stored in your browser. Export/import as a JSON file for backup. No account needed.
-- **Dark / light mode** — the UI follows your OS appearance setting automatically, no toggle needed.
+- **Dark / light mode** — dark by default with a manual sun/moon switch, remembered across visits.
 - **Replay modes** — practice only what you got wrong, only flagged questions, only unattempted ones, or sample by the real exam's domain weights. Questions are always shuffled. Two modes: **Preparation** (no timer, immediate feedback) and **Exam** (timed, deferred feedback, real-exam simulation preset).
 
 ## Documentation

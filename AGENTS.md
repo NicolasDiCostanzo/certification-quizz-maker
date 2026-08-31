@@ -14,7 +14,7 @@ This file gives any LLM / coding agent (Claude Code, Codex, Cursor, Cline, Gemin
 - **Vitest** (jsdom environment) + `@vue/test-utils` for tests
 - **ESLint** (flat config, `eslint-plugin-vue` + `@vue/eslint-config-typescript`)
 - **Husky** pre-commit hooks
-- **Dark/light mode** follows the OS preference automatically — no manual toggle, no theme state: `color-scheme: light dark` on `:root` plus a `@media (prefers-color-scheme: dark)` override of the CSS custom properties in `src/styles/tokens.css` (the single source of truth for theme tokens, imported by `src/style.css`). New styles must use those custom properties (`--text`, `--text-h`, `--bg`, `--border`, `--accent`, `--accent-bg`, `--shadow`, …) instead of hardcoded colors so both themes keep working.
+- **Dark/light mode** — dark by default, with a manual two-state sun/moon switch (`App.vue` header) persisted in the `userPreferences` Pinia store: it sets `data-theme` to `dark`/`light` on `<html>` (via `useThemeMode`), and `src/styles/tokens.css` (the single source of truth for theme tokens, imported by `src/style.css`). New styles must use those custom properties (`--text`, `--text-h`, `--bg`, `--border`, `--accent`, `--accent-bg`, `--shadow`, …) instead of hardcoded colors so both themes keep working. User-facing strings live in `src/texts/en.ts`, SVG icons in `src/components/icons/`, never inline in components.
 
 ## Commands
 
