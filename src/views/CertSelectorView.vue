@@ -1,5 +1,12 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import CertSelector from '../components/CertSelector.vue';
+import { useQuizLoader } from '../composables/useQuizLoader';
+
+const { availableCerts } = useQuizLoader()
+</script>
 
 <template>
-  <div>Cert selector — built in step 9</div>
+  <section id="center">
+    <CertSelector :certs="availableCerts" />
+  </section>
 </template>

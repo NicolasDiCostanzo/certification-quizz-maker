@@ -1,0 +1,17 @@
+export const texts = {
+  appTitle: 'Quiz',
+  selectCertification: 'Choose your certification',
+  emptyStateBefore: 'No certification bundles loaded. Valid bundles placed in',
+  emptyStateHighlight: 'src/assets/',
+  emptyStateAfter: 'are discovered automatically at build time.',
+  questionBankLabel: 'Question bank',
+  realExamLabel: 'Real exam',
+  realExamValue: (count: number) => `${count} question${count === 1 ? '' : 's'}`,
+  timeLimitLabel: 'Time limit',
+  timeLimitValue: (minutes: number) => `${minutes} minute${minutes === 1 ? '' : 's'}`,
+  passingScoreLabel: 'Passing score',
+  startQuizCta: 'Start quiz →',
+  requestNoticeBefore: 'Missing a certification? There is no in-app upload —',
+  requestNoticeLink: 'open a GitHub issue',
+  requestNoticeAfter: 'to request it as a new built-in bundle.',
+}

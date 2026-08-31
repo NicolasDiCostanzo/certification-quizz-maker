@@ -63,16 +63,26 @@ Single source of truth for every feature discussed for this project, with its cu
 
 Implementation order (each step depends on the previous):
 
-1. ☑ `SKILL.md` — AI authoring spec (Rule #1 stop-and-ask, schema, taxonomies, worked example, DVA-C02 reference)
-2. ☑ `src/types.ts` — all shared interfaces
-3. ☑ Migrate `src/assets/DVA-C02 questions.json` to the cert-bundle schema (555 questions preserved; validate JSON) — done via `scripts/migrate-cert-bundle.py`; 8 image-source questions (75, 139, 235, 441, 452, 481, 501, 541) intentionally keep empty options until real content is authored
-4. ☑ `src/utils/schemaValidator.ts` — pure validator
-5. ☑ `src/stores/userProgress.ts` — Pinia store with `persist: true`, export/import
-6. ☑ `src/composables/useQuizLoader.ts` — build-time discovery (`import.meta.glob`) and validation only; no runtime upload or client-side cert storage
-7. ☐ `src/components/CertSelector.vue` — home screen, including the "request a cert via GitHub issue" notice
-8. ☐ `src/main.ts` + `package.json` — Pinia + persistedstate wiring
-9. ☐ `npm install` && `npm run build` passes
-10. ☐ Smoke test: DVA-C02 loads with 555 questions, 4 topics, 3 theme groups; progress survives refresh; export→import round-trips
+✅ Test harness setup (Vitest)
+✅ SKILL.md — AI authoring spec
+✅ src/types.ts — shared interfaces
+✅ src/utils/schemaValidator.ts — validator + isQuestionAnswerable
+✅ src/utils/markdownImage.ts — inline ![alt](url) parsing
+✅ src/composables/useQuizLoader.ts — build-time cert discovery/validation
+✅ src/stores/userProgress.ts — Pinia store (attempts/correct/wrong/flag, export/import)
+✅ Router + app shell — vue-router, remove HelloWorld.vue boilerplate, nav guard
+✅ CertSelectorView.vue — home screen + "request a cert via GitHub issue" notice
+☐ src/utils/sampling.ts — exam-ratio-weighted question sampling
+☐ src/utils/filterPool.ts — theme include/exclude (AND/OR) + replay-mode filtering
+☐ QuizConfigureView.vue — filters, mode, count, replay-mode UI
+☐ src/stores/quizSession.ts — active quiz session state (sessionStorage-persisted)
+☐ src/utils/scoring.ts — pass/fail + projected scaled score
+☐ QuizSessionView.vue — question rendering, timer, flag, feedback
+☐ QuizReviewView.vue — score banner, per-question review
+☐ Progress export/import UI (on CertSelectorView.vue)
+☐ Manual light/dark theme toggle + real style.css
+☐ Visual polish pass (transitions, cross-screen consistency)
+☐ Final integration (build/typecheck/lint/test green + full manual smoke test)
 
 ## Deliberate non-features
 
