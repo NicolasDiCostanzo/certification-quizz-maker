@@ -67,7 +67,7 @@ Implementation order (each step depends on the previous):
 2. ☑ `src/types.ts` — all shared interfaces
 3. ☑ Migrate `src/assets/DVA-C02 questions.json` to the cert-bundle schema (555 questions preserved; validate JSON) — done via `scripts/migrate-cert-bundle.py`; 8 image-source questions (75, 139, 235, 441, 452, 481, 501, 541) intentionally keep empty options until real content is authored
 4. ☑ `src/utils/schemaValidator.ts` — pure validator
-5. ☐ `src/stores/userProgress.ts` — Pinia store with `persist: true`, export/import
+5. ☑ `src/stores/userProgress.ts` — Pinia store with `persist: true`, export/import
 6. ☑ `src/composables/useQuizLoader.ts` — build-time discovery (`import.meta.glob`) and validation only; no runtime upload or client-side cert storage
 7. ☐ `src/components/CertSelector.vue` — home screen, including the "request a cert via GitHub issue" notice
 8. ☐ `src/main.ts` + `package.json` — Pinia + persistedstate wiring
