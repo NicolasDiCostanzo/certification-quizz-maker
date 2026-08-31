@@ -99,4 +99,26 @@ describe('userProgress store', () => {
     // a different exam code is added without disturbing DVA-C02
     expect(store.byExamCode['SAA-C03'].q1.attempts).toBe(1)
   })
+
+  it('import rejects files with an unsupported format or version without applying them', () => {
+    const store = useUserProgressStore()
+    store.recordAnswer('DVA-C02', 'q1', true)
+
+    const incompatible = (overrides: Record<string, unknown>) =>
+      ({
+        ...store.exportProgress(),
+        byExamCode: {
+          'DVA-C02': {
+            q1: { questionId: 'q1', attempts: 99, timesCorrect: 99, timesWrong: 0, flagged: false, lastSeenAt: 9999 },
+          },
+        },
+        ...overrides,
+      }) as unknown as ProgressExportFile
+
+    store.importProgress(incompatible({ format: 'something-else' }))
+    store.importProgress(incompatible({ version: 2 }))
+
+    expect(store.byExamCode['DVA-C02'].q1.attempts).toBe(1)
+  })
 })
+
