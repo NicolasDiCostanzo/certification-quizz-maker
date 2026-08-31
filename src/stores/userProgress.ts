@@ -47,13 +47,10 @@ export const useUserProgressStore = defineStore('userProgress', {
         format: EXPORT_FORMAT,
         version: EXPORT_VERSION,
         exportedAt: new Date().toISOString(),
-        // JSON round-trip rather than structuredClone: `this.byExamCode` is a Vue
-        // reactive proxy, which structuredClone cannot clone directly.
         byExamCode: JSON.parse(JSON.stringify(this.byExamCode)) as UserProgress['byExamCode'],
       }
     },
 
-    /** Merges per-question: the entry with the newest `lastSeenAt` wins. */
     importProgress(file: ProgressExportFile) {
       if (file.format !== EXPORT_FORMAT || file.version !== EXPORT_VERSION) return
       for (const [examCode, questions] of Object.entries(file.byExamCode)) {

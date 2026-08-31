@@ -18,11 +18,6 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((entry) => typeof entry === 'string')
 }
 
-/**
- * A question with no non-empty option can't be answered. Such questions are
- * kept in the bundle (they reappear once real content is authored) but are
- * excluded from the active quiz pool by the loader.
- */
 export function isQuestionAnswerable(question: Question): boolean {
   return question.options.some((option) => option.trim().length > 0)
 }

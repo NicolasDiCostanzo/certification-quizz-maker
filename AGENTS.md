@@ -74,7 +74,7 @@ Known quirk: questions with no non-empty `options` are kept in the bundle but ex
 - TypeScript strict; shared types live in `src/types.ts` — extend them there rather than redefining interfaces locally.
 - Tests are colocated with the code (e.g. `src/stores/userProgress.test.ts`, `src/router/index.test.ts`) using Vitest; add/adjust tests for behavior changes.
 - `src/assets/**` is ESLint-ignored (the question banks are data, not code).
-- Explanatory comments in this codebase state *why*, not *what* — keep that style.
+- Source files are kept **comment-free**: design rationale lives in `AGENTS.md`, `docs/`, and `SKILL.md` — don't add explanatory comments to code, put new rationale in the docs instead.
 - Branch naming follows `feat/…` style; commits go through Husky hooks.
 
 ## Where to look first

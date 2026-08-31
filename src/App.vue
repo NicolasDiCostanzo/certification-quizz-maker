@@ -1,7 +1,8 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <HelloWorld />
+  <header class="app-header">
+    <RouterLink to="/" class="app-title">Quiz</RouterLink>
+  </header>
+  <main>
+    <RouterView />
+  </main>
 </template>
