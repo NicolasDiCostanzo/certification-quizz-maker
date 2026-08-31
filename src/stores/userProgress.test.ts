@@ -92,11 +92,8 @@ describe('userProgress store', () => {
 
     store.importProgress(incoming)
 
-    // q1: incoming is newer -> incoming wins
     expect(store.byExamCode['DVA-C02'].q1.attempts).toBe(9)
-    // q2: local is newer -> local is kept
     expect(store.byExamCode['DVA-C02'].q2.attempts).toBe(5)
-    // a different exam code is added without disturbing DVA-C02
     expect(store.byExamCode['SAA-C03'].q1.attempts).toBe(1)
   })
 

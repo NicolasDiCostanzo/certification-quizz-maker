@@ -36,10 +36,6 @@ if (Object.keys(certLoadIssues).length > 0) {
   }
 }
 
-/**
- * Cert bundles are discovered once at build time (no runtime upload). A bundle
- * that fails validation is excluded and logged rather than crashing the app.
- */
 export function useQuizLoader() {
   function getCert(examCode: string): CertBundle | undefined {
     return availableCerts.find((cert) => cert.exam.code === examCode)

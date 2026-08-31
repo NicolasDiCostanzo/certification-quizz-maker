@@ -1,5 +1,3 @@
-// Cert bundle (see docs/DATA-MODEL.md)
-
 export interface PassingScore {
   passingScore: number
   scale?: number
@@ -38,8 +36,6 @@ export interface CertBundle {
   questions: Question[]
 }
 
-// User progress (see docs/DATA-MODEL.md)
-
 export interface QuestionProgress {
   questionId: string
   attempts: number
@@ -59,8 +55,6 @@ export interface ProgressExportFile {
   exportedAt: string
   byExamCode: UserProgress['byExamCode']
 }
-
-// Quiz configuration and session
 
 export type QuizMode = 'preparation' | 'exam'
 export type ReplayMode = 'all' | 'wrong' | 'flagged' | 'unattempted'

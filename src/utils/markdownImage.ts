@@ -13,12 +13,6 @@ export type InlineSegment = TextSegment | ImageSegment
 
 const IMAGE_PATTERN = /!\[([^\]]*)\]\(([^)]+)\)/g
 
-/**
- * Splits option/question text into text and image segments, recognizing only
- * the narrow `![alt](url)` markdown-image syntax (per docs/DATA-MODEL.md —
- * options are plain text except for inline images). Anything else, including
- * malformed image syntax, is left as literal text.
- */
 export function parseInlineSegments(text: string): InlineSegment[] {
   const segments: InlineSegment[] = []
   let lastIndex = 0
