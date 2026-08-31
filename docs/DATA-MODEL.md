@@ -6,7 +6,7 @@ This document specifies the two data structures the app works with: the **cert b
 
 ## Cert bundle
 
-One JSON file per certification, named `<CODE> questions.json` (e.g. `DVA-C02 questions.json`). The app auto-discovers all files matching `/src/assets/* questions.json` at build time, and accepts additional bundles at runtime via the upload screen (stored in IndexedDB).
+One JSON file per certification, named `<CODE> questions.json` (e.g. `DVA-C02 questions.json`). The app auto-discovers all files matching `/src/assets/* questions.json` at build time — this is the only way a bundle enters the app. There is no runtime upload or client-side storage of bundles; a certification that isn't built in yet is requested via a GitHub issue and shipped as a new file here (see `SKILL.md` for the maintainer-side conversion spec).
 
 ### Top-level shape
 
@@ -193,5 +193,4 @@ Note: this export's `version` is unrelated to the cert bundle's top-level `versi
 | Store | Limit | Usage |
 |---|---|---|
 | localStorage (progress) | ~5 MB | Progress is tiny (a few bytes per question); safe even with thousands of questions. |
-| IndexedDB (uploaded certs) | 50 MB+ | Handles multi-MB cert bundles comfortably. |
 
