@@ -75,7 +75,7 @@ No such disclaimer is needed for percentage-based certs (no `scale`), since ther
 
 ### `themes` — taxonomy registry
 
-A dictionary mapping **theme groups** to their possible **values**. Each key is also the name of the flat question field that carries that group's tags (`"services"`, `"concepts"`, `"questionTypes"` in the built-in bank); the key becomes the filter-group label in the UI and its values become the filter options.
+A dictionary mapping **theme groups** to their possible **values**. Each key is also the key used inside a question's nested `themes` object (`"services"`, `"concepts"`, `"questionTypes"` in the built-in bank — see `questions[]` below); the key becomes the filter-group label in the UI and its values become the filter options.
 
 ```jsonc
 {
@@ -124,13 +124,11 @@ A dictionary mapping **theme groups** to their possible **values**. Each key is 
 | `explanation` | string | optional | Rationale for the correct answer. Shown as immediate feedback in preparation mode and on the end-of-quiz review screen in both modes. |
 | `url` | string | optional | Source/discussion link. Omit the field entirely if unavailable (never `null` or `""`). |
 | `promptImages` | string[] | optional | Images referenced **by the question prompt** (diagrams, screenshots). URLs or data URIs. Per-option images do **not** go here — they are inline markdown in `options`. |
-| `services` | string[] | optional | AWS services the question involves. Values must exist in `themes.services`. Omit the field entirely when empty (never `[]`). |
-| `concepts` | string[] | optional | Concepts the question tests (e.g. `encryption`, `caching`). Values must exist in `themes.concepts`. Omit when empty. |
-| `questionTypes` | string[] | optional | Question-style tags (e.g. `troubleshooting`, `most-secure`). Values must exist in `themes.questionTypes`. Omit when empty. |
+| `themes` | object | optional | Nested object keyed by this cert's theme-group names (the keys of the top-level `themes` registry above — `services`/`concepts`/`questionTypes` for DVA-C02, something else for another cert). Each value is an array of strings drawn from that group's registry. Omit a sub-array entirely when it doesn't apply to this question (never `[]`); omit the whole `themes` object when the question has no tags at all. Unknown values are a validator warning, not an error (see below). |
 
 ### DVA-C02 canonical themes (reference)
 
-The built-in DVA-C02 bank defines three registry groups (`services` / `concepts` / `questionTypes`), mirrored as flat fields on every question:
+The built-in DVA-C02 bank defines three registry groups (`services` / `concepts` / `questionTypes`), mirrored under a nested `themes` object on every question (e.g. `question.themes.services`):
 
 - **Topics** (4): `Development with AWS Services`, `Deployment`, `Security`, `Troubleshooting and Optimization`
 - **Services** (33): `acm`, `amplify`, `api-gateway`, `cloudformation`, `cloudfront`, `cloudwatch`, `codebuild`, `codecommit`, `codedeploy`, `codepipeline`, `cognito`, `container`, `dynamodb`, `ec2`, `efs-ebs`, `elastic-beanstalk`, `elasticache`, `eventbridge`, `iam`, `kinesis`, `kms`, `lambda`, `rds-aurora`, `route53`, `s3`, `sam`, `secrets-manager`, `sns`, `sqs`, `ssm`, `step-functions`, `vpc`, `x-ray`
