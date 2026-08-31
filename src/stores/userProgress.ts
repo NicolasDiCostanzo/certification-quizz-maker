@@ -22,7 +22,7 @@ export const useUserProgressStore = defineStore('userProgress', {
     isFlagged: (state) => (examCode: string, questionId: string): boolean =>
       state.byExamCode[examCode]?.[questionId]?.flagged ?? false,
     isUnattempted: (state) => (examCode: string, questionId: string): boolean =>
-      state.byExamCode[examCode]?.[questionId] === undefined,
+      (state.byExamCode[examCode]?.[questionId]?.attempts ?? 0) === 0,
   },
 
   actions: {
