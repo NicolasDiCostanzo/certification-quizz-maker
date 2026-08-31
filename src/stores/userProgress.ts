@@ -55,6 +55,7 @@ export const useUserProgressStore = defineStore('userProgress', {
 
     /** Merges per-question: the entry with the newest `lastSeenAt` wins. */
     importProgress(file: ProgressExportFile) {
+      if (file.format !== EXPORT_FORMAT || file.version !== EXPORT_VERSION) return
       for (const [examCode, questions] of Object.entries(file.byExamCode)) {
         const examProgress = (this.byExamCode[examCode] ??= {})
         for (const [questionId, incoming] of Object.entries(questions)) {
