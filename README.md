@@ -10,12 +10,14 @@ Built with **Vue 3 + TypeScript + Vite**. Fully static, hostable anywhere, local
 - **DVA-C02 included** — 555 real exam questions, tagged by topic, services, concepts, and question types.
 - **Want another certification?** — open a GitHub issue to request it. A maintainer or contributor converts the exam using `SKILL.md` and ships it as a new built-in bundle.
 - **Local-first progress** — quiz history, wrong answers, and flagged questions are stored in your browser. Export/import as a JSON file for backup. No account needed.
+- **Dark / light mode** — the UI follows your OS appearance setting automatically, no toggle needed.
 - **Replay modes** — practice only what you got wrong, only flagged questions, only unattempted ones, or sample by the real exam's domain weights. Questions are always shuffled. Two modes: **Preparation** (no timer, immediate feedback) and **Exam** (timed, deferred feedback, real-exam simulation preset).
 
 ## Documentation
 
 | Document | Contents |
 |---|---|
+| [`AGENTS.md`](./AGENTS.md) | Context file for any AI coding agent (tool-agnostic): stack, commands, architecture rules, conventions |
 | [`SKILL.md`](./SKILL.md) | AI-facing spec for maintainers/contributors: how to convert a raw exam dump into the app's JSON format when a new cert is requested |
 | [`docs/DATA-MODEL.md`](./docs/DATA-MODEL.md) | Cert-bundle JSON schema + user-progress schema |
 | [`docs/FEATURES.md`](./docs/FEATURES.md) | Full feature matrix, Phase 1 implementation checklist, deliberate non-features |
