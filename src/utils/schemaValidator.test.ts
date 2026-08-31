@@ -151,7 +151,7 @@ describe('validateCertBundle', () => {
     const result = validateCertBundle(payload)
 
     expect(result.valid).toBe(false)
-    expect(result.errors).toEqual(['The uploaded file is not a JSON object.'])
+    expect(result.errors).toEqual(['The provided cert bundle is not a JSON object.'])
   })
 
   it.each<[string, unknown, string[]]>([

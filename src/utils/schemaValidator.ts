@@ -32,7 +32,7 @@ export function validateCertBundle(json: unknown): ValidationResult {
   const warnings: string[] = []
 
   if (!isPlainObject(json)) {
-    return { valid: false, errors: ['The uploaded file is not a JSON object.'], warnings }
+    return { valid: false, errors: ['The provided cert bundle is not a JSON object.'], warnings }
   }
 
   if (json.version !== SUPPORTED_VERSION) {
