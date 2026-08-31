@@ -16,7 +16,7 @@ Built with **Vue 3 + TypeScript + Vite**. Fully static, hostable anywhere, local
 
 | Document | Contents |
 |---|---|
-| [`SKILL.md`](./SKILL.md) | AI-facing spec: how to convert a raw exam dump into the app's JSON format *(to be written — Phase 1 deliverable)* |
+| [`SKILL.md`](./SKILL.md) | AI-facing spec: how to convert a raw exam dump into the app's JSON format |
 | [`docs/DATA-MODEL.md`](./docs/DATA-MODEL.md) | Cert-bundle JSON schema + user-progress schema |
 | [`docs/FEATURES.md`](./docs/FEATURES.md) | Full feature matrix, Phase 1 implementation checklist, deliberate non-features |
 

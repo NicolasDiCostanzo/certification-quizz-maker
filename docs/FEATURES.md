@@ -67,7 +67,7 @@ Single source of truth for every feature discussed for this project, with its cu
 
 Implementation order (each step depends on the previous):
 
-1. ☐ `SKILL.md` — AI authoring spec (Rule #1 stop-and-ask, schema, taxonomies, worked example, DVA-C02 reference)
+1. ☑ `SKILL.md` — AI authoring spec (Rule #1 stop-and-ask, schema, taxonomies, worked example, DVA-C02 reference)
 2. ☐ `src/types.ts` — all shared interfaces
 3. ☑ Migrate `src/assets/DVA-C02 questions.json` to the cert-bundle schema (555 questions preserved; validate JSON) — done via `scripts/migrate-cert-bundle.py`; 8 image-source questions (75, 139, 235, 441, 452, 481, 501, 541) intentionally keep empty options until real content is authored
 4. ☐ `src/utils/schemaValidator.ts` — pure validator
