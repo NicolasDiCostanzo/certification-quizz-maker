@@ -20,6 +20,12 @@ function allocateQuotas(
   total: number,
 ): Map<string, number> {
   const quotas = new Map<string, number>(topics.map((topic) => [topic, 0]))
+  const remainingCapacity = (topic: string): number => {
+    const limit = capacity.get(topic) ?? 0
+    const assigned = quotas.get(topic) ?? 0
+    return Math.max(0, limit - assigned)
+  }
+
   let active = topics.filter((topic) => (capacity.get(topic) ?? 0) > 0)
   let remaining = total
 
@@ -32,7 +38,7 @@ function allocateQuotas(
       for (const topic of active) {
         const share = (remaining * weightOf(topic)) / totalWeight
         shares.set(topic, share)
-        round.set(topic, Math.min(Math.floor(share), capacity.get(topic) ?? 0))
+        round.set(topic, Math.min(Math.floor(share), remainingCapacity(topic)))
       }
     }
 
