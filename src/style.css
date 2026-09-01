@@ -77,6 +77,25 @@ code {
   box-sizing: border-box;
 }
 
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  text-align: left;
+}
+
+.panel legend,
+.panel-heading {
+  margin: 0;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-h);
+  padding: 0 4px;
+}
+
 .app-header {
   display: flex;
   align-items: center;

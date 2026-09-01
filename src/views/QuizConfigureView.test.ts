@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { router } from '../router'
+import { texts } from '../texts/en'
 
 vi.mock('../composables/useQuizLoader', async () => {
   const { validCertBundle } = await import('../utils/fixtures/certBundle.fixture')
@@ -32,6 +33,59 @@ describe('QuizConfigureView', () => {
     const wrapper = await mountView()
 
     expect(wrapper.find('h1').text()).toContain('Fixture Certification')
+    wrapper.unmount()
+  })
+
+  it('splits the configuration into quick setup and filter sections', async () => {
+    const wrapper = await mountView()
+    const sections = wrapper.findAll('.config-section')
+
+    expect(sections).toHaveLength(2)
+    expect(sections[0].find('.section-title').text()).toBe(texts.quickSetupLabel)
+    expect(sections[1].find('.section-title').text()).toBe(texts.filterQuestionsLabel)
+    expect(sections[1].find('.topics-section').exists()).toBe(true)
+    expect(sections[1].find('.include-section').exists()).toBe(true)
+    expect(sections[1].find('.exclude-section').exists()).toBe(true)
+    expect(sections[1].find('.include-section .match-row').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
+  it('displays localized labels for known theme groups', async () => {
+    const wrapper = await mountView()
+    const headings = wrapper
+      .find('.include-section')
+      .findAll('.group-label')
+      .map((heading) => heading.text())
+
+    expect(headings).toEqual([texts.services, texts.concepts])
+    wrapper.unmount()
+  })
+
+  it('shows the match-groups pills only once two groups have selections', async () => {
+    const wrapper = await mountView()
+    const includeCheckboxes = wrapper.find('.include-section').findAll('input[type="checkbox"]')
+
+    expect(wrapper.find('.match-row').exists()).toBe(false)
+
+    await includeCheckboxes[0].setValue(true)
+    expect(wrapper.find('.match-row').exists()).toBe(false)
+
+    await includeCheckboxes[2].setValue(true)
+    expect(wrapper.find('.match-row').exists()).toBe(true)
+    expect(wrapper.find('.match-row').attributes('aria-label')).toBe(texts.matchGroupsLabel)
+
+    const pills = wrapper.findAll('.match-row input[type="radio"]')
+    expect(pills).toHaveLength(2)
+    expect(wrapper.findAll('.match-row .pill').map((pill) => pill.text())).toEqual([
+      texts.matchAllGroups,
+      texts.matchAnyGroups,
+    ])
+    expect((pills[0].element as HTMLInputElement).checked).toBe(true)
+
+    await pills[1].setValue(true)
+
+    expect((pills[1].element as HTMLInputElement).checked).toBe(true)
+    expect((pills[0].element as HTMLInputElement).checked).toBe(false)
     wrapper.unmount()
   })
 

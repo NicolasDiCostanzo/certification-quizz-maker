@@ -28,7 +28,7 @@ function setMatch(match: ThemeGroupFilter['match']) {
 <template>
   <div class="filter-group" role="group" :aria-label="label">
     <h3 class="group-label">{{ label }}</h3>
-    <div v-if="matchChoice" class="match-choice" role="radiogroup" :aria-label="texts.matchChoiceLabel">
+    <div v-if="matchChoice" class="match-choice" role="radiogroup" :aria-label="texts.matchTagsLabel">
       <FilterOption :text="texts.matchAny">
         <input
           type="radio"
@@ -46,14 +46,16 @@ function setMatch(match: ThemeGroupFilter['match']) {
         />
       </FilterOption>
     </div>
-    <FilterOption v-for="value in values" :key="value" :text="value">
-      <input
-        type="checkbox"
-        :checked="modelValue.values.includes(value)"
-        :disabled="disabledValues?.includes(value) ?? false"
-        @change="toggle(value, ($event.target as HTMLInputElement).checked)"
-      />
-    </FilterOption>
+    <div class="values-list">
+      <FilterOption v-for="value in values" :key="value" :text="value">
+        <input
+          type="checkbox"
+          :checked="modelValue.values.includes(value)"
+          :disabled="disabledValues?.includes(value) ?? false"
+          @change="toggle(value, ($event.target as HTMLInputElement).checked)"
+        />
+      </FilterOption>
+    </div>
   </div>
 </template>
 
@@ -62,14 +64,12 @@ function setMatch(match: ThemeGroupFilter['match']) {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
 }
 
 .group-label {
   margin: 0;
   font-size: 16px;
+  font-weight: 600;
   color: var(--text-h);
 }
 
@@ -78,5 +78,14 @@ function setMatch(match: ThemeGroupFilter['match']) {
   gap: 12px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
+}
+
+.values-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-inline-start: 20px;
 }
 </style>

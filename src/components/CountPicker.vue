@@ -67,21 +67,6 @@ function updateCount(event: Event) {
 </template>
 
 <style scoped>
-.panel {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 14px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-}
-
-.panel legend {
-  font-weight: 600;
-  color: var(--text-h);
-  padding: 0 4px;
-}
-
 .count-input {
   width: 90px;
   padding: 4px 8px;
