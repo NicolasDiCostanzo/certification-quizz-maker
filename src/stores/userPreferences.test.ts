@@ -1,7 +1,7 @@
-import { createApp, nextTick } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { createApp, nextTick } from 'vue'
 import { useUserPreferencesStore } from './userPreferences'
 
 function createTestPinia() {
