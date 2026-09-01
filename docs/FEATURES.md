@@ -74,7 +74,7 @@ Implementation order (each step depends on the previous):
 ✅ CertSelectorView.vue — home screen + "request a cert via GitHub issue" notice
 ✅ Manual light/dark theme toggle + real style.css
 ✅ src/utils/sampling.ts — exam-ratio-weighted question sampling
-☐ src/utils/filterPool.ts — theme include/exclude (AND/OR) + replay-mode filtering
+✅ src/utils/filterPool.ts — theme include/exclude (AND/OR) + replay-mode filtering
 ☐ QuizConfigureView.vue — filters, mode, count, replay-mode UI
 ☐ src/stores/quizSession.ts — active quiz session state (sessionStorage-persisted)
 ☐ src/utils/scoring.ts — pass/fail + projected scaled score
@@ -95,4 +95,3 @@ Recorded so they aren't re-proposed later without revisiting the reasoning:
 - Force-fitting unsupported question types (drag-and-drop, matching, simulations) — SKILL.md and the validator reject them instead.
 - Automated or server-side AI formatting of exam dumps — conversion is always manual: whoever picks up a requested cert runs SKILL.md through an LLM of their choice, then submits the resulting JSON as a PR.
 - Sharing certs between users — moot now that certs ship as built-ins available to everyone; no per-user cert sharing mechanism is needed.
-
