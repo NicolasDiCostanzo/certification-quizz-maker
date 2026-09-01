@@ -14,7 +14,6 @@ export const texts = {
   requestNoticeBefore: 'Missing a certification? There is no in-app upload —',
   requestNoticeLink: 'open a GitHub issue',
   requestNoticeAfter: 'to request it as a new built-in bundle.',
-  configureTitle: (name: string) => `Configure your quiz: ${name}`,
   modeLabel: 'Mode',
   modePreparation: 'Preparation',
   modeExam: 'Exam',

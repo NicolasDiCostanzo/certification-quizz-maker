@@ -71,7 +71,7 @@ export interface QuizConfig {
   mode: QuizMode
   includeThemes?: Record<string, ThemeGroupFilter>
   includeMatchMode: ThemeMatchMode
-  excludeThemes?: Record<string, string[]>
+  excludeThemes?: Record<string, ThemeGroupFilter>
   topics?: string[]
   replayMode: ReplayMode
   count: number | 'all'

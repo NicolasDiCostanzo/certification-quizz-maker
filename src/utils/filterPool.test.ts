@@ -44,9 +44,11 @@ describe('filterByThemes', () => {
         exclude: {},
         expected: [],
       },
-      { include: {}, mode: 'and' as const, exclude: { services: ['s3'] }, expected: ['q1', 'q3', 'q4', 'q5'] },
-      { include: { services: group(['s3']) }, mode: 'or' as const, exclude: { services: ['s3'] }, expected: [] },
-    ] as { include: Record<string, ThemeGroupFilter>; mode: ThemeMatchMode; exclude: Record<string, string[]>; expected: string[] }[]),
+      { include: {}, mode: 'and' as const, exclude: { services: group(['s3']) }, expected: ['q1', 'q3', 'q4', 'q5'] },
+      { include: { services: group(['s3']) }, mode: 'or' as const, exclude: { services: group(['s3']) }, expected: [] },
+      { include: {}, mode: 'and' as const, exclude: { services: group(['lambda', 's3'], 'any') }, expected: ['q3', 'q4', 'q5'] },
+      { include: {}, mode: 'and' as const, exclude: { services: group(['container', 'ec2'], 'all') }, expected: ['q1', 'q2', 'q3', 'q4'] },
+    ] as { include: Record<string, ThemeGroupFilter>; mode: ThemeMatchMode; exclude: Record<string, ThemeGroupFilter>; expected: string[] }[]),
   ])('include=$include mode=$mode exclude=$exclude -> $expected', ({ include, mode, exclude, expected }) => {
     expect(idsOf(filterByThemes(pool, include, mode, exclude))).toEqual(expected)
   })
@@ -118,7 +120,7 @@ describe('buildQuestionPool', () => {
     const result = buildQuestionPool(bundle, {
       includeThemes: { services: group(['lambda', 's3'], 'any') },
       includeMatchMode: 'or',
-      excludeThemes: { concepts: ['encryption'] },
+      excludeThemes: { concepts: group(['encryption']) },
     })
 
     expect(idsOf(result)).toEqual(['q2'])

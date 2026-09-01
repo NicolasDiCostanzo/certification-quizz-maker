@@ -5,9 +5,9 @@ import ChoiceGroup from '../components/ChoiceGroup.vue'
 import CountPicker from '../components/CountPicker.vue'
 import ThemeFilterGroup from '../components/ThemeFilterGroup.vue'
 import { useQuizLoader } from '../composables/useQuizLoader'
+import { texts } from '../texts/en'
 import type { QuizMode, ReplayMode, ThemeGroupFilter, ThemeMatchMode } from '../types'
 import { filterByReplay, filterByThemes, filterByTopics } from '../utils/filterPool'
-import { texts } from '../texts/en'
 
 const route = useRoute()
 const { getCert, activePool } = useQuizLoader()
@@ -46,8 +46,8 @@ const includeGroups = reactive<Record<string, ThemeGroupFilter>>(
     ]),
   ),
 )
-const excludeGroups = reactive<Record<string, string[]>>(
-  Object.fromEntries(Object.keys(cert.value?.themes ?? {}).map((group) => [group, []])),
+const excludeGroups = reactive<Record<string, ThemeGroupFilter>>(
+  Object.fromEntries(Object.keys(cert.value?.themes ?? {}).map((group) => [group, { values: [], match: 'any' }])),
 )
 const selectedTopics = ref<string[]>([])
 
@@ -66,7 +66,7 @@ const matchingCount = computed(() =>
 
 <template>
   <section v-if="cert" class="configure">
-    <h1>{{ texts.configureTitle(cert.exam.name) }}</h1>
+    <h1>{{ cert.exam.name }}</h1>
 
     <div class="configure-grid">
       <ChoiceGroup
@@ -112,9 +112,9 @@ const matchingCount = computed(() =>
           :key="`exclude-${group}`"
           :label="group"
           :values="values"
-          :model-value="{ values: excludeGroups[group] ?? [], match: 'any' }"
+          :model-value="{ values: excludeGroups[group]?.values ?? [], match: 'any' }"
           :match-choice="false"
-          @update:model-value="excludeGroups[group] = $event.values"
+          @update:model-value="excludeGroups[group] = $event"
         />
       </fieldset>
 

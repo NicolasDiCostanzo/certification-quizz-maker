@@ -1,4 +1,5 @@
 <script setup lang="ts" generic="T extends string">
+import FilterOption from './FilterOption.vue'
 
 defineProps<{
   name: string
@@ -13,15 +14,14 @@ const emit = defineEmits<{ 'update:modelValue': [value: T] }>()
 <template>
   <fieldset class="panel">
     <legend>{{ label }}</legend>
-    <label v-for="option in options" :key="option.value" class="filter-option">
+    <FilterOption v-for="option in options" :key="option.value" :text="option.label">
       <input
         type="radio"
         :name="name"
         :checked="modelValue === option.value"
         @change="emit('update:modelValue', option.value)"
       />
-      <span>{{ option.label }}</span>
-    </label>
+    </FilterOption>
   </fieldset>
 </template>
 
@@ -39,12 +39,5 @@ const emit = defineEmits<{ 'update:modelValue': [value: T] }>()
   font-weight: 600;
   color: var(--text-h);
   padding: 0 4px;
-}
-
-.filter-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text);
 }
 </style>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { texts } from '../texts/en'
+import FilterOption from './FilterOption.vue'
 
 type CountSelection = number | 'all'
 
@@ -36,16 +37,15 @@ function updateCount(event: Event) {
 <template>
   <fieldset class="panel">
     <legend>{{ texts.countLabel }}</legend>
-    <label class="filter-option">
+    <FilterOption :text="texts.countAll(max)">
       <input
         type="radio"
         name="count-mode"
         :checked="modelValue === 'all'"
         @change="emit('update:modelValue', 'all')"
       />
-      <span>{{ texts.countAll(max) }}</span>
-    </label>
-    <label class="filter-option">
+    </FilterOption>
+    <FilterOption :text="texts.countCustomLabel">
       <input
         type="radio"
         name="count-mode"
@@ -53,8 +53,7 @@ function updateCount(event: Event) {
         :disabled="max < 1"
         @change="emit('update:modelValue', max < 1 ? 'all' : Math.min(max, 1))"
       />
-      <span>{{ texts.countCustomLabel }}</span>
-    </label>
+    </FilterOption>
     <input
       v-if="isCustom"
       class="count-input"
@@ -81,13 +80,6 @@ function updateCount(event: Event) {
   font-weight: 600;
   color: var(--text-h);
   padding: 0 4px;
-}
-
-.filter-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text);
 }
 
 .count-input {

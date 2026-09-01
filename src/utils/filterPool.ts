@@ -31,10 +31,10 @@ function matchesInclude(
   return matchMode === 'and' ? groups.every(matches) : groups.some(matches)
 }
 
-function matchesExclude(question: Question, exclude: Record<string, string[]>): boolean {
+function matchesExclude(question: Question, exclude: Record<string, ThemeGroupFilter>): boolean {
   return Object.entries(exclude).every(
-    ([group, values]) =>
-      values.length === 0 || !hasRequiredTags(question, group, { values, match: 'any' }),
+    ([group, filter]) =>
+      filter.values.length === 0 || !hasRequiredTags(question, group, filter),
   )
 }
 
@@ -48,7 +48,7 @@ export function filterByThemes(
   questions: readonly Question[],
   include: Record<string, ThemeGroupFilter> = {},
   matchMode: ThemeMatchMode = 'and',
-  exclude: Record<string, string[]> = {},
+  exclude: Record<string, ThemeGroupFilter> = {},
 ): Question[] {
   const includeActive = Object.values(include).some((filter) => filter.values.length > 0)
 
@@ -91,7 +91,7 @@ export function filterByReplay(
 export interface BuildPoolOptions {
   includeThemes?: Record<string, ThemeGroupFilter>
   includeMatchMode?: ThemeMatchMode
-  excludeThemes?: Record<string, string[]>
+  excludeThemes?: Record<string, ThemeGroupFilter>
   topics?: string[]
   replayMode?: ReplayMode
   progress?: Record<string, QuestionProgress>
