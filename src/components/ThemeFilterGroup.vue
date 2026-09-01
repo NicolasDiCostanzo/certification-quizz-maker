@@ -7,6 +7,7 @@ defineProps<{
   values: string[]
   modelValue: ThemeGroupFilter
   matchChoice: boolean
+  disabledValues?: string[]
 }>()
 
 const emit = defineEmits<{ 'update:modelValue': [value: ThemeGroupFilter] }>()
@@ -18,6 +19,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: ThemeGroupFilter] }>()
     :values="values"
     :model-value="modelValue"
     :match-choice="matchChoice"
+    :disabled-values="disabledValues"
     @update:model-value="emit('update:modelValue', $event)"
   />
 </template>

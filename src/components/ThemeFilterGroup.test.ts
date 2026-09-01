@@ -33,6 +33,20 @@ describe('ThemeFilterGroup', () => {
 
     expect(wrapper.emitted('update:modelValue')![0][0]).toEqual({ values: ['lambda'], match: 'all' })
   })
+
+  it('passes disabledValues through to the inner filter', () => {
+    const wrapper = mount(ThemeFilterGroup, {
+      props: {
+        label: 'services',
+        values: ['lambda', 's3'],
+        modelValue: base,
+        matchChoice: false,
+        disabledValues: ['lambda'],
+      },
+    })
+
+    expect(wrapper.findAll('input[type="checkbox"]')[0].attributes('disabled')).toBeDefined()
+  })
 })
 
 

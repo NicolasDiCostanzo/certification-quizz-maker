@@ -8,6 +8,7 @@ const props = defineProps<{
   values: string[]
   modelValue: ThemeGroupFilter
   matchChoice: boolean
+  disabledValues?: string[]
 }>()
 
 const emit = defineEmits<{ 'update:modelValue': [value: ThemeGroupFilter] }>()
@@ -49,6 +50,7 @@ function setMatch(match: ThemeGroupFilter['match']) {
       <input
         type="checkbox"
         :checked="modelValue.values.includes(value)"
+        :disabled="disabledValues?.includes(value) ?? false"
         @change="toggle(value, ($event.target as HTMLInputElement).checked)"
       />
     </FilterOption>

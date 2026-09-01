@@ -101,6 +101,7 @@ const matchingCount = computed(() =>
           :values="values"
           :model-value="includeGroups[group]"
           :match-choice="true"
+          :disabled-values="excludeGroups[group]?.values ?? []"
           @update:model-value="includeGroups[group] = $event"
         />
       </fieldset>
@@ -114,6 +115,7 @@ const matchingCount = computed(() =>
           :values="values"
           :model-value="{ values: excludeGroups[group]?.values ?? [], match: 'any' }"
           :match-choice="false"
+          :disabled-values="includeGroups[group]?.values ?? []"
           @update:model-value="excludeGroups[group] = $event"
         />
       </fieldset>

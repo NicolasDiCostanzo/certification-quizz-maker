@@ -56,6 +56,17 @@ describe('QuizConfigureView', () => {
     wrapper.unmount()
   })
 
+  it('disables exclude checkboxes for values selected in include', async () => {
+    const wrapper = await mountView()
+
+    await wrapper.find('.include-section').findAll('input[type="checkbox"]')[0].setValue(true)
+
+    const excludeCheckboxes = wrapper.find('.exclude-section').findAll('input[type="checkbox"]')
+    expect(excludeCheckboxes[0].attributes('disabled')).toBeDefined()
+    expect(excludeCheckboxes[1].attributes('disabled')).toBeUndefined()
+    wrapper.unmount()
+  })
+
   it('applies topic filters to the preview', async () => {
     const wrapper = await mountView()
 

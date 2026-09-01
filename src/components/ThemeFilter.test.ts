@@ -53,4 +53,20 @@ describe('ThemeFilter', () => {
 
     expect(wrapper.findAll('input[type="radio"]')).toHaveLength(0)
   })
+
+  it('disables checkboxes for values listed in disabledValues', () => {
+    const wrapper = mount(ThemeFilter, {
+      props: {
+        label: 'services',
+        values: ['lambda', 's3'],
+        modelValue: base,
+        matchChoice: false,
+        disabledValues: ['lambda'],
+      },
+    })
+
+    const checkboxes = wrapper.findAll('input[type="checkbox"]')
+    expect(checkboxes[0].attributes('disabled')).toBeDefined()
+    expect(checkboxes[1].attributes('disabled')).toBeUndefined()
+  })
 })
