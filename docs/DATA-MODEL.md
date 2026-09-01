@@ -176,7 +176,7 @@ The store exposes helpers used by the quiz launcher:
 |---|---|
 | Only wrong | `timesWrong > timesCorrect` |
 | Only flagged | `flagged === true` |
-| Only unattempted | no entry for that question id |
+| Only unattempted | no entry for that question id, or `attempts === 0` |
 | All / custom | no predicate (combined with theme filters) |
 
 ### Export / import
