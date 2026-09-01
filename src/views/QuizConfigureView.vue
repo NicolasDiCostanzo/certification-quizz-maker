@@ -3,7 +3,7 @@ import { computed, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import ChoiceGroup from '../components/ChoiceGroup.vue'
 import CountPicker from '../components/CountPicker.vue'
-import ThemeFilterGroup from '../components/ThemeFilterGroup.vue'
+import ThemeFilter from '../components/ThemeFilter.vue'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { texts } from '../texts/en'
 import type { QuizMode, ReplayMode, ThemeGroupFilter, ThemeMatchMode } from '../types'
@@ -94,7 +94,7 @@ const matchingCount = computed(() =>
 
       <fieldset class="panel include-section">
         <legend>{{ texts.includeLabel }}</legend>
-        <ThemeFilterGroup
+        <ThemeFilter
           v-for="(values, group) in cert.themes"
           :key="`include-${group}`"
           :label="group"
@@ -108,7 +108,7 @@ const matchingCount = computed(() =>
 
       <fieldset class="panel exclude-section">
         <legend>{{ texts.excludeLabel }}</legend>
-        <ThemeFilterGroup
+        <ThemeFilter
           v-for="(values, group) in cert.themes"
           :key="`exclude-${group}`"
           :label="group"
@@ -122,7 +122,7 @@ const matchingCount = computed(() =>
 
       <fieldset class="panel topics-section">
         <legend>{{ texts.topicsLabel }}</legend>
-        <ThemeFilterGroup
+        <ThemeFilter
           :label="texts.topicsLabel"
           :values="availableTopics"
           :model-value="{ values: selectedTopics, match: 'any' }"

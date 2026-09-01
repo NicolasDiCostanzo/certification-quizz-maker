@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { ThemeGroupFilter } from '../types'
-import { texts } from '../texts/en'
-import FilterOption from './FilterOption.vue'
+import { texts } from '../texts/en';
+import type { ThemeGroupFilter } from '../types';
+import FilterOption from './FilterOption.vue';
 
 const props = defineProps<{
   label: string
