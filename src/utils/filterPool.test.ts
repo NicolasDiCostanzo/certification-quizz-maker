@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { ThemeGroupFilter, ThemeMatchMode } from '../types'
-import { idsOf, pool, progress } from './fixtures/filterPool.fixture'
 import { buildQuestionPool, filterByReplay, filterByThemes, filterByTopics } from './filterPool'
+import { idsOf, pool, progress } from './fixtures/filterPool.fixture'
 
 const group = (values: string[], match: ThemeGroupFilter['match'] = 'any'): ThemeGroupFilter => ({
   values,
