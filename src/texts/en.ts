@@ -14,4 +14,5 @@ export const texts = {
   requestNoticeBefore: 'Missing a certification? There is no in-app upload —',
   requestNoticeLink: 'open a GitHub issue',
   requestNoticeAfter: 'to request it as a new built-in bundle.',
+  themeToggle: (dark: boolean) => (dark ? 'Switch to light mode' : 'Switch to dark mode'),
 }

@@ -72,6 +72,7 @@ Implementation order (each step depends on the previous):
 ✅ src/stores/userProgress.ts — Pinia store (attempts/correct/wrong/flag, export/import)
 ✅ Router + app shell — vue-router, remove HelloWorld.vue boilerplate, nav guard
 ✅ CertSelectorView.vue — home screen + "request a cert via GitHub issue" notice
+✅ Manual light/dark theme toggle + real style.css
 ☐ src/utils/sampling.ts — exam-ratio-weighted question sampling
 ☐ src/utils/filterPool.ts — theme include/exclude (AND/OR) + replay-mode filtering
 ☐ QuizConfigureView.vue — filters, mode, count, replay-mode UI
@@ -80,7 +81,6 @@ Implementation order (each step depends on the previous):
 ☐ QuizSessionView.vue — question rendering, timer, flag, feedback
 ☐ QuizReviewView.vue — score banner, per-question review
 ☐ Progress export/import UI (on CertSelectorView.vue)
-☐ Manual light/dark theme toggle + real style.css
 ☐ Visual polish pass (transitions, cross-screen consistency)
 ☐ Final integration (build/typecheck/lint/test green + full manual smoke test)
 

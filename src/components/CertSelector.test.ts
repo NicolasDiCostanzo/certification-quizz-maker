@@ -1,10 +1,10 @@
 import { mount, type DOMWrapper } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
-import CertSelector from './CertSelector.vue'
-import { router } from '../router'
 import { useQuizLoader } from '../composables/useQuizLoader'
+import { router } from '../router'
 import { texts } from '../texts/en'
+import CertSelector from './CertSelector.vue'
 
 beforeEach(() => {
   setActivePinia(createPinia())
