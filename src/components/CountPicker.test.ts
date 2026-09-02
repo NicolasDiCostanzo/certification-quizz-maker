@@ -48,6 +48,12 @@ describe('CountPicker', () => {
     expect(wrapper.emitted('update:modelValue')![0]).toEqual([1])
   })
 
+  it('emits all on mount when the initial count exceeds a zero max', () => {
+    const wrapper = mountPicker(5, 0)
+
+    expect(wrapper.emitted('update:modelValue')![0]).toEqual(['all'])
+  })
+
   it('emits all when the all radio is picked from custom mode', async () => {
     const wrapper = mountPicker(5)
 

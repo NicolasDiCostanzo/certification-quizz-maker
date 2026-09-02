@@ -25,6 +25,7 @@ watch(
       emit('update:modelValue', max)
     }
   },
+  { immediate: true },
 )
 
 function updateCount(event: Event) {
