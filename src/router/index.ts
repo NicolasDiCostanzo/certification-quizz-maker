@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { useQuizLoader } from '../composables/useQuizLoader'
+import { useQuizSessionStore } from '../stores/quizSession'
 import CertSelectorView from '../views/CertSelectorView.vue'
 import QuizConfigureView from '../views/QuizConfigureView.vue'
 import QuizReviewView from '../views/QuizReviewView.vue'
@@ -21,5 +22,13 @@ router.beforeEach((to) => {
   const certCode = to.params.certCode
   if (typeof certCode === 'string' && !getCert(certCode)) {
     return { name: 'cert-selector' }
+  }
+})
+
+router.beforeEach((to) => {
+  if (to.name !== 'quiz-session' && to.name !== 'quiz-review') return
+  const session = useQuizSessionStore()
+  if (!session.hasSession || session.currentSession?.certCode !== to.params.certCode) {
+    return { name: 'quiz-configure', params: { certCode: to.params.certCode } }
   }
 })
