@@ -75,7 +75,7 @@ Implementation order (each step depends on the previous):
 ✅ Manual light/dark theme toggle + real style.css
 ✅ src/utils/sampling.ts — exam-ratio-weighted question sampling
 ✅ src/utils/filterPool.ts — theme include/exclude (AND/OR) + replay-mode filtering
-☐ QuizConfigureView.vue — filters, mode, count, replay-mode UI
+✅ QuizConfigureView.vue — filters, mode, count, replay-mode UI
 ☐ src/stores/quizSession.ts — active quiz session state (sessionStorage-persisted)
 ☐ src/utils/scoring.ts — pass/fail + projected scaled score
 ☐ QuizSessionView.vue — question rendering, timer, flag, feedback
