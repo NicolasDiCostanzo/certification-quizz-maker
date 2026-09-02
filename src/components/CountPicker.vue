@@ -19,6 +19,10 @@ watch(
   (max) => {
     if (max < 1 && props.modelValue !== 'all') {
       emit('update:modelValue', 'all')
+      return
+    }
+    if (props.modelValue !== 'all' && props.modelValue > max) {
+      emit('update:modelValue', max)
     }
   },
 )

@@ -14,6 +14,7 @@ defineProps<{ text: string }>()
   display: flex;
   align-items: center;
   gap: 8px;
+  text-align: left;
   color: var(--text);
 }
 </style>

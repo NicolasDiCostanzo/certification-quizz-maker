@@ -2,6 +2,7 @@
   --text: #593e2e;
   --text-h: #3e2a1f;
   --bg: #f2e6d8;
+  --surface: #f8f0e6;
   --border: #bf9b7a;
   --code-bg: rgba(191, 155, 122, 0.18);
   --accent: #555934;
@@ -9,6 +10,8 @@
   --accent-border: rgba(85, 89, 52, 0.5);
   --shadow:
     rgba(89, 62, 46, 0.15) 0 10px 15px -3px, rgba(89, 62, 46, 0.08) 0 4px 6px -2px;
+  --green: #2e5b26;
+  --red: #b02e26;
 
   --sans: system-ui, 'Segoe UI', roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', roboto, sans-serif;
@@ -19,6 +22,7 @@
   --text: rgba(242, 230, 216, 0.85);
   --text-h: #f2e6d8;
   --bg: #16171d;
+  --surface: #1f2028;
   --border: rgba(242, 230, 216, 0.2);
   --code-bg: rgba(0, 0, 0, 0.3);
   --accent: #bf9b7a;

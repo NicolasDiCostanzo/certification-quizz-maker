@@ -1,14 +1,19 @@
 <script setup lang="ts">
+import { useId } from 'vue';
 import { texts } from '../texts/en';
 import type { ThemeGroupFilter } from '../types';
 import FilterOption from './FilterOption.vue';
 
+const uid = useId()
+
 const props = defineProps<{
-  label: string
+  label?: string
   values: string[]
   modelValue: ThemeGroupFilter
   matchChoice: boolean
   disabledValues?: string[]
+  labelClass?: string
+  allOption?: boolean
 }>()
 
 const emit = defineEmits<{ 'update:modelValue': [value: ThemeGroupFilter] }>()
@@ -23,16 +28,20 @@ function toggle(value: string, checked: boolean) {
 function setMatch(match: ThemeGroupFilter['match']) {
   emit('update:modelValue', { ...props.modelValue, match })
 }
+
+function selectAll() {
+  emit('update:modelValue', { ...props.modelValue, values: [] })
+}
 </script>
 
 <template>
   <div class="filter-group" role="group" :aria-label="label">
-    <h3 class="group-label">{{ label }}</h3>
-    <div v-if="matchChoice" class="match-choice" role="radiogroup" :aria-label="texts.matchTagsLabel">
+    <h3 v-if="label" :class="labelClass ?? 'group-label'">{{ label }}</h3>
+    <div class="match-choice" v-if="matchChoice" role="radiogroup" :aria-label="texts.matchTagsLabel">
       <FilterOption :text="texts.matchAny">
         <input
           type="radio"
-          :name="`match-${label}`"
+          :name="`match-${uid}`"
           :checked="modelValue.match === 'any'"
           @change="setMatch('any')"
         />
@@ -40,13 +49,20 @@ function setMatch(match: ThemeGroupFilter['match']) {
       <FilterOption :text="texts.matchAll">
         <input
           type="radio"
-          :name="`match-${label}`"
+          :name="`match-${uid}`"
           :checked="modelValue.match === 'all'"
           @change="setMatch('all')"
         />
       </FilterOption>
     </div>
     <div class="values-list">
+      <FilterOption v-if="allOption" class="all-option" :text="texts.topicsAllOption">
+        <input
+          type="checkbox"
+          :checked="modelValue.values.length === 0"
+          @change="selectAll()"
+        />
+      </FilterOption>
       <FilterOption v-for="value in values" :key="value" :text="value">
         <input
           type="checkbox"
@@ -64,6 +80,9 @@ function setMatch(match: ThemeGroupFilter['match']) {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  border-radius: 10px;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
 }
 
 .group-label {
@@ -87,5 +106,11 @@ function setMatch(match: ThemeGroupFilter['match']) {
   max-height: 280px;
   overflow-y: auto;
   padding-inline-start: 20px;
+  box-shadow: inset 0 0 6px -2px var(--shadow);
+}
+
+.all-option {
+  font-weight: 600;
+  color: var(--text-h);
 }
 </style>

@@ -75,6 +75,16 @@ describe('CountPicker', () => {
     expect(wrapper.find('.count-input').exists()).toBe(false)
   })
 
+  it('clamps a custom selection to max when max drops below the current value', async () => {
+    const wrapper = mount(CountPicker, {
+      props: { max: 20, modelValue: 10, 'onUpdate:modelValue': (v) => wrapper.setProps({ modelValue: v }) },
+    })
+
+    await wrapper.setProps({ max: 5 })
+
+    expect(wrapper.emitted('update:modelValue')![0]).toEqual([5])
+  })
+
   it('emits all instead of a number from the custom radio change when max is below one', async () => {
     const wrapper = mountPicker(5, 0)
 

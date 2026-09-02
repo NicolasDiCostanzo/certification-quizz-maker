@@ -28,6 +28,7 @@ export const texts = {
   includeLabel: 'Include themes',
   excludeLabel: 'Exclude themes',
   topicsLabel: 'Topics',
+  topicsAllOption: 'All',
   matchTagsLabel: 'Match tags',
   matchGroupsLabel: 'Match groups',
   quickSetupLabel: 'Quick setup',
