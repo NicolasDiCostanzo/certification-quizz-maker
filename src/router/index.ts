@@ -26,10 +26,6 @@ router.beforeEach((to) => {
 })
 
 router.beforeEach((to) => {
-  if (!session.hasSession || session.currentSession?.certCode !== to.params.certCode) {
-    return { name: 'quiz-configure', params: { certCode: to.params.certCode } }
-  }
-})
   if (to.name !== 'quiz-session' && to.name !== 'quiz-review') return
   const session = useQuizSessionStore()
   if (!session.hasSession || session.currentSession?.certCode !== to.params.certCode) {

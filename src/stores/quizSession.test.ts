@@ -1,6 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createApp, nextTick } from 'vue'
 import type { Question, QuizConfig } from '../types'
 import { useQuizSessionStore } from './quizSession'
 
@@ -145,15 +146,20 @@ describe('quizSession store', () => {
     expect(store.hasSession).toBe(false)
   })
 
-  it('persists the session to sessionStorage and restores it on a fresh store', () => {
+  it('persists the session to sessionStorage and restores it on a fresh store', async () => {
     const pinia = createPinia()
+    createApp({ render: () => null }).use(pinia)
     pinia.use(piniaPluginPersistedstate)
     const first = useQuizSessionStore(pinia)
     first.startSession('DVA-C02', config('exam'), makeQuestions(), 130)
     first.answerQuestion('q1', ['B'])
     first.toggleFlag('q2')
+    await nextTick()
 
-    const second = useQuizSessionStore(pinia)
+    const freshPinia = createPinia()
+    createApp({ render: () => null }).use(freshPinia)
+    freshPinia.use(piniaPluginPersistedstate)
+    const second = useQuizSessionStore(freshPinia)
     expect(second.hasSession).toBe(true)
     expect(second.currentSession?.mode).toBe('exam')
     expect(second.currentSession?.questions).toHaveLength(3)
