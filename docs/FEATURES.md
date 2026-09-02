@@ -76,8 +76,8 @@ Implementation order (each step depends on the previous):
 ✅ src/utils/sampling.ts — exam-ratio-weighted question sampling
 ✅ src/utils/filterPool.ts — theme include/exclude (AND/OR) + replay-mode filtering
 ✅ QuizConfigureView.vue — filters, mode, count, replay-mode UI
-☑ src/stores/quizSession.ts — active quiz session state (sessionStorage-persisted)
-☐ src/utils/scoring.ts — pass/fail + projected scaled score
+✅ src/stores/quizSession.ts — active quiz session state (sessionStorage-persisted)
+✅ src/utils/scoring.ts — pass/fail + projected scaled score
 ☐ QuizSessionView.vue — question rendering, timer, flag, feedback
 ☐ QuizReviewView.vue — score banner, per-question review
 ☐ Progress export/import UI (on CertSelectorView.vue)
