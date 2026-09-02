@@ -1,13 +1,6 @@
 import { defineStore } from 'pinia'
 import type { Question, QuizConfig, QuizSessionState, ScoreResult } from '../types'
-
-function isCorrect(question: Question, selected: string[]): boolean {
-  const expected = Array.isArray(question.answers) ? question.answers : [question.answers]
-  if (expected.length !== selected.length) return false
-  const expectedSet = new Set(expected)
-  const selectedSet = new Set(selected)
-  return selectedSet.size === selected.length && selected.every((letter) => expectedSet.has(letter))
-}
+import { isCorrect } from '../utils/scoring'
 
 export const useQuizSessionStore = defineStore('quizSession', {
   state: (): { session: QuizSessionState | null } => ({
