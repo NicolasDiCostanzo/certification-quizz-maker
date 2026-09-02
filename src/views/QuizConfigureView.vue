@@ -1,15 +1,17 @@
 <script setup lang="ts">
   import { computed, reactive, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import ChoiceGroup from '../components/ChoiceGroup.vue'
 import CountPicker from '../components/CountPicker.vue'
 import FilterOption from '../components/FilterOption.vue'
 import ThemeFilter from '../components/ThemeFilter.vue'
 import { useQuizLoader } from '../composables/useQuizLoader'
-import { texts } from '../texts/en'
+import { useQuizSessionStore } from '../stores/quizSession'
 import { useUserProgressStore } from '../stores/userProgress'
-import type { QuizMode, ReplayMode, ThemeGroupFilter, ThemeMatchMode, ThemeRegistry } from '../types'
+import { texts } from '../texts/en'
+import type { QuizConfig, QuizMode, ReplayMode, ThemeGroupFilter, ThemeMatchMode, ThemeRegistry } from '../types'
 import { filterByReplay, filterByThemes, filterByTopics } from '../utils/filterPool'
+import { sampleQuestions } from '../utils/sampling'
 import { groupLabel } from '../utils/themeGroupLabel'
 
 function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilter> {
@@ -19,8 +21,10 @@ function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilt
 }
 
   const route = useRoute()
+  const router = useRouter()
   const { getCert, activePool } = useQuizLoader()
   const progressStore = useUserProgressStore()
+  const quizSessionStore = useQuizSessionStore()
 
   const certCode = computed(() => String(route.params.certCode))
   const cert = computed(() => getCert(certCode.value))
@@ -28,7 +32,7 @@ function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilt
 
   const mode = ref<QuizMode>('preparation')
   const replayMode = ref<ReplayMode>('all')
-  const count = ref<number | 'all'>('all')
+  const count = ref<number | 'all'>(cert.value?.exam.totalQuestions ?? 'all')
   const includeMatchMode = ref<ThemeMatchMode>('or')
 
   const modeOptions: { value: QuizMode; label: string }[] = [
@@ -63,6 +67,7 @@ function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilt
     for (const group of Object.keys(excludeGroups)) delete excludeGroups[group]
     Object.assign(excludeGroups, emptyGroupFilters(themes))
     selectedTopics.value = []
+    count.value = cert.value?.exam.totalQuestions ?? 'all'
   })
 
   const availableTopics = computed(() => [...new Set(pool.value.map((question) => question.topic))])
@@ -81,6 +86,33 @@ function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilt
       progressStore.byExamCode[certCode.value] ?? {},
     ).length,
   )
+
+  async function startQuiz() {
+    const filtered = filterByReplay(
+      filterByTopics(
+        filterByThemes(pool.value, includeGroups, includeMatchMode.value, excludeGroups),
+        selectedTopics.value,
+      ),
+      replayMode.value,
+      progressStore.byExamCode[certCode.value] ?? {},
+    )
+    const questions = sampleQuestions(filtered, count.value, cert.value?.exam.weights)
+    const initialFlags = questions
+      .filter((q) => progressStore.isFlagged(certCode.value, q.id))
+      .map((q) => q.id)
+    const config: QuizConfig = {
+      certCode: certCode.value,
+      mode: mode.value,
+      includeThemes: includeGroups,
+      includeMatchMode: includeMatchMode.value,
+      excludeThemes: excludeGroups,
+      topics: selectedTopics.value,
+      replayMode: replayMode.value,
+      count: count.value,
+    }
+    quizSessionStore.startSession(certCode.value, config, questions, cert.value?.exam.timeLimitMinutes, initialFlags)
+    await router.push({ name: 'quiz-session', params: { certCode: certCode.value } })
+  }
 </script>
 
 <template>
@@ -139,7 +171,7 @@ function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilt
       <p class="match-preview" :class="{ warning: matchingCount === 0 }">
         {{ matchingCount === 0 ? texts.noMatchWarning : texts.matchingCountValue(matchingCount) }}
       </p>
-      <button type="button" class="start-cta" :disabled="matchingCount === 0">{{ texts.startQuizCta }}</button>
+      <button type="button" class="start-cta" :disabled="matchingCount === 0" @click="startQuiz">{{ texts.startQuizCta }}</button>
     </footer>
   </section>
 </template>

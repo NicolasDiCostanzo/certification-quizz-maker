@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { defineComponent, h } from 'vue'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { ThemeGroupFilter } from '../types'
 import { texts } from '../texts/en'
 import ThemeFilter from './ThemeFilter.vue'
@@ -13,25 +13,31 @@ function mountGroup(modelValue: ThemeGroupFilter = base, matchChoice = false) {
   })
 }
 
+let wrapper!: ReturnType<typeof mount>
+
+beforeEach(() => {
+  wrapper?.unmount()
+  wrapper = mountGroup()
+})
+
+afterEach(() => { wrapper?.unmount() })
+
 describe('ThemeFilter', () => {
   it('renders a checkbox per value with the group label', () => {
-    const wrapper = mountGroup()
-
     expect(wrapper.find('[role="group"]').attributes('aria-label')).toBe('services')
     expect(wrapper.findAll('input[type="checkbox"]')).toHaveLength(2)
     expect(wrapper.text()).toContain('lambda')
   })
 
   it('emits the added value when a checkbox is checked', async () => {
-    const wrapper = mountGroup()
-
     await wrapper.findAll('input[type="checkbox"]')[0].setValue(true)
 
     expect(wrapper.emitted('update:modelValue')![0][0]).toEqual({ values: ['lambda'], match: 'all' })
   })
 
   it('emits the removed value when a checkbox is unchecked', async () => {
-    const wrapper = mountGroup({ values: ['lambda'], match: 'any' })
+    wrapper?.unmount()
+    wrapper = mountGroup({ values: ['lambda'], match: 'any' })
 
     await wrapper.findAll('input[type="checkbox"]')[0].setValue(false)
 
@@ -39,7 +45,8 @@ describe('ThemeFilter', () => {
   })
 
   it('emits the match mode when a radio is picked', async () => {
-    const wrapper = mountGroup({ values: [], match: 'any' }, true)
+    wrapper?.unmount()
+    wrapper = mountGroup({ values: [], match: 'any' }, true)
     const radios = wrapper.findAll('input[type="radio"]')
 
     expect(radios).toHaveLength(2)
@@ -50,13 +57,12 @@ describe('ThemeFilter', () => {
   })
 
   it('hides the any/all radios when matchChoice is false', () => {
-    const wrapper = mountGroup()
-
     expect(wrapper.find('.match-choice').exists()).toBe(false)
   })
 
   it('disables checkboxes for values listed in disabledValues', () => {
-    const wrapper = mount(ThemeFilter, {
+    wrapper?.unmount()
+    wrapper = mount(ThemeFilter, {
       props: {
         label: 'services',
         values: ['lambda', 's3'],
@@ -72,7 +78,8 @@ describe('ThemeFilter', () => {
   })
 
   it('renders the All checkbox ticked by default when allOption is set', () => {
-    const wrapper = mount(ThemeFilter, {
+    wrapper?.unmount()
+    wrapper = mount(ThemeFilter, {
       props: { label: 'topics', values: ['Security', 'Deployment'], modelValue: base, matchChoice: false, allOption: true },
     })
 
@@ -83,7 +90,8 @@ describe('ThemeFilter', () => {
   })
 
   it('unticks All once a value is selected', () => {
-    const wrapper = mount(ThemeFilter, {
+    wrapper?.unmount()
+    wrapper = mount(ThemeFilter, {
       props: { label: 'topics', values: ['Security', 'Deployment'], modelValue: { values: ['Security'], match: 'any' }, matchChoice: false, allOption: true },
     })
 
@@ -93,7 +101,8 @@ describe('ThemeFilter', () => {
   })
 
   it('emits an empty selection when All is clicked', async () => {
-    const wrapper = mount(ThemeFilter, {
+    wrapper?.unmount()
+    wrapper = mount(ThemeFilter, {
       props: { label: 'topics', values: ['Security', 'Deployment'], modelValue: { values: ['Security'], match: 'any' }, matchChoice: false, allOption: true },
     })
 
@@ -103,8 +112,6 @@ describe('ThemeFilter', () => {
   })
 
   it('renders no All checkbox by default', () => {
-    const wrapper = mountGroup()
-
     expect(wrapper.findAll('input[type="checkbox"]')).toHaveLength(2)
     expect(wrapper.find('.all-option').exists()).toBe(false)
   })
@@ -119,7 +126,8 @@ describe('ThemeFilter', () => {
           ])
       },
     })
-    const wrapper = mount(Host)
+    wrapper?.unmount()
+    wrapper = mount(Host)
 
     const matchChoices = wrapper.findAll('.match-choice')
     const names = matchChoices.flatMap((choice) =>
@@ -133,6 +141,5 @@ describe('ThemeFilter', () => {
     expect(names[0]).not.toBe(names[2])
     expect((anyRadios[0].element as HTMLInputElement).checked).toBe(true)
     expect((anyRadios[1].element as HTMLInputElement).checked).toBe(true)
-    wrapper.unmount()
   })
 })

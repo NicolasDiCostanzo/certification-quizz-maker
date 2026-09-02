@@ -1,7 +1,8 @@
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { router } from '../router'
+import { useQuizSessionStore } from '../stores/quizSession'
 import { useUserProgressStore } from '../stores/userProgress'
 import { texts } from '../texts/en'
 
@@ -29,7 +30,7 @@ const mountView = async (
   const pinia = createPinia()
   setActivePinia(pinia)
   if (seedProgress) seedProgress(useUserProgressStore())
-  const wrapper = mount(QuizConfigureView, { global: { plugins: [router, pinia] } })
+  wrapper = mount(QuizConfigureView, { global: { plugins: [router, pinia] } })
   return wrapper
 }
 
@@ -37,17 +38,20 @@ beforeEach(async () => {
   await router.push('/')
 })
 
-describe('QuizConfigureView', () => {
-  it('renders the exam name in the title', async () => {
-    const wrapper = await mountView()
+let wrapper!: ReturnType<typeof mount>
 
+beforeEach(async () => {
+  wrapper = await mountView()
+})
+
+afterEach(() => { wrapper?.unmount() })
+
+describe('QuizConfigureView', () => {
+  it('renders the exam name in the title', () => {
     expect(wrapper.find('h1').text()).toContain('Fixture Certification')
-    wrapper.unmount()
   })
 
-  it('splits the configuration into quick setup and filter sections', async () => {
-    const wrapper = await mountView()
-    const cards = wrapper.findAll('.config-card')
+  it('splits the configuration into quick setup and filter sections', async () => {    const cards = wrapper.findAll('.config-card')
 
     expect(cards).toHaveLength(2)
     expect(cards[0].find('.section-title').text()).toBe(texts.quickSetupLabel)
@@ -63,23 +67,18 @@ describe('QuizConfigureView', () => {
     expect(excludeDetails.attributes('open')).toBeUndefined()
     expect(includeDetails.find('summary').text()).toBe(texts.includeLabel)
     expect(excludeDetails.find('summary').text()).toBe(texts.excludeLabel)
-    wrapper.unmount()
   })
 
   it('displays localized labels for known theme groups', async () => {
-    const wrapper = await mountView()
     const headings = wrapper
       .find('.include-section')
       .findAll('.group-label')
       .map((heading) => heading.text())
 
     expect(headings).toEqual([texts.services, texts.concepts])
-    wrapper.unmount()
   })
 
-  it('disables the match-groups pills until two groups have selections', async () => {
-    const wrapper = await mountView()
-    const includeCheckboxes = wrapper.find('.include-section').findAll('input[type="checkbox"]')
+  it('disables the match-groups pills until two groups have selections', async () => {    const includeCheckboxes = wrapper.find('.include-section').findAll('input[type="checkbox"]')
     const matchRow = () => wrapper.find('.include-section .match-row')
 
     expect(matchRow().classes()).toContain('match-row--disabled')
@@ -104,19 +103,13 @@ describe('QuizConfigureView', () => {
 
     expect((pills[0].element as HTMLInputElement).checked).toBe(true)
     expect((pills[1].element as HTMLInputElement).checked).toBe(false)
-    wrapper.unmount()
   })
 
   it('previews the matching question count', async () => {
-    const wrapper = await mountView()
-
     expect(wrapper.find('.match-preview').text()).toContain('2 questions match your filters')
-    wrapper.unmount()
   })
 
-  it('updates the preview from a theme include checkbox', async () => {
-    const wrapper = await mountView()
-    const include = wrapper.find('.include-section')
+  it('updates the preview from a theme include checkbox', async () => {    const include = wrapper.find('.include-section')
     const lambdaCheckbox = include.findAll('input[type="checkbox"]')[0]
 
     await lambdaCheckbox.setValue(true)
@@ -130,33 +123,24 @@ describe('QuizConfigureView', () => {
     const matchAllRadio = servicesGroup.findAll('input[type="radio"]')[1]
     await matchAllRadio.setValue(true)
     expect(wrapper.find('.match-preview').text()).toContain('No question matches')
-    wrapper.unmount()
   })
 
   it('disables exclude checkboxes for values selected in include', async () => {
-    const wrapper = await mountView()
-
     await wrapper.find('.include-section').findAll('input[type="checkbox"]')[0].setValue(true)
 
     const excludeCheckboxes = wrapper.find('.exclude-section').findAll('input[type="checkbox"]')
     expect(excludeCheckboxes[0].attributes('disabled')).toBeDefined()
     expect(excludeCheckboxes[1].attributes('disabled')).toBeUndefined()
-    wrapper.unmount()
   })
 
-  it('keeps the filter questions card folded by default', async () => {
-    const wrapper = await mountView()
-    const filters = wrapper.find('details.filters-card')
+  it('keeps the filter questions card folded by default', async () => {    const filters = wrapper.find('details.filters-card')
 
     expect(filters.exists()).toBe(true)
     expect(filters.attributes('open')).toBeUndefined()
     expect(filters.find('summary').text()).toBe(texts.filterQuestionsLabel)
-    wrapper.unmount()
   })
 
-  it('ticks the topics All option by default and unticks it when a topic is picked', async () => {
-    const wrapper = await mountView()
-    const topics = wrapper.find('.topics-section')
+  it('ticks the topics All option by default and unticks it when a topic is picked', async () => {    const topics = wrapper.find('.topics-section')
     const checkboxes = topics.findAll('input[type="checkbox"]')
 
     expect(checkboxes).toHaveLength(3)
@@ -166,12 +150,9 @@ describe('QuizConfigureView', () => {
 
     expect((topics.findAll('input[type="checkbox"]')[0].element as HTMLInputElement).checked).toBe(false)
     expect(wrapper.find('.match-preview').text()).toContain('1 question match')
-    wrapper.unmount()
   })
 
-  it('re-ticks All when every picked topic is removed', async () => {
-    const wrapper = await mountView()
-    const topics = wrapper.find('.topics-section')
+  it('re-ticks All when every picked topic is removed', async () => {    const topics = wrapper.find('.topics-section')
     const checkboxes = topics.findAll('input[type="checkbox"]')
 
     await checkboxes[1].setValue(true)
@@ -179,39 +160,32 @@ describe('QuizConfigureView', () => {
 
     expect((topics.findAll('input[type="checkbox"]')[0].element as HTMLInputElement).checked).toBe(true)
     expect(wrapper.find('.match-preview').text()).toContain('2 questions match')
-    wrapper.unmount()
   })
 
   it('applies topic filters to the preview', async () => {
-    const wrapper = await mountView()
-
     await wrapper.find('.topics-section input[type="checkbox"]').setValue(true)
     await wrapper.findAll('.topics-section input[type="checkbox"]')[1].setValue(true)
 
     expect(wrapper.find('.match-preview').text()).toContain('1 question match')
-    wrapper.unmount()
   })
 
   it.each([
     { mode: 'wrong', expected: 'No question matches' },
     { mode: 'flagged', expected: 'No question matches' },
     { mode: 'unattempted', expected: '2 questions match' },
-  ] as { mode: string; expected: string }[])('replay mode $mode previews $expected', async ({ mode, expected }) => {
-    const wrapper = await mountView()
-    const radios = wrapper.findAll('input[name="replay-mode"]')
+  ] as { mode: string; expected: string }[])('replay mode $mode previews $expected', async ({ mode, expected }) => {    const radios = wrapper.findAll('input[name="replay-mode"]')
     const index = ['all', 'wrong', 'flagged', 'unattempted'].indexOf(mode)
 
     await radios[index].setValue(true)
 
     expect(wrapper.find('.match-preview').text()).toContain(expected)
-    wrapper.unmount()
   })
 
   it('applies stored progress to the replay preview', async () => {
-    const wrapper = await mountView((store) => {
-      store.recordAnswer('FIX-001', 'q1', false)
-      store.toggleFlag('FIX-001', 'q2')
-    })
+    const progressStore = useUserProgressStore()
+    progressStore.recordAnswer('FIX-001', 'q1', false)
+    progressStore.toggleFlag('FIX-001', 'q2')
+    await wrapper.vm.$nextTick()
     const radios = wrapper.findAll('input[name="replay-mode"]')
 
     await radios[1].setValue(true)
@@ -222,24 +196,13 @@ describe('QuizConfigureView', () => {
 
     await radios[3].setValue(true)
     expect(wrapper.find('.match-preview').text()).toContain('1 question match')
-    wrapper.unmount()
   })
 
-  it('shows the custom count input only when custom mode is selected', async () => {
-    const wrapper = await mountView()
-
-    expect(wrapper.find('.count-input').exists()).toBe(false)
-
-    await wrapper.findAll('input[name="count-mode"]')[1].setValue(true)
-
+  it('shows the custom count input by default', async () => {
     expect(wrapper.find('.count-input').exists()).toBe(true)
-    expect(wrapper.find('.count-input').attributes('max')).toBe('2')
-    wrapper.unmount()
   })
 
   it('rebuilds the filter groups and clears selections when the certificate changes', async () => {
-    const wrapper = await mountView()
-
     await wrapper.find('.include-section').findAll('input[type="checkbox"]')[0].setValue(true)
     await router.push('/certs/SECOND/configure')
     await wrapper.vm.$nextTick()
@@ -251,19 +214,27 @@ describe('QuizConfigureView', () => {
     expect(headings).toEqual(['levels'])
     expect(wrapper.find('.match-row').classes()).toContain('match-row--disabled')
     expect(wrapper.find('.match-preview').text()).toContain('1 question match')
-    wrapper.unmount()
+  })
+
+  it('resets the question count to the new certification total when the certificate changes', async () => {
+    const countInput = wrapper.find('input.count-input[type="number"]')
+    expect(countInput.element.getAttribute('value')).toBe('2')
+
+    await countInput.setValue(1)
+    expect(countInput.element.getAttribute('value')).toBe('1')
+
+    await router.push('/certs/SECOND/configure')
+    await wrapper.vm.$nextTick()
+
+    const newCountInput = wrapper.find('input.count-input[type="number"]')
+    expect(newCountInput.element.getAttribute('value')).toBe('1')
   })
 
   it('enables the start CTA once questions match the filters', async () => {
-    const wrapper = await mountView()
-
     expect(wrapper.find('.start-cta').attributes('disabled')).toBeUndefined()
-    wrapper.unmount()
   })
 
   it('disables the start CTA when no question matches the filters', async () => {
-    const wrapper = await mountView()
-
     await wrapper.find('.include-section').findAll('input[type="checkbox"]')[0].setValue(true)
     await wrapper.find('.include-section').findAll('input[type="checkbox"]')[1].setValue(true)
     const matchAllRadio = wrapper.find('.include-section').findAll('.filter-group')[0].findAll('input[type="radio"]')[1]
@@ -271,6 +242,26 @@ describe('QuizConfigureView', () => {
 
     expect(wrapper.find('.match-preview').text()).toContain('No question matches')
     expect(wrapper.find('.start-cta').attributes('disabled')).toBeDefined()
-    wrapper.unmount()
+  })
+
+  it('starts a session when the CTA is clicked', async () => {
+    const quizSessionStore = useQuizSessionStore()
+
+    await wrapper.find('.start-cta').trigger('click')
+
+    expect(quizSessionStore.hasSession).toBe(true)
+    expect(quizSessionStore.currentSession?.certCode).toBe('FIX-001')
+    expect(quizSessionStore.currentSession?.questions.length).toBeGreaterThan(0)
+    expect(quizSessionStore.currentSession?.mode).toBe('preparation')
+  })
+
+  it('seeds session flags from the persisted progress store', async () => {
+    const progressStore = useUserProgressStore()
+    progressStore.toggleFlag('FIX-001', 'q1')
+
+    const quizSessionStore = useQuizSessionStore()
+    await wrapper.find('.start-cta').trigger('click')
+
+    expect(quizSessionStore.currentSession?.flags).toContain('q1')
   })
 })

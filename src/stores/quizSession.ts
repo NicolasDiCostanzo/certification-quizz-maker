@@ -20,6 +20,7 @@ export const useQuizSessionStore = defineStore('quizSession', {
       config: QuizConfig,
       questions: Question[],
       timeLimitMinutes: number | undefined,
+      initialFlags: string[] = [],
     ) {
       const startedAt = Date.now()
       this.session = {
@@ -28,7 +29,7 @@ export const useQuizSessionStore = defineStore('quizSession', {
         questions,
         currentIndex: 0,
         answers: {},
-        flags: [],
+        flags: [...initialFlags],
         startedAt,
         deadlineAt: config.mode === 'exam' && timeLimitMinutes ? startedAt + timeLimitMinutes * 60_000 : undefined,
         finished: false,
