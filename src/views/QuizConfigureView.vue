@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { computed, reactive, ref } from 'vue'
+  import { computed, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import ChoiceGroup from '../components/ChoiceGroup.vue'
 import CountPicker from '../components/CountPicker.vue'
@@ -8,9 +8,15 @@ import ThemeFilter from '../components/ThemeFilter.vue'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { texts } from '../texts/en'
 import { useUserProgressStore } from '../stores/userProgress'
-import type { QuizMode, ReplayMode, ThemeGroupFilter, ThemeMatchMode } from '../types'
+import type { QuizMode, ReplayMode, ThemeGroupFilter, ThemeMatchMode, ThemeRegistry } from '../types'
 import { filterByReplay, filterByThemes, filterByTopics } from '../utils/filterPool'
 import { groupLabel } from '../utils/themeGroupLabel'
+
+function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilter> {
+  return Object.fromEntries(
+    Object.keys(themes).map((group): [string, ThemeGroupFilter] => [group, { values: [], match: 'any' }]),
+  )
+}
 
   const route = useRoute()
   const { getCert, activePool } = useQuizLoader()
@@ -43,17 +49,21 @@ import { groupLabel } from '../utils/themeGroupLabel'
   ]
 
   const includeGroups = reactive<Record<string, ThemeGroupFilter>>(
-    Object.fromEntries(
-      Object.keys(cert.value?.themes ?? {}).map((group): [string, ThemeGroupFilter] => [
-        group,
-        { values: [], match: 'any' },
-      ]),
-    ),
+    emptyGroupFilters(cert.value?.themes ?? {}),
   )
   const excludeGroups = reactive<Record<string, ThemeGroupFilter>>(
-    Object.fromEntries(Object.keys(cert.value?.themes ?? {}).map((group) => [group, { values: [], match: 'any' }])),
+    emptyGroupFilters(cert.value?.themes ?? {}),
   )
   const selectedTopics = ref<string[]>([])
+
+  watch(certCode, () => {
+    const themes = cert.value?.themes ?? {}
+    for (const group of Object.keys(includeGroups)) delete includeGroups[group]
+    Object.assign(includeGroups, emptyGroupFilters(themes))
+    for (const group of Object.keys(excludeGroups)) delete excludeGroups[group]
+    Object.assign(excludeGroups, emptyGroupFilters(themes))
+    selectedTopics.value = []
+  })
 
   const availableTopics = computed(() => [...new Set(pool.value.map((question) => question.topic))])
 

@@ -6,13 +6,15 @@ import { useUserProgressStore } from '../stores/userProgress'
 import { texts } from '../texts/en'
 
 vi.mock('../composables/useQuizLoader', async () => {
-  const { validCertBundle } = await import('../utils/fixtures/certBundle.fixture')
+  const { validCertBundle, secondCertBundle } = await import('../utils/fixtures/certBundle.fixture')
   return {
     useQuizLoader: () => ({
-      availableCerts: [validCertBundle],
+      availableCerts: [validCertBundle, secondCertBundle],
       certLoadIssues: {},
-      getCert: (code: string) => (code === 'FIX-001' ? validCertBundle : undefined),
-      activePool: (code: string) => (code === 'FIX-001' ? validCertBundle.questions : []),
+      getCert: (code: string) =>
+        code === 'FIX-001' ? validCertBundle : code === 'SECOND' ? secondCertBundle : undefined,
+      activePool: (code: string) =>
+        code === 'FIX-001' ? validCertBundle.questions : code === 'SECOND' ? secondCertBundle.questions : [],
     }),
   }
 })
@@ -232,6 +234,23 @@ describe('QuizConfigureView', () => {
 
     expect(wrapper.find('.count-input').exists()).toBe(true)
     expect(wrapper.find('.count-input').attributes('max')).toBe('2')
+    wrapper.unmount()
+  })
+
+  it('rebuilds the filter groups and clears selections when the certificate changes', async () => {
+    const wrapper = await mountView()
+
+    await wrapper.find('.include-section').findAll('input[type="checkbox"]')[0].setValue(true)
+    await router.push('/certs/SECOND/configure')
+    await wrapper.vm.$nextTick()
+
+    const headings = wrapper
+      .find('.include-section')
+      .findAll('.group-label')
+      .map((heading) => heading.text())
+    expect(headings).toEqual(['levels'])
+    expect(wrapper.find('.match-row').classes()).toContain('match-row--disabled')
+    expect(wrapper.find('.match-preview').text()).toContain('1 question match')
     wrapper.unmount()
   })
 
