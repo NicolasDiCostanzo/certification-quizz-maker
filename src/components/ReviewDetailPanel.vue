@@ -14,7 +14,9 @@ const props = defineProps<{
 
 const progressStore = useUserProgressStore()
 
-const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+function letterForIndex(index: number): string {
+  return String.fromCharCode(65 + index)
+}
 
 function isCorrectLetter(letter: string): boolean {
   if (!props.question) return false
@@ -54,8 +56,8 @@ function renderSegments(text: string) {
         </template>
       </p>
       <ul class="options">
-        <label v-for="(option, i) in question.options" :key="option" class="option" :class="letterClass(letters[i])">
-          <span class="option-letter">{{ letters[i] }}</span>
+        <label v-for="(option, i) in question.options" :key="option" class="option" :class="letterClass(letterForIndex(i))">
+          <span class="option-letter">{{ letterForIndex(i) }}</span>
           <span class="option-text">
             <template v-for="(segment, j) in renderSegments(option)" :key="j">
               <img v-if="segment.type === 'image'" :src="segment.value" :alt="segment.alt" class="inline-image" />

@@ -54,7 +54,7 @@ export function breakdownByTheme(
     for (const q of questions) {
       const values = q.themes?.[group]
       if (!values) continue
-      for (const value of values) {
+      for (const value of new Set(values)) {
         const list = byValue.get(value) ?? []
         list.push(q)
         byValue.set(value, list)
