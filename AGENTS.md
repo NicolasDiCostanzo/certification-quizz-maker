@@ -63,11 +63,48 @@ SKILL.md                    AI spec for converting a raw exam dump into a cert-b
 6. **Questions are always shuffled**; there is no user setting for order.
 7. **Deliberate non-features** are recorded in `docs/FEATURES.md` (no mandatory accounts, no runtime cert upload, no auto-fixing invalid JSON, no force-fitting drag-and-drop/matching questions, no server-side AI formatting). Revisit the reasoning before proposing any of them.
 
+## Testing philosophy
+
+When writing tests for this project, focus on **major and crucial behavior**. Do not write tests for trivial stuff like checking the text in an element.
+
+**Worth testing (behavior):**
+- Scoring logic, pass/fail thresholds, projected scaled scores
+- Filter composition (AND/OR semantics, exclude logic, replay modes)
+- Session state transitions (start → answer → finish → review)
+- Answer correctness (single vs multi-select, deduplication)
+- Data validation (cert-bundle schema rules)
+
+**Not worth testing (implementation details):**
+- That a specific label string renders in a DOM element (e.g. `expect(wrapper.find('h1').text()).toContain('Some Title')`)
+- That a button has a certain CSS class
+- That a component renders the right number of children
+- That a specific HTML structure is used
+
+If a test would break only by changing copy (not behavior), it's too trivial. Test the *what*, not the *how*.
+
 ## Adding a certification
 
 There is no in-app upload. A new cert = a new `src/assets/<CODE> questions.json` bundle. Raw exam dumps are converted by an LLM using the root **`SKILL.md`** (a maintainer/contributor spec with a strict stop-and-ask rule: never guess, never force-fit, never silently drop data). If your task is "convert these questions" or "add cert X", read `SKILL.md` first and follow it; the resulting JSON must pass `src/utils/schemaValidator.ts` (validate via `npm run test`, which covers the validator).
 
 Known quirk: questions with no non-empty `options` are kept in the bundle but excluded from the active quiz pool by `isQuestionAnswerable` (the loader's `activePool()` filters them out, and the validator emits a warning). The DVA-C02 bank currently has zero such questions — but if you see the warning for a newly added bundle, it's expected behavior, not a bug: author the missing options rather than deleting the questions.
+
+## What the agent should do
+
+### Scope
+The agent may modify any file in the repository, including CI configuration (`.github/workflows/`) and dependencies (`package.json`). There is no restricted directory.
+
+### Git
+The agent **must not** interact with the git repository: no `git add`, `git commit`, `git push`, or any other git command. When a unit of work is complete and ready for review, tell the user what was changed and that it should be committed.
+
+### When things go wrong
+- **Test failures / bugs:** stop and ask the user. Do not unilaterally decide whether to fix the code or the tests.
+- **Conflicting instructions:** if the user requests something that violates an architecture rule (section "Core architecture rules" below), warn the user and ask for confirmation before proceeding.
+
+### Output
+Explain changes briefly and clearly. The user will ask for more detail if needed — lead with the essentials.
+
+### TODO / FIXME comments
+`TODO` and `FIXME` markers are acceptable in code. The comment-free convention below applies to design rationale, not task tracking.
 
 ## Conventions
 
@@ -76,6 +113,10 @@ Known quirk: questions with no non-empty `options` are kept in the bundle but ex
 - `src/assets/**` is ESLint-ignored (the question banks are data, not code).
 - Source files are kept **comment-free**: design rationale lives in `AGENTS.md`, `docs/`, and `SKILL.md` — don't add explanatory comments to code, put new rationale in the docs instead.
 - Branch naming follows `feat/…` style; commits go through Husky hooks.
+
+## First session
+
+After reading this file, read `docs/FEATURES.md` for the current project state and Phase 1 checklist. Then follow the routing table below for the task at hand.
 
 ## Where to look first
 
