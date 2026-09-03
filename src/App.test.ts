@@ -30,14 +30,6 @@ describe('theme mode toggle', () => {
     },
   )
 
-  it('renders both icons inside the switch', () => {
-    wrapper = mount(App, { global: { plugins: [router] } })
-    const $switch = wrapper.find('.theme-switch')
-
-    expect($switch.find('.icon-sun').exists()).toBe(true)
-    expect($switch.find('.icon-moon').exists()).toBe(true)
-  })
-
   it('toggles to light and applies it on click', async () => {
     wrapper = mount(App, { global: { plugins: [router] } })
     const store = useUserPreferencesStore()

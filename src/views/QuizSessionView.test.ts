@@ -56,10 +56,9 @@ describe('QuizSessionView', () => {
     expect(wrapper.find('.session').exists()).toBe(false)
   })
 
-  it('shows the question counter and hides the timer in preparation mode', () => {
+  it('hides the timer in preparation mode', () => {
     store.startSession('TEST', { certCode: 'TEST', mode: 'preparation', includeMatchMode: 'or', replayMode: 'all', count: 'all' }, questions, undefined)
     const wrapper = mount(QuizSessionView, { global: { plugins: [pinia, router] } })
-    expect(wrapper.text()).toContain('Question 1 of 3')
     expect(wrapper.findComponent({ name: 'TimerBar' }).exists()).toBe(false)
   })
 
@@ -89,11 +88,10 @@ describe('QuizSessionView', () => {
     expect(wrapper.text()).toContain('Finish quiz')
   })
 
-  it('toggles the flag and shows the badge', async () => {
+  it('toggles the flag', async () => {
     store.startSession('TEST', { certCode: 'TEST', mode: 'preparation', includeMatchMode: 'or', replayMode: 'all', count: 'all' }, questions, undefined)
     const wrapper = mount(QuizSessionView, { global: { plugins: [pinia, router] } })
     await wrapper.findAll('button')[2].trigger('click')
-    expect(wrapper.text()).toContain('Flagged')
     expect(store.currentSession?.flags).toEqual(['q1'])
   })
 

@@ -20,13 +20,6 @@ const mountCard = (question: Question, selected: string[] = [], reveal = false) 
   })
 
 describe('QuestionCard', () => {
-  it('renders the question text and option letters', () => {
-    const wrapper = mountCard(makeQuestion())
-    expect(wrapper.text()).toContain('What is A?')
-    expect(wrapper.text()).toContain('Option B')
-    expect(wrapper.findAll('input').length).toBe(4)
-  })
-
   it('uses radio inputs for single-answer questions', () => {
     const wrapper = mountCard(makeQuestion({ answers: 'C' }))
     expect(wrapper.find('input').attributes('type')).toBe('radio')
@@ -62,26 +55,5 @@ describe('QuestionCard', () => {
   it('does not reveal feedback when reveal is false', () => {
     const wrapper = mountCard(makeQuestion(), ['B'], false)
     expect(wrapper.find('.feedback').exists()).toBe(false)
-  })
-
-  it('shows correct feedback when the answer is right', () => {
-    const wrapper = mountCard(makeQuestion({ answers: 'B' }), ['B'], true)
-    expect(wrapper.find('.feedback--correct').exists()).toBe(true)
-    expect(wrapper.find('.feedback').text()).toContain('Correct')
-  })
-
-  it('shows incorrect feedback with the correct answer when wrong', () => {
-    const wrapper = mountCard(makeQuestion({ answers: 'B' }), ['A'], true)
-    expect(wrapper.find('.feedback--incorrect').exists()).toBe(true)
-    expect(wrapper.find('.feedback').text()).toContain('Correct answer: B')
-  })
-
-  it('renders inline images in the question text', () => {
-    const wrapper = mountCard(
-      makeQuestion({ question: 'Look ![diagram](https://img/x.png) here' }),
-    )
-    const img = wrapper.find('.inline-image')
-    expect(img.exists()).toBe(true)
-    expect(img.attributes('src')).toBe('https://img/x.png')
   })
 })

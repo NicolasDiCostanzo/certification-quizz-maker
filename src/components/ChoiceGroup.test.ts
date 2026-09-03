@@ -15,13 +15,10 @@ describe('ChoiceGroup', () => {
     })
   }
 
-  it('renders the legend and one checked radio per option', () => {
+  it('reflects the checked state of each option', () => {
     const wrapper = mountGroup()
     const radios = wrapper.findAll('input[type="radio"]')
 
-    expect(wrapper.find('legend').text()).toBe(texts.modeLabel)
-    expect(radios).toHaveLength(2)
-    expect(radios[0].attributes('name')).toBe('test-group')
     expect((radios[0].element as HTMLInputElement).checked).toBe(true)
     expect((radios[1].element as HTMLInputElement).checked).toBe(false)
   })

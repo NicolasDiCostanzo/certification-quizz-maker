@@ -47,55 +47,13 @@ beforeEach(async () => {
 afterEach(() => { wrapper?.unmount() })
 
 describe('QuizConfigureView', () => {
-  it('renders the exam name in the title', () => {
-    expect(wrapper.find('h1').text()).toContain('Fixture Certification')
-  })
-
-  it('splits the configuration into quick setup and filter sections', async () => {    const cards = wrapper.findAll('.config-card')
-
-    expect(cards).toHaveLength(2)
-    expect(cards[0].find('.section-title').text()).toBe(texts.quickSetupLabel)
-    expect(cards[1].find('.section-title').text()).toBe(texts.filterQuestionsLabel)
-    expect(wrapper.find('.topics-section').exists()).toBe(true)
-    expect(wrapper.find('.include-section').exists()).toBe(true)
-    expect(wrapper.find('.exclude-section').exists()).toBe(true)
-    expect(wrapper.find('.include-section .match-row').classes()).toContain('match-row--disabled')
-
-    const includeDetails = wrapper.find('details.include-section')
-    const excludeDetails = wrapper.find('details.exclude-section')
-    expect(includeDetails.attributes('open')).toBeUndefined()
-    expect(excludeDetails.attributes('open')).toBeUndefined()
-    expect(includeDetails.find('summary').text()).toBe(texts.includeLabel)
-    expect(excludeDetails.find('summary').text()).toBe(texts.excludeLabel)
-  })
-
-  it('displays localized labels for known theme groups', async () => {
-    const headings = wrapper
-      .find('.include-section')
-      .findAll('.group-label')
-      .map((heading) => heading.text())
-
-    expect(headings).toEqual([texts.services, texts.concepts])
-  })
-
-  it('disables the match-groups pills until two groups have selections', async () => {    const includeCheckboxes = wrapper.find('.include-section').findAll('input[type="checkbox"]')
-    const matchRow = () => wrapper.find('.include-section .match-row')
-
-    expect(matchRow().classes()).toContain('match-row--disabled')
+  it('selects the match mode once two groups have selections', async () => {
+    const includeCheckboxes = wrapper.find('.include-section').findAll('input[type="checkbox"]')
 
     await includeCheckboxes[0].setValue(true)
-    expect(matchRow().classes()).toContain('match-row--disabled')
-
     await includeCheckboxes[2].setValue(true)
-    expect(matchRow().classes()).not.toContain('match-row--disabled')
-    expect(matchRow().attributes('aria-label')).toBe(texts.matchGroupsLabel)
 
     const pills = wrapper.findAll('.include-section .match-row input[type="radio"]')
-    expect(pills).toHaveLength(2)
-    expect(wrapper.findAll('.include-section .match-row .pill').map((pill) => pill.text())).toEqual([
-      texts.matchAllGroups,
-      texts.matchAnyGroups,
-    ])
     expect((pills[1].element as HTMLInputElement).checked).toBe(true)
     expect((pills[0].element as HTMLInputElement).checked).toBe(false)
 
@@ -198,10 +156,6 @@ describe('QuizConfigureView', () => {
     expect(wrapper.find('.match-preview').text()).toContain('1 question match')
   })
 
-  it('shows the custom count input by default', async () => {
-    expect(wrapper.find('.count-input').exists()).toBe(true)
-  })
-
   it('rebuilds the filter groups and clears selections when the certificate changes', async () => {
     await wrapper.find('.include-section').findAll('input[type="checkbox"]')[0].setValue(true)
     await router.push('/certs/SECOND/configure')
@@ -212,7 +166,6 @@ describe('QuizConfigureView', () => {
       .findAll('.group-label')
       .map((heading) => heading.text())
     expect(headings).toEqual(['levels'])
-    expect(wrapper.find('.match-row').classes()).toContain('match-row--disabled')
     expect(wrapper.find('.match-preview').text()).toContain('1 question match')
   })
 

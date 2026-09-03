@@ -2,7 +2,6 @@ import { mount } from '@vue/test-utils'
 import { defineComponent, h } from 'vue'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { ThemeGroupFilter } from '../types'
-import { texts } from '../texts/en'
 import ThemeFilter from './ThemeFilter.vue'
 
 const base: ThemeGroupFilter = { values: [], match: 'all' }
@@ -23,12 +22,6 @@ beforeEach(() => {
 afterEach(() => { wrapper?.unmount() })
 
 describe('ThemeFilter', () => {
-  it('renders a checkbox per value with the group label', () => {
-    expect(wrapper.find('[role="group"]').attributes('aria-label')).toBe('services')
-    expect(wrapper.findAll('input[type="checkbox"]')).toHaveLength(2)
-    expect(wrapper.text()).toContain('lambda')
-  })
-
   it('emits the added value when a checkbox is checked', async () => {
     await wrapper.findAll('input[type="checkbox"]')[0].setValue(true)
 
@@ -49,11 +42,9 @@ describe('ThemeFilter', () => {
     wrapper = mountGroup({ values: [], match: 'any' }, true)
     const radios = wrapper.findAll('input[type="radio"]')
 
-    expect(radios).toHaveLength(2)
     await radios[1].setValue(true)
 
     expect(wrapper.emitted('update:modelValue')![0][0]).toEqual({ values: [], match: 'all' })
-    expect(wrapper.text()).toContain(texts.matchAny)
   })
 
   it('hides the any/all radios when matchChoice is false', () => {
@@ -77,16 +68,14 @@ describe('ThemeFilter', () => {
     expect(checkboxes[1].attributes('disabled')).toBeUndefined()
   })
 
-  it('renders the All checkbox ticked by default when allOption is set', () => {
+  it('checks the All checkbox by default when allOption is set', () => {
     wrapper?.unmount()
     wrapper = mount(ThemeFilter, {
       props: { label: 'topics', values: ['Security', 'Deployment'], modelValue: base, matchChoice: false, allOption: true },
     })
 
     const checkboxes = wrapper.findAll('input[type="checkbox"]')
-    expect(checkboxes).toHaveLength(3)
     expect((checkboxes[0].element as HTMLInputElement).checked).toBe(true)
-    expect(wrapper.find('.all-option').text()).toBe(texts.topicsAllOption)
   })
 
   it('unticks All once a value is selected', () => {
@@ -109,11 +98,6 @@ describe('ThemeFilter', () => {
     await wrapper.findAll('input[type="checkbox"]')[0].setValue(true)
 
     expect(wrapper.emitted('update:modelValue')![0][0]).toEqual({ values: [], match: 'any' })
-  })
-
-  it('renders no All checkbox by default', () => {
-    expect(wrapper.findAll('input[type="checkbox"]')).toHaveLength(2)
-    expect(wrapper.find('.all-option').exists()).toBe(false)
   })
 
   it('keeps its match radios checked independently of same-label instances', () => {

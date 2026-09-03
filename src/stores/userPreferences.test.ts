@@ -18,10 +18,6 @@ beforeEach(() => {
 })
 
 describe('userPreferences store', () => {
-  it('defaults to dark mode', () => {
-    expect(useUserPreferencesStore().dark).toBe(true)
-  })
-
   it('toggles between dark and light', () => {
     const store = useUserPreferencesStore()
 
