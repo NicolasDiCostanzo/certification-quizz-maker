@@ -11,10 +11,9 @@ export function isCorrect(question: Question, selected: string[]): boolean {
 export function computeScore(
   questions: Question[],
   answers: Record<string, QuestionAnswer>,
-  mode: 'preparation' | 'exam',
   exam: ExamInfo,
 ): ScoreResult {
-  const totalAnswered = mode === 'exam' ? questions.length : Object.keys(answers).length
+  const totalAnswered = questions.length
   const timesCorrect = questions.filter((q) => answers[q.id]?.correct).length
   const percentCorrect = totalAnswered === 0 ? 0 : (timesCorrect / totalAnswered) * 100
 

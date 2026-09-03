@@ -66,7 +66,7 @@ function finishQuiz() {
   }
   const cert = getCert(certCode.value)
   if (!cert) return
-  const result = computeScore(session.value.questions, session.value.answers, session.value.mode, cert.exam)
+  const result = computeScore(session.value.questions, session.value.answers, cert.exam)
   store.finishSession(result)
   router.push({ name: 'quiz-review', params: { certCode: certCode.value } })
 }

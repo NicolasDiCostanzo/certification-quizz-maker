@@ -78,8 +78,8 @@ Implementation order (each step depends on the previous):
 ✅ QuizConfigureView.vue — filters, mode, count, replay-mode UI
 ✅ src/stores/quizSession.ts — active quiz session state (sessionStorage-persisted)
 ✅ src/utils/scoring.ts — pass/fail + projected scaled score
-☑ QuizSessionView.vue — question rendering, timer, flag, feedback
-☐ QuizReviewView.vue — score banner, per-question review
+✅ QuizSessionView.vue — question rendering, timer, flag, feedback
+✅ QuizReviewView.vue — score banner, per-question review
 ☐ Progress export/import UI (on CertSelectorView.vue)
 ☐ Visual polish pass (transitions, cross-screen consistency)
 ☐ Final integration (build/typecheck/lint/test green + full manual smoke test)
