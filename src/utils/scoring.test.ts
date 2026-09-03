@@ -49,28 +49,28 @@ describe('isCorrect', () => {
 })
 
 describe('computeScore', () => {
-  it('counts unanswered as wrong in exam mode', () => {
+  it('counts unanswered questions as wrong', () => {
     const questions = [makeQuestion('q1', 'B'), makeQuestion('q2', 'C'), makeQuestion('q3', 'A')]
     const answers = { q1: { selected: ['B'], correct: true, answeredAt: 0 } }
-    const result = computeScore(questions, answers, 'exam', examScaled)
+    const result = computeScore(questions, answers, examScaled)
     expect(result.timesCorrect).toBe(1)
     expect(result.totalAnswered).toBe(3)
     expect(result.percentCorrect).toBeCloseTo(33.33, 1)
   })
 
-  it('counts only answered in preparation mode', () => {
+  it('counts unanswered questions as wrong even when some are answered', () => {
     const questions = [makeQuestion('q1', 'B'), makeQuestion('q2', 'C')]
     const answers = { q1: { selected: ['B'], correct: true, answeredAt: 0 } }
-    const result = computeScore(questions, answers, 'preparation', examScaled)
+    const result = computeScore(questions, answers, examScaled)
     expect(result.timesCorrect).toBe(1)
-    expect(result.totalAnswered).toBe(1)
-    expect(result.percentCorrect).toBe(100)
+    expect(result.totalAnswered).toBe(2)
+    expect(result.percentCorrect).toBe(50)
   })
 
   it('computes projected scaled score and passes', () => {
     const questions = [makeQuestion('q1', 'B'), makeQuestion('q2', 'C'), makeQuestion('q3', 'A'), makeQuestion('q4', 'D')]
     const answers = makeAnswers(['q1', 'q2', 'q3'])
-    const result = computeScore(questions, answers, 'exam', examScaled)
+    const result = computeScore(questions, answers, examScaled)
     expect(result.percentCorrect).toBe(75)
     expect(result.projectedScaledScore).toBe(750)
     expect(result.passed).toBe(true)
@@ -79,7 +79,7 @@ describe('computeScore', () => {
   it('fails when below threshold', () => {
     const questions = [makeQuestion('q1', 'B'), makeQuestion('q2', 'C'), makeQuestion('q3', 'A'), makeQuestion('q4', 'D')]
     const answers = makeAnswers(['q1'])
-    const result = computeScore(questions, answers, 'exam', examScaled)
+    const result = computeScore(questions, answers, examScaled)
     expect(result.percentCorrect).toBe(25)
     expect(result.projectedScaledScore).toBe(250)
     expect(result.passed).toBe(false)
@@ -88,24 +88,24 @@ describe('computeScore', () => {
   it('handles percentage-based cert without scale', () => {
     const questions = [makeQuestion('q1', 'B'), makeQuestion('q2', 'C')]
     const answers = makeAnswers(['q1'])
-    const result = computeScore(questions, answers, 'exam', examPercent)
+    const result = computeScore(questions, answers, examPercent)
     expect(result.percentCorrect).toBe(50)
     expect(result.projectedScaledScore).toBeUndefined()
     expect(result.passed).toBe(false)
   })
 
-  it('returns zero when nothing answered in preparation mode', () => {
+  it('counts a single unanswered question as wrong', () => {
     const questions = [makeQuestion('q1', 'B')]
-    const result = computeScore(questions, {}, 'preparation', examScaled)
+    const result = computeScore(questions, {}, examScaled)
     expect(result.percentCorrect).toBe(0)
-    expect(result.totalAnswered).toBe(0)
+    expect(result.totalAnswered).toBe(1)
     expect(result.timesCorrect).toBe(0)
   })
 
   it('all correct passes with full score', () => {
     const questions = [makeQuestion('q1', 'B'), makeQuestion('q2', 'C')]
     const answers = makeAnswers(['q1', 'q2'])
-    const result = computeScore(questions, answers, 'exam', examScaled)
+    const result = computeScore(questions, answers, examScaled)
     expect(result.percentCorrect).toBe(100)
     expect(result.projectedScaledScore).toBe(1000)
     expect(result.passed).toBe(true)

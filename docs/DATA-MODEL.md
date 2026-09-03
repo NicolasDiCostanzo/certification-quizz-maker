@@ -69,7 +69,7 @@ How a quiz session's raw `timesCorrect` / `totalAnswered` maps onto `exam.passin
 
    > \* This is a linear projection of your percentage correct onto {examName}'s scale, shown for reference only. Real certification exams score with an undisclosed, difficulty-weighted algorithm (often item-response theory) that varies per certification and cannot be reproduced here — this number has no guaranteed relationship to the score {examName} would actually give you.
 
-5. **Unanswered questions in exam mode count as incorrect** — `totalAnswered` is the session's full question count (the real-exam rule). In preparation mode a session only ends when every question has been answered, so `totalAnswered` is simply the number of answers given.
+5. **Unanswered questions always count as incorrect** — `totalAnswered` is always the session's full question count, regardless of mode.
 
 No such disclaimer is needed for percentage-based certs (no `scale`), since there `percentCorrect` already **is** the number the cert defines.
 
