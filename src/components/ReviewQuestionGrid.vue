@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import type { Question, QuestionAnswer } from '../types'
-import { texts } from '../texts/en'
-import { useUserProgressStore } from '../stores/userProgress'
-import QuestionSummaryCard from './QuestionSummaryCard.vue'
+import { useUserProgressStore } from '../stores/userProgress';
+import type { Question, QuestionAnswer } from '../types';
+import QuestionSummaryCard from './QuestionSummaryCard.vue';
 
 defineProps<{
   questions: Question[]
   answers: Record<string, QuestionAnswer>
   certCode: string
   selectedQuestionId: string | null
+  title?: string
 }>()
 
 const emit = defineEmits<{
@@ -20,7 +20,6 @@ const progressStore = useUserProgressStore()
 
 <template>
   <section class="questions-section">
-    <h2>{{ texts.questionsInQuiz }}</h2>
     <div class="questions-grid">
       <QuestionSummaryCard
         v-for="(question, i) in questions"

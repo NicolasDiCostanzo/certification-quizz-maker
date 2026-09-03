@@ -1,4 +1,4 @@
-import type { Question, QuestionAnswer } from '../types'
+import type { Question, QuestionAnswer, QuizHistoryEntry } from '../types'
 
 export interface TopicBreakdown {
   label: string
@@ -73,5 +73,55 @@ export function breakdownByTheme(
     }
   }
 
+  return cells
+}
+
+export function breakdownByTopicAllTime(entries: QuizHistoryEntry[]): TopicBreakdown[] {
+  const byLabel = new Map<string, { correct: number; total: number }>()
+  for (const entry of entries) {
+    for (const q of entry.questions) {
+      const cell = byLabel.get(q.topic) ?? { correct: 0, total: 0 }
+      cell.total += 1
+      if (entry.answers[q.id]?.correct) cell.correct += 1
+      byLabel.set(q.topic, cell)
+    }
+  }
+  return [...byLabel.entries()].map(([label, cell]) => ({
+    label,
+    correct: cell.correct,
+    total: cell.total,
+    percent: cell.total === 0 ? 0 : Math.round((cell.correct / cell.total) * 100),
+  }))
+}
+
+export function breakdownByThemeAllTime(
+  entries: QuizHistoryEntry[],
+  groups: string[],
+): ThemeBreakdown[] {
+  const cells: ThemeBreakdown[] = []
+  for (const group of groups) {
+    const byValue = new Map<string, { correct: number; total: number }>()
+    for (const entry of entries) {
+      for (const q of entry.questions) {
+        const values = q.themes?.[group]
+        if (!values) continue
+        for (const value of new Set(values)) {
+          const cell = byValue.get(value) ?? { correct: 0, total: 0 }
+          cell.total += 1
+          if (entry.answers[q.id]?.correct) cell.correct += 1
+          byValue.set(value, cell)
+        }
+      }
+    }
+    for (const [value, cell] of byValue) {
+      cells.push({
+        group,
+        value,
+        correct: cell.correct,
+        total: cell.total,
+        percent: cell.total === 0 ? 0 : Math.round((cell.correct / cell.total) * 100),
+      })
+    }
+  }
   return cells
 }

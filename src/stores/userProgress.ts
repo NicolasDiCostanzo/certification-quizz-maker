@@ -63,6 +63,14 @@ export const useUserProgressStore = defineStore('userProgress', {
         }
       }
     },
+
+    resetByCertCode(examCode: string) {
+      delete this.byExamCode[examCode]
+    },
+
+    resetAll() {
+      this.byExamCode = {}
+    },
   },
 
   persist: true,

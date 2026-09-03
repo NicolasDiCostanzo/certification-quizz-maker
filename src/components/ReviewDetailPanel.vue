@@ -3,7 +3,6 @@ import { useUserProgressStore } from '../stores/userProgress';
 import { texts } from '../texts/en';
 import type { Question, QuestionAnswer } from '../types';
 import { parseInlineSegments } from '../utils/markdownImage';
-import { groupLabel } from '../utils/themeGroupLabel';
 
 const props = defineProps<{
   question: Question | null
@@ -45,7 +44,7 @@ function renderSegments(text: string) {
         <span class="tag">{{ texts.topic }}: {{ question.topic }}</span>
         <template v-for="group in themeGroups" :key="group">
           <span v-if="question.themes?.[group]?.length" class="tag">
-            {{ texts.themeGroupDisplay(groupLabel(group), question.themes[group]) }}
+            {{ texts.themeGroupDisplay(group, question.themes[group]) }}
           </span>
         </template>
       </div>

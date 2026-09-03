@@ -104,3 +104,15 @@ export interface QuizSessionState {
   finished: boolean
   result?: ScoreResult
 }
+
+export interface QuizHistoryEntry {
+  id: string
+  certCode: string
+  mode: QuizMode
+  startedAt: number
+  finishedAt: number
+  questions: Question[]
+  answers: Record<string, QuestionAnswer>
+  flags: string[]
+  result: ScoreResult
+}
