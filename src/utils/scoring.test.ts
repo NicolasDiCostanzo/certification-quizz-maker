@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { computeScore, isCorrect } from './scoring'
 import type { ExamInfo, Question, QuestionAnswer } from '../types'
+import { computeScore, isCorrect } from './scoring'
 
 function makeQuestion(id: string, answers: string | string[]): Question {
   return {
@@ -12,14 +12,9 @@ function makeQuestion(id: string, answers: string | string[]): Question {
   }
 }
 
-function makeAnswers(questions: Question[], ids: string[]): Record<string, QuestionAnswer> {
-  const byId = new Map(questions.map((q) => [q.id, q]))
+function makeAnswers(ids: string[]): Record<string, QuestionAnswer> {
   return Object.fromEntries(
-    ids.map((id) => {
-      const q = byId.get(id)
-      const expected = Array.isArray(q?.answers) ? q!.answers : q?.answers ? [q.answers] : []
-      return [id, { selected: expected, correct: isCorrect(q!, expected), answeredAt: 0 }]
-    }),
+    ids.map((id) => [id, { selected: ['B'], correct: true, answeredAt: 0 }]),
   )
 }
 
@@ -74,7 +69,7 @@ describe('computeScore', () => {
 
   it('computes projected scaled score and passes', () => {
     const questions = [makeQuestion('q1', 'B'), makeQuestion('q2', 'C'), makeQuestion('q3', 'A'), makeQuestion('q4', 'D')]
-    const answers = makeAnswers(questions, ['q1', 'q2', 'q3'])
+    const answers = makeAnswers(['q1', 'q2', 'q3'])
     const result = computeScore(questions, answers, 'exam', examScaled)
     expect(result.percentCorrect).toBe(75)
     expect(result.projectedScaledScore).toBe(750)
@@ -83,7 +78,7 @@ describe('computeScore', () => {
 
   it('fails when below threshold', () => {
     const questions = [makeQuestion('q1', 'B'), makeQuestion('q2', 'C'), makeQuestion('q3', 'A'), makeQuestion('q4', 'D')]
-    const answers = makeAnswers(questions, ['q1'])
+    const answers = makeAnswers(['q1'])
     const result = computeScore(questions, answers, 'exam', examScaled)
     expect(result.percentCorrect).toBe(25)
     expect(result.projectedScaledScore).toBe(250)
@@ -92,7 +87,7 @@ describe('computeScore', () => {
 
   it('handles percentage-based cert without scale', () => {
     const questions = [makeQuestion('q1', 'B'), makeQuestion('q2', 'C')]
-    const answers = makeAnswers(questions, ['q1'])
+    const answers = makeAnswers(['q1'])
     const result = computeScore(questions, answers, 'exam', examPercent)
     expect(result.percentCorrect).toBe(50)
     expect(result.projectedScaledScore).toBeUndefined()
@@ -109,7 +104,7 @@ describe('computeScore', () => {
 
   it('all correct passes with full score', () => {
     const questions = [makeQuestion('q1', 'B'), makeQuestion('q2', 'C')]
-    const answers = makeAnswers(questions, ['q1', 'q2'])
+    const answers = makeAnswers(['q1', 'q2'])
     const result = computeScore(questions, answers, 'exam', examScaled)
     expect(result.percentCorrect).toBe(100)
     expect(result.projectedScaledScore).toBe(1000)

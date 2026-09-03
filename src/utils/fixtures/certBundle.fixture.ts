@@ -36,7 +36,7 @@ export const validCertBundle: CertBundle = {
 
 export const secondCertBundle: CertBundle = (() => {
   const bundle = cloneBundle(validCertBundle)
-  bundle.exam = { ...bundle.exam, code: 'SECOND', name: 'Second Certification' }
+  bundle.exam = { ...bundle.exam, code: 'SECOND', name: 'Second Certification', totalQuestions: 65 }
   bundle.themes = { levels: ['begin', 'advanced'] }
   bundle.questions = [
     {
