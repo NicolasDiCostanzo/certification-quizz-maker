@@ -8,7 +8,6 @@ defineProps<{
   answers: Record<string, QuestionAnswer>
   certCode: string
   selectedQuestionId: string | null
-  title?: string
 }>()
 
 const emit = defineEmits<{

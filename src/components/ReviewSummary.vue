@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { CertBundle, ScoreResult } from '../types'
 import { texts } from '../texts/en'
+import type { CertBundle, ScoreResult } from '../types'
 import type { ThemeBreakdown, TopicBreakdown } from '../utils/scoreBreakdown'
 import ReviewBreakdown from './ReviewBreakdown.vue'
 import ReviewScoreCard from './ReviewScoreCard.vue'

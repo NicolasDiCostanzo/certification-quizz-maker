@@ -45,4 +45,28 @@ const themeBreakdown = computed(() =>
     :theme-breakdown="themeBreakdown"
     :back-route="{ name: 'quiz-dashboard', params: { certCode } }"
   />
+  <div v-else class="not-found">
+    <p>{{ texts.quizNotFoundMessage }}</p>
+    <router-link :to="{ name: 'quiz-dashboard', params: { certCode } }" class="btn">
+      {{ texts.goBackToDashboard }}
+    </router-link>
+  </div>
 </template>
+
+<style scoped>
+.not-found {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+.not-found p {
+  color: var(--text);
+  font-size: 1.125rem;
+}
+</style>

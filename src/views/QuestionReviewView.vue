@@ -78,7 +78,6 @@ function goBack() {
       :answers="answers"
       :cert-code="cert?.exam.code ?? ''"
       :selected-question-id="selectedQuestionId"
-      :title="questionsTitle"
       @select="toggleSelected"
     />
 
@@ -135,6 +134,8 @@ function goBack() {
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--cta);
 }
 
 .cta:hover {

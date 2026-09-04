@@ -42,13 +42,13 @@ const visibleThemeGroups = computed(() =>
 
 function navigateToTopic(topic: string) {
   if (props.certCode) {
-    router.push({ name: 'topic-review', params: { certCode: props.certCode, topic: encodeURIComponent(topic) } })
+    router.push({ name: 'topic-review', params: { certCode: props.certCode, topic } })
   }
 }
 
 function navigateToTheme(group: string, value: string) {
   if (props.certCode) {
-    router.push({ name: 'theme-review', params: { certCode: props.certCode, themeGroup: encodeURIComponent(group), themeValue: encodeURIComponent(value) } })
+    router.push({ name: 'theme-review', params: { certCode: props.certCode, themeGroup: group, themeValue: value } })
   }
 }
 </script>
@@ -264,6 +264,8 @@ function navigateToTheme(group: string, value: string) {
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  background: var(--cta);
+  border: 1px solid var(--border);
 }
 
 .btn-review:hover {

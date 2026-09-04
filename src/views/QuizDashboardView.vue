@@ -179,14 +179,16 @@ function goHome() {
 }
 
 .cta {
-    padding: 8px 12px;
-    font-size: 14px;
-    color: var(--cta-text);
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--cta-text);
   border: none;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  background: var(--cta);
+  border: 1px solid var(--border);
 }
 
 .cta:hover {

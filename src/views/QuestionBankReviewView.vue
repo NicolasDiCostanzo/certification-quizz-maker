@@ -47,7 +47,7 @@ const answers = computed((): Record<string, QuestionAnswer> => {
   for (const entry of entries.value) {
     for (const [questionId, answer] of Object.entries(entry.answers)) {
       if (questions.value.some((q) => q.id === questionId)) {
-        result[questionId] = answer
+        result[questionId] ??= answer
       }
     }
   }
