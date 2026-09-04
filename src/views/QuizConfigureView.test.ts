@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { router } from '../router'
 import { useQuizSessionStore } from '../stores/quizSession'
+import { useUserPreferencesStore } from '../stores/userPreferences'
 import { useUserProgressStore } from '../stores/userProgress'
 import { texts } from '../texts/en'
 
@@ -35,6 +36,8 @@ const mountView = async (
 }
 
 beforeEach(async () => {
+  setActivePinia(createPinia())
+  useUserPreferencesStore().accountMode = 'local'
   await router.push('/')
 })
 

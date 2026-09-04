@@ -57,6 +57,7 @@ export interface ProgressExportFile {
 }
 
 export type QuizMode = 'preparation' | 'exam'
+export type AccountMode = 'account' | 'local'
 export type ReplayMode = 'all' | 'wrong' | 'flagged' | 'unattempted'
 export type ThemeMatchMode = 'and' | 'or'
 export type ThemeGroupMatch = 'any' | 'all'
