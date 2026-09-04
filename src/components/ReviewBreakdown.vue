@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { texts } from '../texts/en'
 import type { ThemeBreakdown, TopicBreakdown } from '../utils/scoreBreakdown'
+import PrimaryButton from './PrimaryButton.vue'
 import ProgressBar from './ProgressBar.vue'
 
 const props = defineProps<{
@@ -72,14 +73,13 @@ function navigateToFlagged() {
       <span class="breakdown__label">{{ item.label }}</span>
       <span class="breakdown__fraction">{{ item.correct }} / {{ item.total }}</span>
       <ProgressBar :value="item.percent" :passing="passingPercent" />
-      <button
+      <PrimaryButton
         v-if="showReviewButton"
-        type="button"
-        class="btn-review"
+        size="sm"
         @click.stop="navigateToTopic(item.label)"
       >
         {{ texts.review }}
-      </button>
+      </PrimaryButton>
     </div>
   </section>
 
@@ -101,14 +101,13 @@ function navigateToFlagged() {
             <span class="breakdown__label">{{ item.value }}</span>
             <span class="breakdown__fraction">{{ item.correct }} / {{ item.total }}</span>
             <ProgressBar :value="item.percent" :passing="passingPercent" />
-            <button
+            <PrimaryButton
               v-if="showReviewButton"
-              type="button"
-              class="btn-review"
+              size="sm"
               @click.stop="navigateToTheme(item.group, item.value)"
             >
               {{ texts.review }}
-            </button>
+            </PrimaryButton>
           </div>
         </div>
       </div>
@@ -116,14 +115,14 @@ function navigateToFlagged() {
   </section>
 
   <section v-if="showReviewButton" class="breakdown">
-    <button
-      type="button"
-      class="btn-review btn-review--flagged"
+    <PrimaryButton
+      size="sm"
+      class="flagged-review-btn"
       :disabled="!hasFlaggedQuestions"
       @click="navigateToFlagged"
     >
       {{ texts.reviewFlagged }}
-    </button>
+    </PrimaryButton>
   </section>
 </template>
 
@@ -265,27 +264,5 @@ function navigateToFlagged() {
 
 .breakdown__chevron--open {
   transform: rotate(180deg);
-}
-
-.btn-review {
-  padding: 6px 12px;
-  color: var(--cta-text);
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  background: var(--cta);
-  border: 1px solid var(--border);
-}
-
-.btn-review:hover {
-  opacity: 0.9;
-}
-
-.btn-review:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
 }
 </style>

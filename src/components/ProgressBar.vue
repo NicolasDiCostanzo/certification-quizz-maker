@@ -36,7 +36,7 @@ const isPassed = computed(() => props.value >= props.passing)
   height: 100%;
   background-color: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 8px;
   overflow: hidden;
 }
 

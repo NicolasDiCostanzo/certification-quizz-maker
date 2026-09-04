@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { CertBundle, ScoreResult } from '../types'
 import { texts } from '../texts/en'
+import Card from './BaseCard.vue'
 
 defineProps<{
   result: ScoreResult
@@ -9,7 +10,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="score-card">
+  <Card padding="xl" radius="2xl" class="score-card">
     <div class="score-card__percent">{{ Math.round(result.percentCorrect) }}%</div>
     <div class="score-card__detail">
       <p>{{ texts.correctCount(result.timesCorrect, result.totalAnswered) }}</p>
@@ -20,7 +21,7 @@ defineProps<{
         {{ texts.scaledScoreDisclaimer }}
       </p>
     </div>
-  </div>
+  </Card>
 </template>
 
 <style scoped>
@@ -28,10 +29,6 @@ defineProps<{
   display: flex;
   align-items: center;
   gap: 24px;
-  padding: 24px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
   margin-bottom: 24px;
 }
 

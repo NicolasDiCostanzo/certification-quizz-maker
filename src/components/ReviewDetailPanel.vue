@@ -3,6 +3,9 @@ import { useUserProgressStore } from '../stores/userProgress';
 import { texts } from '../texts/en';
 import type { Question, QuestionAnswer } from '../types';
 import { parseInlineSegments } from '../utils/markdownImage';
+import Badge from './BaseBadge.vue';
+import Card from './BaseCard.vue';
+import SecondaryButton from './SecondaryButton.vue';
 
 const props = defineProps<{
   question: Question | null
@@ -38,14 +41,14 @@ function renderSegments(text: string) {
 </script>
 
 <template>
-  <section class="detail-panel">
+  <Card tag="section" padding="xl" radius="2xl" class="detail-panel">
     <div v-if="question" class="detail-panel__content">
       <div class="detail-panel__tags">
-        <span class="tag">{{ texts.topic }}: {{ question.topic }}</span>
+        <Badge variant="tag">{{ texts.topic }}: {{ question.topic }}</Badge>
         <template v-for="group in themeGroups" :key="group">
-          <span v-if="question.themes?.[group]?.length" class="tag">
+          <Badge v-if="question.themes?.[group]?.length" variant="tag">
             {{ texts.themeGroupDisplay(group, question.themes[group]) }}
-          </span>
+          </Badge>
         </template>
       </div>
       <p class="detail-panel__question">
@@ -66,9 +69,13 @@ function renderSegments(text: string) {
         </label>
       </ul>
       <div class="detail-panel__status">
-        <span class="status-badge" :class="answer?.correct ? 'status-badge--correct' : 'status-badge--incorrect'">
+        <Badge
+          class="status-badge"
+          size="md"
+          :variant="answer?.correct ? 'status-correct' : 'status-incorrect'"
+        >
           {{ answer?.correct ? texts.correct : texts.incorrect }}
-        </span>
+        </Badge>
         <p v-if="answer">{{ texts.yourAnswer }}: {{ answer.selected.join(', ') }}</p>
         <p v-else>{{ texts.noAnswer }}</p>
         <p v-if="answer && !answer.correct">
@@ -78,19 +85,15 @@ function renderSegments(text: string) {
       <div v-if="question.explanation" class="detail-panel__explanation">
         <strong>{{ texts.explanation }}:</strong> {{ question.explanation }}
       </div>
-      <button type="button" class="flag-toggle" @click="progressStore.toggleFlag(certCode, question.id)">
+      <SecondaryButton size="md" @click="progressStore.toggleFlag(certCode, question.id)">
         {{ progressStore.isFlagged(certCode, question.id) ? texts.unflag : texts.flag }}
-      </button>
+      </SecondaryButton>
     </div>
-  </section>
+  </Card>
 </template>
 
 <style scoped>
 .detail-panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
   margin-bottom: 24px;
 }
 
@@ -99,15 +102,6 @@ function renderSegments(text: string) {
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
-}
-
-.tag {
-  padding: 4px 10px;
-  background: var(--accent-bg);
-  border: 1px solid var(--accent-border);
-  border-radius: 16px;
-  font-size: 12px;
-  color: var(--text-h);
 }
 
 .detail-panel__question {
@@ -175,22 +169,7 @@ function renderSegments(text: string) {
 }
 
 .status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 13px;
   margin-bottom: 8px;
-}
-
-.status-badge--correct {
-  background: color-mix(in srgb, var(--green) 15%, var(--surface));
-  color: var(--green);
-}
-
-.status-badge--incorrect {
-  background: color-mix(in srgb, var(--red) 15%, var(--surface));
-  color: var(--red);
 }
 
 .detail-panel__explanation {
@@ -201,19 +180,5 @@ function renderSegments(text: string) {
   font-size: 14px;
   line-height: 1.5;
   margin-bottom: 16px;
-}
-
-.flag-toggle {
-  padding: 8px 16px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text-h);
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.flag-toggle:hover {
-  border-color: var(--accent);
 }
 </style>

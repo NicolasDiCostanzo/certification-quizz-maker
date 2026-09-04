@@ -187,7 +187,7 @@ describe('QuizConfigureView', () => {
   })
 
   it('enables the start CTA once questions match the filters', async () => {
-    expect(wrapper.find('.start-cta').attributes('disabled')).toBeUndefined()
+    expect(wrapper.find('.btn--primary').attributes('disabled')).toBeUndefined()
   })
 
   it('disables the start CTA when no question matches the filters', async () => {
@@ -197,13 +197,13 @@ describe('QuizConfigureView', () => {
     await matchAllRadio.setValue(true)
 
     expect(wrapper.find('.match-preview').text()).toContain('No question matches')
-    expect(wrapper.find('.start-cta').attributes('disabled')).toBeDefined()
+    expect(wrapper.find('.btn--primary').attributes('disabled')).toBeDefined()
   })
 
   it('starts a session when the CTA is clicked', async () => {
     const quizSessionStore = useQuizSessionStore()
 
-    await wrapper.find('.start-cta').trigger('click')
+    await wrapper.find('.btn--primary').trigger('click')
 
     expect(quizSessionStore.hasSession).toBe(true)
     expect(quizSessionStore.currentSession?.certCode).toBe('FIX-001')
@@ -216,7 +216,7 @@ describe('QuizConfigureView', () => {
     progressStore.toggleFlag('FIX-001', 'q1')
 
     const quizSessionStore = useQuizSessionStore()
-    await wrapper.find('.start-cta').trigger('click')
+    await wrapper.find('.btn--primary').trigger('click')
 
     expect(quizSessionStore.currentSession?.flags).toContain('q1')
   })

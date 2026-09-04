@@ -8,8 +8,10 @@ import { texts } from '../texts/en'
 import { breakdownByThemeAllTime, breakdownByTopicAllTime } from '../utils/scoreBreakdown'
 
 import ConfirmModal from '../components/ConfirmModal.vue'
+import PrimaryButton from '../components/PrimaryButton.vue'
 import QuizHistoryList from '../components/QuizHistoryList.vue'
 import ReviewBreakdown from '../components/ReviewBreakdown.vue'
+import SecondaryButton from '../components/SecondaryButton.vue'
 
 const props = defineProps<{
   certCode: string
@@ -76,8 +78,8 @@ function goHome() {
   <div v-if="cert" class="dashboard">
     <header class="dashboard__header">
       <div class="header-buttons">
-        <button type="button" class="cta" @click="goHome">{{ texts.backToHomeCta }}</button>
-        <button type="button" class="cta" @click="startQuiz">{{ texts.startQuizCta }}</button>
+        <PrimaryButton size="sm" @click="goHome">{{ texts.backToHomeCta }}</PrimaryButton>
+        <PrimaryButton size="sm" @click="startQuiz">{{ texts.startQuizCta }}</PrimaryButton>
       </div>
       <h1>{{ cert.exam.name }}</h1>
     </header>
@@ -114,14 +116,14 @@ function goHome() {
     <section class="history-section">
       <div class="history-header">
         <h2>{{ texts.quizHistory }}</h2>
-        <button
+        <SecondaryButton
           v-if="entries.length > 0"
-          type="button"
-          class="btn-reset"
+          size="sm"
+          danger
           @click="showResetModal = true"
         >
           {{ texts.resetAll }}
-        </button>
+        </SecondaryButton>
       </div>
       <QuizHistoryList :cert-code="certCode" @request-delete="requestDelete" />
     </section>
@@ -181,23 +183,6 @@ function goHome() {
   text-align: center;
 }
 
-.cta {
-  padding: 8px 12px;
-  font-size: 14px;
-  color: var(--cta-text);
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  background: var(--cta);
-  border: 1px solid var(--border);
-}
-
-.cta:hover {
-  opacity: 0.9;
-}
-
 .all-time {
   margin-bottom: 24px;
 }
@@ -240,21 +225,6 @@ function goHome() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.btn-reset {
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text);
-}
-
-.btn-reset:hover {
-  border-color: var(--red);
-  color: var(--red);
 }
 
 .dashboard__footer {

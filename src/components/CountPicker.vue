@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { texts } from '../texts/en'
+import Card from './BaseCard.vue'
 import FilterOption from './FilterOption.vue'
 
 type CountSelection = number | 'all'
@@ -40,7 +41,7 @@ function updateCount(event: Event) {
 </script>
 
 <template>
-  <fieldset class="panel">
+  <Card tag="fieldset" padding="md" radius="xl" bg="none">
     <legend>{{ texts.countLabel }}</legend>
     <FilterOption :text="texts.countAll(max)">
       <input
@@ -68,7 +69,7 @@ function updateCount(event: Event) {
       :value="modelValue"
       @change="updateCount"
     />
-  </fieldset>
+  </Card>
 </template>
 
 <style scoped>

@@ -80,7 +80,7 @@ Implementation order (each step depends on the previous):
 ✅ src/utils/scoring.ts — pass/fail + projected scaled score
 ✅ QuizSessionView.vue — question rendering, timer, flag, feedback
 ✅ QuizReviewView.vue — score banner, per-question review
-☐ Visual polish pass (transitions, cross-screen consistency)
+✅ Visual polish pass (transitions, cross-screen consistency)
 ☐ Final integration (build/typecheck/lint/test green + full manual smoke test)
 
 ## Deliberate non-features

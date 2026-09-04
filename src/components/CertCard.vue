@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { RouterLink } from 'vue-router'
 import { texts } from '../texts/en'
 import type { CertBundle } from '../types'
 import { formatPassingScore } from '../utils/examDisplay'
+import Card from './BaseCard.vue'
 import CertCodeBadge from './CertCodeBadge.vue'
 import CertFact from './CertFact.vue'
 import WeightPill from './WeightPill.vue'
@@ -10,9 +12,14 @@ defineProps<{ cert: CertBundle }>()
 </script>
 
 <template>
-  <RouterLink
-    class="cert-card"
+  <Card
+    :as="RouterLink"
     :to="{ name: 'quiz-dashboard', params: { certCode: cert.exam.code } }"
+    padding="lg"
+    bg="bg"
+    shadow
+    hoverable
+    class="cert-card"
   >
     <h2>{{ cert.exam.name }}</h2>
     <CertCodeBadge :code="cert.exam.code" />
@@ -27,7 +34,7 @@ defineProps<{ cert: CertBundle }>()
     </ul>
     <p v-if="cert.exam.instructions" class="cert-instructions">{{ cert.exam.instructions }}</p>
     <p class="cert-cta">{{ texts.viewDashboardCta }}</p>
-  </RouterLink>
+  </Card>
 </template>
 
 <style scoped>
@@ -35,18 +42,7 @@ defineProps<{ cert: CertBundle }>()
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 20px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg);
-  box-shadow: var(--shadow);
   text-decoration: none;
-  transition: border-color 0.15s ease;
-}
-
-.cert-card:hover {
-  border-color: var(--accent-border);
-  background: var(--accent-bg);
 }
 
 .cert-facts {
