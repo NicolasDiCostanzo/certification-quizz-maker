@@ -125,7 +125,7 @@ function goHome() {
           {{ texts.resetAll }}
         </SecondaryButton>
       </div>
-      <QuizHistoryList :cert-code="certCode" @request-delete="requestDelete" />
+      <QuizHistoryList :cert-code="certCode" :entries="entries" @request-delete="requestDelete" />
     </section>
 
     <footer class="dashboard__footer">

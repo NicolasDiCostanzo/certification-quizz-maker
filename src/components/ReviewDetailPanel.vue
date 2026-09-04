@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useUserProgressStore } from '../stores/userProgress';
 import { texts } from '../texts/en';
 import type { Question, QuestionAnswer } from '../types';
 import { parseInlineSegments } from '../utils/markdownImage';
@@ -11,11 +10,13 @@ import SecondaryButton from './SecondaryButton.vue';
 defineProps<{
   question: Question | null
   answer: QuestionAnswer | null
-  certCode: string
   themeGroups: string[]
+  flagged: boolean
 }>()
 
-const progressStore = useUserProgressStore()
+const emit = defineEmits<{
+  'toggle-flag': [questionId: string]
+}>()
 
 function renderSegments(text: string) {
   return parseInlineSegments(text)
@@ -63,8 +64,8 @@ function renderSegments(text: string) {
       <div v-if="question.explanation" class="detail-panel__explanation">
         <strong>{{ texts.explanation }}:</strong> {{ question.explanation }}
       </div>
-      <SecondaryButton size="md" @click="progressStore.toggleFlag(certCode, question.id)">
-        {{ progressStore.isFlagged(certCode, question.id) ? texts.unflag : texts.flag }}
+      <SecondaryButton size="md" @click="emit('toggle-flag', question.id)">
+        {{ flagged ? texts.unflag : texts.flag }}
       </SecondaryButton>
     </div>
   </Card>

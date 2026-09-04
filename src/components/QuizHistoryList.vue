@@ -1,19 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import QuizHistoryItem from './QuizHistoryItem.vue'
-import { useQuizHistoryStore } from '../stores/quizHistory'
 import { texts } from '../texts/en'
 import type { QuizHistoryEntry } from '../types'
 
 const props = defineProps<{
   certCode: string
+  entries: QuizHistoryEntry[]
 }>()
 
 const router = useRouter()
-const historyStore = useQuizHistoryStore()
-
-const entries = computed(() => historyStore.byCertCode(props.certCode))
 
 const emit = defineEmits<{
   requestDelete: [id: string]
