@@ -71,7 +71,6 @@ function navigateToFlagged() {
     >
       <span class="breakdown__label">{{ item.label }}</span>
       <span class="breakdown__fraction">{{ item.correct }} / {{ item.total }}</span>
-      <span class="breakdown__percent">{{ item.percent }}%</span>
       <ProgressBar :value="item.percent" :passing="passingPercent" />
       <button
         v-if="showReviewButton"
@@ -101,7 +100,6 @@ function navigateToFlagged() {
           >
             <span class="breakdown__label">{{ item.value }}</span>
             <span class="breakdown__fraction">{{ item.correct }} / {{ item.total }}</span>
-            <span class="breakdown__percent">{{ item.percent }}%</span>
             <ProgressBar :value="item.percent" :passing="passingPercent" />
             <button
               v-if="showReviewButton"
@@ -149,7 +147,7 @@ function navigateToFlagged() {
 }
 
 .breakdown__row--with-button {
-  grid-template-columns: 1fr 80px 50px 200px 70px;
+  grid-template-columns: 1fr 80px 200px 70px;
 }
 
 @media (max-width: 500px) {
@@ -176,10 +174,6 @@ function navigateToFlagged() {
     grid-area: fraction;
     text-align: left;
     white-space: nowrap;
-  }
-
-  .breakdown__row .breakdown__percent {
-    display: none;
   }
 
   .breakdown__row:not(.breakdown__row--with-button) > :last-child {
