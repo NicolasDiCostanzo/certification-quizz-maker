@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from 'vue';
 
 const props = defineProps({
   value: { type: Number, required: true },
@@ -18,7 +18,9 @@ const isPassed = computed(() => props.value >= props.passing)
         :class="{ 'progress-bar__fill--passed': isPassed }"
         :style="{ width }"
         :data-passed="isPassed"
-      />
+      >
+      {{ props.value }}%
+      </div>
     </div>
   </div>
 </template>

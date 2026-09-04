@@ -1,19 +1,23 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { texts } from '../texts/en';
-import type { ThemeBreakdown, TopicBreakdown } from '../utils/scoreBreakdown';
-import { groupLabel } from '../utils/themeGroupLabel';
-import ProgressBar from './ProgressBar.vue';
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { texts } from '../texts/en'
+import type { ThemeBreakdown, TopicBreakdown } from '../utils/scoreBreakdown'
+import ProgressBar from './ProgressBar.vue'
 
 const props = defineProps<{
   topicBreakdown: TopicBreakdown[]
   themeBreakdown: ThemeBreakdown[]
   themeGroups: string[]
   passingPercent: number
+  certCode?: string
+  showReviewButton?: boolean
+  hasFlaggedQuestions?: boolean
 }>()
 
+const router = useRouter()
+
 const openThemeGroups = ref<Record<string, boolean>>({})
-const themeSectionOpen = ref(true)
 
 function isThemeGroupOpen(group: string): boolean {
   return openThemeGroups.value[group] ?? false
@@ -36,37 +40,90 @@ const themeBreakdownByGroup = computed(() => {
 const visibleThemeGroups = computed(() =>
   props.themeGroups.filter(group => (themeBreakdownByGroup.value[group]?.length ?? 0) > 0)
 )
+
+function navigateToTopic(topic: string) {
+  if (props.certCode) {
+    router.push({ name: 'topic-review', params: { certCode: props.certCode, topic } })
+  }
+}
+
+function navigateToTheme(group: string, value: string) {
+  if (props.certCode) {
+    router.push({ name: 'theme-review', params: { certCode: props.certCode, themeGroup: group, themeValue: value } })
+  }
+}
+
+function navigateToFlagged() {
+  if (props.certCode) {
+    router.push({ name: 'flagged-review', params: { certCode: props.certCode } })
+  }
+}
 </script>
 
 <template>
   <section v-if="topicBreakdown.length" class="breakdown">
     <h2>{{ texts.scoreBreakdownByTopic }}</h2>
-    <div v-for="item in topicBreakdown" :key="item.label" class="breakdown__row">
+    <div
+      v-for="item in topicBreakdown"
+      :key="item.label"
+      class="breakdown__row breakdown__row--clickable"
+      :class="{ 'breakdown__row--with-button': showReviewButton }"
+    >
       <span class="breakdown__label">{{ item.label }}</span>
       <span class="breakdown__fraction">{{ item.correct }} / {{ item.total }}</span>
-      <span class="breakdown__percent">{{ item.percent }}%</span>
       <ProgressBar :value="item.percent" :passing="passingPercent" />
+      <button
+        v-if="showReviewButton"
+        type="button"
+        class="btn-review"
+        @click.stop="navigateToTopic(item.label)"
+      >
+        {{ texts.review }}
+      </button>
     </div>
   </section>
 
   <section v-if="themeBreakdown.length" class="breakdown">
-      <h2 class="breakdown__title">{{ texts.scoreBreakdownByTheme }}</h2>
-    <div v-show="themeSectionOpen" class="breakdown__section-content">
+    <h2 class="breakdown__title">{{ texts.scoreBreakdownByTheme }}</h2>
+    <div class="breakdown__section-content">
       <div v-for="group in visibleThemeGroups" :key="group" class="breakdown__group">
         <button class="breakdown__group-toggle" @click="toggleThemeGroup(group)">
-          <span class="breakdown__group-label">{{ groupLabel(group) }}</span>
+          <span class="breakdown__group-label">{{ group }}</span>
           <span class="breakdown__chevron" :class="{ 'breakdown__chevron--open': isThemeGroupOpen(group) }">▼</span>
         </button>
         <div v-if="isThemeGroupOpen(group)" class="breakdown__group-content">
-          <div v-for="item in themeBreakdownByGroup[group]" :key="item.value" class="breakdown__row">
+          <div
+            v-for="item in themeBreakdownByGroup[group]"
+            :key="item.value"
+            class="breakdown__row breakdown__row--clickable"
+            :class="{ 'breakdown__row--with-button': showReviewButton }"
+          >
             <span class="breakdown__label">{{ item.value }}</span>
             <span class="breakdown__fraction">{{ item.correct }} / {{ item.total }}</span>
-            <span class="breakdown__percent">{{ item.percent }}%</span>
             <ProgressBar :value="item.percent" :passing="passingPercent" />
+            <button
+              v-if="showReviewButton"
+              type="button"
+              class="btn-review"
+              @click.stop="navigateToTheme(item.group, item.value)"
+            >
+              {{ texts.review }}
+            </button>
           </div>
         </div>
       </div>
     </div>
+  </section>
+
+  <section v-if="showReviewButton" class="breakdown">
+    <button
+      type="button"
+      class="btn-review btn-review--flagged"
+      :disabled="!hasFlaggedQuestions"
+      @click="navigateToFlagged"
+    >
+      {{ texts.reviewFlagged }}
+    </button>
   </section>
 </template>
 
@@ -89,6 +146,10 @@ const visibleThemeGroups = computed(() =>
   margin-bottom: 8px;
 }
 
+.breakdown__row--with-button {
+  grid-template-columns: 1fr 80px 200px 70px;
+}
+
 @media (max-width: 500px) {
   .breakdown__row {
     grid-template-columns: 1fr 1fr;
@@ -98,6 +159,13 @@ const visibleThemeGroups = computed(() =>
     gap: 4px 8px;
   }
 
+  .breakdown__row--with-button {
+    grid-template-columns: 40px 1fr auto;
+    grid-template-areas:
+      'label label label'
+      'fraction bar button';
+  }
+
   .breakdown__row .breakdown__label {
     grid-area: label;
   }
@@ -105,14 +173,19 @@ const visibleThemeGroups = computed(() =>
   .breakdown__row .breakdown__fraction {
     grid-area: fraction;
     text-align: left;
+    white-space: nowrap;
   }
 
-  .breakdown__row .breakdown__percent {
-    display: none;
-  }
-
-  .breakdown__row > :last-child {
+  .breakdown__row:not(.breakdown__row--with-button) > :last-child {
     grid-area: bar;
+  }
+
+  .breakdown__row--with-button > :nth-last-child(2) {
+    grid-area: bar;
+  }
+
+  .breakdown__row--with-button > :last-child {
+    grid-area: button;
   }
 }
 
@@ -120,6 +193,11 @@ const visibleThemeGroups = computed(() =>
   color: var(--text-h);
   font-weight: 500;
   text-align: left;
+}
+
+.breakdown__row--clickable {
+  border-radius: 8px;
+  padding: 8px;
 }
 
 .breakdown__fraction,
@@ -187,5 +265,27 @@ const visibleThemeGroups = computed(() =>
 
 .breakdown__chevron--open {
   transform: rotate(180deg);
+}
+
+.btn-review {
+  padding: 6px 12px;
+  color: var(--cta-text);
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  background: var(--cta);
+  border: 1px solid var(--border);
+}
+
+.btn-review:hover {
+  opacity: 0.9;
+}
+
+.btn-review:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 </style>

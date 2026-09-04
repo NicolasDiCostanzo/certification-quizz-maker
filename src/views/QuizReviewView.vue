@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import ReviewBreakdown from '../components/ReviewBreakdown.vue'
 import ReviewDetailPanel from '../components/ReviewDetailPanel.vue'
 import ReviewQuestionGrid from '../components/ReviewQuestionGrid.vue'
-import ReviewScoreCard from '../components/ReviewScoreCard.vue'
+import ReviewSummary from '../components/ReviewSummary.vue'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { useQuizSessionStore } from '../stores/quizSession'
 import { texts } from '../texts/en'
@@ -68,13 +67,11 @@ function goHome() {
   <div v-if="session && result" class="review">
     <header class="review__header">
       <h1>{{ texts.reviewTitle }}</h1>
-      <div class="banner" :class="result.passed ? 'banner--passed' : 'banner--failed'">
-        {{ result.passed ? texts.passed : texts.failed }}
-      </div>
-      <ReviewScoreCard :result="result" :cert="cert" />
     </header>
 
-    <ReviewBreakdown
+    <ReviewSummary
+      :result="result"
+      :cert="cert"
       :topic-breakdown="topicBreakdown"
       :theme-breakdown="themeBreakdown"
       :theme-groups="themeGroups"
@@ -119,26 +116,6 @@ function goHome() {
   color: var(--text-h);
 }
 
-.banner {
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 16px;
-}
-
-.banner--passed {
-  background: color-mix(in srgb, var(--green) 15%, var(--surface));
-  color: var(--green);
-  border: 1px solid var(--green);
-}
-
-.banner--failed {
-  background: color-mix(in srgb, var(--red) 15%, var(--surface));
-  color: var(--red);
-  border: 1px solid var(--red);
-}
-
 .review__footer {
   display: flex;
   justify-content: center;
@@ -146,8 +123,7 @@ function goHome() {
 
 .cta {
   padding: 12px 24px;
-  background: var(--accent);
-  color: var(--bg);
+  color: var(--cta-text);
   border: none;
   border-radius: 8px;
   font-size: 16px;

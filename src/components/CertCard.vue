@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { texts } from '../texts/en'
 import type { CertBundle } from '../types'
+import { formatPassingScore } from '../utils/examDisplay'
 import CertCodeBadge from './CertCodeBadge.vue'
 import CertFact from './CertFact.vue'
 import WeightPill from './WeightPill.vue'
-import { formatPassingScore } from '../utils/examDisplay'
-import { texts } from '../texts/en'
 
 defineProps<{ cert: CertBundle }>()
 </script>
@@ -12,7 +12,7 @@ defineProps<{ cert: CertBundle }>()
 <template>
   <RouterLink
     class="cert-card"
-    :to="{ name: 'quiz-configure', params: { certCode: cert.exam.code } }"
+    :to="{ name: 'quiz-dashboard', params: { certCode: cert.exam.code } }"
   >
     <h2>{{ cert.exam.name }}</h2>
     <CertCodeBadge :code="cert.exam.code" />
@@ -26,7 +26,7 @@ defineProps<{ cert: CertBundle }>()
       <WeightPill v-for="(weight, topic) in cert.exam.weights" :key="topic" :topic="topic" :weight="weight" />
     </ul>
     <p v-if="cert.exam.instructions" class="cert-instructions">{{ cert.exam.instructions }}</p>
-    <p class="cert-cta">{{ texts.startQuizCta }}</p>
+    <p class="cert-cta">{{ texts.viewDashboardCta }}</p>
   </RouterLink>
 </template>
 

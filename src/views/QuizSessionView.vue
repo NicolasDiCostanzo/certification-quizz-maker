@@ -4,14 +4,17 @@ import { useRouter } from 'vue-router'
 import QuestionCard from '../components/QuestionCard.vue'
 import TimerBar from '../components/TimerBar.vue'
 import { useQuizLoader } from '../composables/useQuizLoader'
+import { useQuizHistoryStore } from '../stores/quizHistory'
 import { useQuizSessionStore } from '../stores/quizSession'
 import { useUserProgressStore } from '../stores/userProgress'
 import { texts } from '../texts/en'
 import { computeScore } from '../utils/scoring'
+import type { QuizHistoryEntry } from '../types'
 
 const router = useRouter()
 const store = useQuizSessionStore()
 const progressStore = useUserProgressStore()
+const historyStore = useQuizHistoryStore()
 const { getCert } = useQuizLoader()
 
 const session = computed(() => store.currentSession)
@@ -68,6 +71,18 @@ function finishQuiz() {
   if (!cert) return
   const result = computeScore(session.value.questions, session.value.answers, cert.exam)
   store.finishSession(result)
+  const entry: QuizHistoryEntry = {
+    id: `${session.value.certCode}-${session.value.startedAt}`,
+    certCode: session.value.certCode,
+    mode: session.value.mode,
+    startedAt: session.value.startedAt,
+    finishedAt: Date.now(),
+    questions: session.value.questions,
+    answers: session.value.answers,
+    flags: session.value.flags,
+    result,
+  }
+  historyStore.record(entry)
   router.push({ name: 'quiz-review', params: { certCode: certCode.value } })
 }
 

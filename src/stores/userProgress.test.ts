@@ -56,6 +56,21 @@ describe('userProgress store', () => {
     expect(store.isFlagged('DVA-C02', 'q1')).toBe(true)
   })
 
+  it('hasFlagged returns false when no questions are flagged, true when at least one is', () => {
+    const store = useUserProgressStore()
+
+    expect(store.hasFlagged('DVA-C02')).toBe(false)
+
+    store.recordAnswer('DVA-C02', 'q1', true)
+    expect(store.hasFlagged('DVA-C02')).toBe(false)
+
+    store.toggleFlag('DVA-C02', 'q1')
+    expect(store.hasFlagged('DVA-C02')).toBe(true)
+
+    store.toggleFlag('DVA-C02', 'q1')
+    expect(store.hasFlagged('DVA-C02')).toBe(false)
+  })
+
   it('exports progress in the documented versioned format', () => {
     const store = useUserProgressStore()
     store.recordAnswer('DVA-C02', 'q1', true)

@@ -12,7 +12,6 @@ import { texts } from '../texts/en'
 import type { QuizConfig, QuizMode, ReplayMode, ThemeGroupFilter, ThemeMatchMode, ThemeRegistry } from '../types'
 import { filterByReplay, filterByThemes, filterByTopics } from '../utils/filterPool'
 import { sampleQuestions } from '../utils/sampling'
-import { groupLabel } from '../utils/themeGroupLabel'
 
 function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilter> {
   return Object.fromEntries(
@@ -147,7 +146,7 @@ function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilt
             </FilterOption>
           </div>
           <div class="filter-wrapper">
-            <ThemeFilter v-for="(values, group) in cert.themes" :key="`include-${group}`" :label="groupLabel(group)"
+            <ThemeFilter v-for="(values, group) in cert.themes" :key="`include-${group}`" :label="group"
               :values="values" :model-value="includeGroups[group]" :match-choice="true"
               :disabled-values="excludeGroups[group]?.values ?? []"
               @update:model-value="includeGroups[group] = $event" />
@@ -158,7 +157,7 @@ function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilt
         <details class="filter-col exclude-section">
           <summary class="col-heading">{{ texts.excludeLabel }}</summary>
           <div class="filter-wrapper">
-            <ThemeFilter v-for="(values, group) in cert.themes" :key="`exclude-${group}`" :label="groupLabel(group)"
+            <ThemeFilter v-for="(values, group) in cert.themes" :key="`exclude-${group}`" :label="group"
               :values="values" :model-value="excludeGroups[group] ?? { values: [], match: 'any' }"
               :match-choice="false" :disabled-values="includeGroups[group]?.values ?? []"
               @update:model-value="excludeGroups[group] = $event" />

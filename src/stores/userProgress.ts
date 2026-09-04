@@ -23,6 +23,11 @@ export const useUserProgressStore = defineStore('userProgress', {
       state.byExamCode[examCode]?.[questionId]?.flagged ?? false,
     isUnattempted: (state) => (examCode: string, questionId: string): boolean =>
       (state.byExamCode[examCode]?.[questionId]?.attempts ?? 0) === 0,
+    hasFlagged: (state) => (examCode: string): boolean => {
+      const examProgress = state.byExamCode[examCode]
+      if (!examProgress) return false
+      return Object.values(examProgress).some(entry => entry.flagged)
+    },
   },
 
   actions: {
@@ -62,6 +67,14 @@ export const useUserProgressStore = defineStore('userProgress', {
           }
         }
       }
+    },
+
+    resetByCertCode(examCode: string) {
+      delete this.byExamCode[examCode]
+    },
+
+    resetAll() {
+      this.byExamCode = {}
     },
   },
 
