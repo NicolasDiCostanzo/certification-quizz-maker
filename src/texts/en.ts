@@ -94,4 +94,13 @@ export const texts = {
   questionsForTheme: (value: string) => `Questions for theme "${value}"`,
   flaggedQuestions: 'Questions you have flagged for review',
   goBackToDashboard: '← Go back to dashboard',
+  welcomeNewAccount: 'Use an account',
+  welcomeNewAccountDesc: 'Create a new account to keep your progress in sync across all your devices.',
+  welcomeNewAccountCta: 'Create a new account →',
+  welcomeExistingAccount: 'I already have an account',
+  welcomeExistingAccountDesc: 'Sign in to pick up where you left off, on any device.',
+  welcomeExistingAccountCta: 'Sign in →',
+  welcomeNoAccount: 'Continue without an account',
+  welcomeNoAccountDesc: 'Your progress is saved in this browser only, on this device. Nothing is synced to a server: switching device or browser, using private browsing, or clearing this site\'s cookies and storage erases it.',
+  welcomeNoAccountCta: 'Continue locally →',
 }
