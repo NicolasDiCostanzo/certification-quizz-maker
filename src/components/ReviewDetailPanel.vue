@@ -5,9 +5,10 @@ import type { Question, QuestionAnswer } from '../types';
 import { parseInlineSegments } from '../utils/markdownImage';
 import Badge from './BaseBadge.vue';
 import Card from './BaseCard.vue';
+import QuestionOptionsList from './QuestionOptionsList.vue';
 import SecondaryButton from './SecondaryButton.vue';
 
-const props = defineProps<{
+defineProps<{
   question: Question | null
   answer: QuestionAnswer | null
   certCode: string
@@ -15,24 +16,6 @@ const props = defineProps<{
 }>()
 
 const progressStore = useUserProgressStore()
-
-function letterForIndex(index: number): string {
-  return String.fromCharCode(65 + index)
-}
-
-function isCorrectLetter(letter: string): boolean {
-  if (!props.question) return false
-  const expected = Array.isArray(props.question.answers)
-    ? props.question.answers
-    : [props.question.answers]
-  return expected.includes(letter)
-}
-
-function letterClass(letter: string): string {
-  if (isCorrectLetter(letter)) return 'option--correct'
-  if (props.answer?.selected.includes(letter)) return 'option--incorrect'
-  return 'option--missed'
-}
 
 function renderSegments(text: string) {
   return parseInlineSegments(text)
@@ -57,17 +40,12 @@ function renderSegments(text: string) {
           <template v-else>{{ segment.value }}</template>
         </template>
       </p>
-      <ul class="options">
-        <label v-for="(option, i) in question.options" :key="i" class="option" :class="letterClass(letterForIndex(i))">
-          <span class="option-letter">{{ letterForIndex(i) }}</span>
-          <span class="option-text">
-            <template v-for="(segment, j) in renderSegments(option)" :key="j">
-              <img v-if="segment.type === 'image'" :src="segment.value" :alt="segment.alt" class="inline-image" />
-              <template v-else>{{ segment.value }}</template>
-            </template>
-          </span>
-        </label>
-      </ul>
+      <QuestionOptionsList
+        class="detail-options"
+        :question="question"
+        :selected="answer?.selected ?? []"
+        variant="review"
+      />
       <div class="detail-panel__status">
         <Badge
           class="status-badge"
@@ -111,52 +89,8 @@ function renderSegments(text: string) {
   margin: 0 0 16px;
 }
 
-.inline-image {
-  max-width: 100%;
-  border-radius: 6px;
-  vertical-align: middle;
-}
-
-.options {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.option {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-}
-
-.option--correct {
-  border-color: var(--green);
-  background: color-mix(in srgb, var(--green) 10%, var(--surface));
-}
-
-.option--incorrect {
-  border-color: var(--red);
-  background: color-mix(in srgb, var(--red) 10%, var(--surface));
-}
-
-.option--missed {
-  opacity: 0.6;
-}
-
-.option-letter {
-  font-weight: 600;
-  color: var(--text-h);
-  flex-shrink: 0;
-}
-
-.option-text {
-  color: var(--text);
+.detail-options {
+  margin-bottom: 16px;
 }
 
 .detail-panel__status {

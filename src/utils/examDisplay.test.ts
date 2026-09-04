@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { formatPassingScore } from './examDisplay'
+import { formatPassingScore, passingScorePercent } from './examDisplay'
+
+describe('passingScorePercent', () => {
+  it('rounds a scaled score to its percentage', () => {
+    expect(passingScorePercent({ passingScore: 720, scale: 1000 })).toBe(72)
+    expect(passingScorePercent({ passingScore: 649, scale: 1000 })).toBe(65)
+  })
+
+  it('returns the value as-is for a percentage-based score without a scale', () => {
+    expect(passingScorePercent({ passingScore: 60 })).toBe(60)
+  })
+})
 
 describe('formatPassingScore', () => {
   it('formats a scaled score as value / scale with the projected percentage', () => {

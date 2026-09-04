@@ -77,7 +77,7 @@ function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilt
     () => Object.values(includeGroups).filter((group) => group.values.length > 0).length,
   )
 
-  const matchingCount = computed(() =>
+  const filteredPool = computed(() =>
     filterByReplay(
       filterByTopics(
         filterByThemes(pool.value, includeGroups, includeMatchMode.value, excludeGroups),
@@ -85,19 +85,13 @@ function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilt
       ),
       replayMode.value,
       progressStore.byExamCode[certCode.value] ?? {},
-    ).length,
+    ),
   )
 
+  const matchingCount = computed(() => filteredPool.value.length)
+
   async function startQuiz() {
-    const filtered = filterByReplay(
-      filterByTopics(
-        filterByThemes(pool.value, includeGroups, includeMatchMode.value, excludeGroups),
-        selectedTopics.value,
-      ),
-      replayMode.value,
-      progressStore.byExamCode[certCode.value] ?? {},
-    )
-    const questions = sampleQuestions(filtered, count.value, cert.value?.exam.weights)
+    const questions = sampleQuestions(filteredPool.value, count.value, cert.value?.exam.weights)
     const initialFlags = questions
       .filter((q) => progressStore.isFlagged(certCode.value, q.id))
       .map((q) => q.id)

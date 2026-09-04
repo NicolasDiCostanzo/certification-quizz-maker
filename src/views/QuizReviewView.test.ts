@@ -46,9 +46,10 @@ describe('QuizReviewView', () => {
     progressStore.byExamCode = {}
   })
 
-  it('renders nothing without a finished session', () => {
+  it('shows a not-found state without a finished session', () => {
     const wrapper = mount(QuizReviewView, { global: { plugins: [pinia, router] } })
-    expect(wrapper.find('.review').exists()).toBe(false)
+    expect(wrapper.find('.review--not-found').exists()).toBe(true)
+    expect(wrapper.find('.banner--passed').exists()).toBe(false)
   })
 
   it('shows a pass banner when the result is a pass', async () => {

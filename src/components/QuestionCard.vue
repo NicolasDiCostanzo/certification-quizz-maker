@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import type { Question } from '../types';
 import { texts } from '../texts/en';
 import { parseInlineSegments } from '../utils/markdownImage';
+import QuestionOptionsList from './QuestionOptionsList.vue'
 
 const props = defineProps<{
   question: Question
@@ -33,13 +34,6 @@ function isCorrectLetter(letter: string): boolean {
   return expected.includes(letter)
 }
 
-function letterClass(letter: string) {
-  if (!props.reveal) return ''
-  if (isCorrectLetter(letter)) return 'option--correct'
-  if (props.selected.includes(letter)) return 'option--incorrect'
-  return 'option--missed'
-}
-
 function renderSegments(text: string) {
   return parseInlineSegments(text)
 }
@@ -67,30 +61,15 @@ const displayAnswer = computed(() => {
       </li>
     </ul>
 
-    <div class="options">
-      <label
-        v-for="(option, i) in question.options"
-        :key="i"
-        class="option"
-        :class="[letterClass(letters[i]), { 'option--selected': selected.includes(letters[i]) }]"
-      >
-        <input
-          :type="isMultiAnswer ? 'checkbox' : 'radio'"
-          :name="question.id"
-          :value="letters[i]"
-          :checked="selected.includes(letters[i])"
-          :disabled="disabled"
-          @change="toggle(letters[i])"
-        />
-        <span class="option-letter">{{ letters[i] }}</span>
-        <span class="option-text">
-          <template v-for="(segment, j) in renderSegments(option)" :key="j">
-            <img v-if="segment.type === 'image'" :src="segment.value" :alt="segment.alt" class="inline-image" />
-            <template v-else>{{ segment.value }}</template>
-          </template>
-        </span>
-      </label>
-    </div>
+    <QuestionOptionsList
+      :question="question"
+      :selected="selected"
+      :reveal="reveal"
+      :disabled="disabled"
+      interactive
+      variant="live"
+      @toggle="toggle"
+    />
 
     <div v-if="reveal" class="feedback" :class="isCorrect ? 'feedback--correct' : 'feedback--incorrect'">
       <span class="feedback-badge">{{ isCorrect ? texts.correct : texts.incorrect }}</span>
@@ -106,22 +85,12 @@ const displayAnswer = computed(() => {
   </div>
 </template>
 
-<script lang="ts">
-const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-</script>
-
 <style scoped>
 .question-text {
   font-size: 17px;
   line-height: 1.5;
   color: var(--text-h);
   margin: 0 0 16px;
-}
-
-.inline-image {
-  max-width: 100%;
-  border-radius: 6px;
-  vertical-align: middle;
 }
 
 .prompt-images {
@@ -136,65 +105,6 @@ const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 .prompt-images img {
   max-width: 100%;
   border-radius: 6px;
-}
-
-.options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.option {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-
-.option:hover {
-  border-color: var(--accent);
-}
-
-.option--selected {
-  border-color: var(--accent);
-  background: var(--accent-bg);
-}
-
-.option--correct {
-  border-color: var(--green);
-  background: var(--accent-bg);
-}
-
-.option--incorrect {
-  border-color: var(--red);
-  background: color-mix(in srgb, var(--text) 6%, transparent);
-}
-
-.option--missed {
-  opacity: 0.6;
-}
-
-.option input {
-  margin-top: 2px;
-  accent-color: var(--accent);
-}
-
-.option-letter {
-  font-weight: 600;
-  color: var(--text-h);
-  flex-shrink: 0;
-}
-
-.option-text {
-  color: var(--text);
-  text-align: left;
 }
 
 .feedback {

@@ -54,6 +54,12 @@ p {
   margin: 0;
 }
 
+.inline-image {
+  max-width: 100%;
+  border-radius: 6px;
+  vertical-align: middle;
+}
+
 code {
   font-family: var(--mono);
   display: inline-flex;

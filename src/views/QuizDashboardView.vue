@@ -5,6 +5,7 @@ import { useQuizLoader } from '../composables/useQuizLoader'
 import { useQuizHistoryStore } from '../stores/quizHistory'
 import { useUserProgressStore } from '../stores/userProgress'
 import { texts } from '../texts/en'
+import { passingScorePercent } from '../utils/examDisplay'
 import { breakdownByThemeAllTime, breakdownByTopicAllTime } from '../utils/scoreBreakdown'
 
 import ConfirmModal from '../components/ConfirmModal.vue'
@@ -39,8 +40,7 @@ const hasFlaggedQuestions = computed(() => progressStore.hasFlagged(props.certCo
 
 const passingPercent = computed(() => {
   const ps = cert.value?.exam.passingScore
-  if (!ps) return 0
-  return ps.scale ? Math.round((ps.passingScore / ps.scale) * 100) : ps.passingScore
+  return ps ? passingScorePercent(ps) : 0
 })
 
 

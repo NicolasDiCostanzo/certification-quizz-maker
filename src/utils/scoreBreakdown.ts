@@ -15,31 +15,48 @@ export interface ThemeBreakdown {
   percent: number
 }
 
-function countForSubset(subset: Question[], answers: Record<string, QuestionAnswer>) {
-  const correct = subset.filter((q) => answers[q.id]?.correct).length
-  return { total: subset.length, correct }
+interface Cell {
+  total: number
+  correct: number
+}
+
+function tally(items: { key: string; correct: boolean }[]): Map<string, Cell> {
+  const byKey = new Map<string, Cell>()
+  for (const { key, correct } of items) {
+    const cell = byKey.get(key) ?? { total: 0, correct: 0 }
+    cell.total += 1
+    if (correct) cell.correct += 1
+    byKey.set(key, cell)
+  }
+  return byKey
+}
+
+function percentOf(cell: Cell): number {
+  return cell.total === 0 ? 0 : Math.round((cell.correct / cell.total) * 100)
+}
+
+function themeItems(
+  questions: Question[],
+  group: string,
+  isCorrect: (question: Question) => boolean,
+): { key: string; correct: boolean }[] {
+  const items: { key: string; correct: boolean }[] = []
+  for (const q of questions) {
+    const values = q.themes?.[group]
+    if (!values) continue
+    for (const value of new Set(values)) {
+      items.push({ key: value, correct: isCorrect(q) })
+    }
+  }
+  return items
 }
 
 export function breakdownByTopic(
   questions: Question[],
   answers: Record<string, QuestionAnswer>,
 ): TopicBreakdown[] {
-  const byLabel = new Map<string, Question[]>()
-  for (const q of questions) {
-    const list = byLabel.get(q.topic) ?? []
-    list.push(q)
-    byLabel.set(q.topic, list)
-  }
-
-  return [...byLabel.entries()].map(([label, subset]) => {
-    const { total, correct } = countForSubset(subset, answers)
-    return {
-      label,
-      correct,
-      total,
-      percent: total === 0 ? 0 : Math.round((correct / total) * 100),
-    }
-  })
+  const items = questions.map((q) => ({ key: q.topic, correct: !!answers[q.id]?.correct }))
+  return [...tally(items).entries()].map(([label, cell]) => ({ label, ...cell, percent: percentOf(cell) }))
 }
 
 export function breakdownByTheme(
@@ -48,50 +65,20 @@ export function breakdownByTheme(
   groups: string[],
 ): ThemeBreakdown[] {
   const cells: ThemeBreakdown[] = []
-
   for (const group of groups) {
-    const byValue = new Map<string, Question[]>()
-    for (const q of questions) {
-      const values = q.themes?.[group]
-      if (!values) continue
-      for (const value of new Set(values)) {
-        const list = byValue.get(value) ?? []
-        list.push(q)
-        byValue.set(value, list)
-      }
-    }
-
-    for (const [value, subset] of byValue) {
-      const { total, correct } = countForSubset(subset, answers)
-      cells.push({
-        group,
-        value,
-        correct,
-        total,
-        percent: total === 0 ? 0 : Math.round((correct / total) * 100),
-      })
+    const items = themeItems(questions, group, (q) => !!answers[q.id]?.correct)
+    for (const [value, cell] of tally(items)) {
+      cells.push({ group, value, ...cell, percent: percentOf(cell) })
     }
   }
-
   return cells
 }
 
 export function breakdownByTopicAllTime(entries: QuizHistoryEntry[]): TopicBreakdown[] {
-  const byLabel = new Map<string, { correct: number; total: number }>()
-  for (const entry of entries) {
-    for (const q of entry.questions) {
-      const cell = byLabel.get(q.topic) ?? { correct: 0, total: 0 }
-      cell.total += 1
-      if (entry.answers[q.id]?.correct) cell.correct += 1
-      byLabel.set(q.topic, cell)
-    }
-  }
-  return [...byLabel.entries()].map(([label, cell]) => ({
-    label,
-    correct: cell.correct,
-    total: cell.total,
-    percent: cell.total === 0 ? 0 : Math.round((cell.correct / cell.total) * 100),
-  }))
+  const items = entries.flatMap((entry) =>
+    entry.questions.map((q) => ({ key: q.topic, correct: !!entry.answers[q.id]?.correct })),
+  )
+  return [...tally(items).entries()].map(([label, cell]) => ({ label, ...cell, percent: percentOf(cell) }))
 }
 
 export function breakdownByThemeAllTime(
@@ -100,27 +87,11 @@ export function breakdownByThemeAllTime(
 ): ThemeBreakdown[] {
   const cells: ThemeBreakdown[] = []
   for (const group of groups) {
-    const byValue = new Map<string, { correct: number; total: number }>()
-    for (const entry of entries) {
-      for (const q of entry.questions) {
-        const values = q.themes?.[group]
-        if (!values) continue
-        for (const value of new Set(values)) {
-          const cell = byValue.get(value) ?? { correct: 0, total: 0 }
-          cell.total += 1
-          if (entry.answers[q.id]?.correct) cell.correct += 1
-          byValue.set(value, cell)
-        }
-      }
-    }
-    for (const [value, cell] of byValue) {
-      cells.push({
-        group,
-        value,
-        correct: cell.correct,
-        total: cell.total,
-        percent: cell.total === 0 ? 0 : Math.round((cell.correct / cell.total) * 100),
-      })
+    const items = entries.flatMap((entry) =>
+      themeItems(entry.questions, group, (q) => !!entry.answers[q.id]?.correct),
+    )
+    for (const [value, cell] of tally(items)) {
+      cells.push({ group, value, ...cell, percent: percentOf(cell) })
     }
   }
   return cells

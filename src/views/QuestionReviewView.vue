@@ -7,6 +7,7 @@ import ReviewSummary from '../components/ReviewSummary.vue'
 import PrimaryButton from '../components/PrimaryButton.vue'
 import { texts } from '../texts/en'
 import type { CertBundle, Question, QuestionAnswer } from '../types'
+import { passingScorePercent } from '../utils/examDisplay'
 
 const props = defineProps<{
   questions: Question[]
@@ -20,6 +21,7 @@ const props = defineProps<{
   backRoute: { name: string; params?: Record<string, string> }
   questionsTitle?: string
   backLabel?: string
+  beforeBack?: () => void
 }>()
 
 const router = useRouter()
@@ -36,8 +38,7 @@ watch(() => props.questions, (qs) => {
 
 const passingPercent = computed(() => {
   const ps = props.cert?.exam.passingScore
-  if (!ps) return 0
-  return ps.scale ? Math.round((ps.passingScore / ps.scale) * 100) : ps.passingScore
+  return ps ? passingScorePercent(ps) : 0
 })
 
 const selectedQuestion = computed(() =>
@@ -53,6 +54,7 @@ function toggleSelected(questionId: string) {
 }
 
 function goBack() {
+  props.beforeBack?.()
   router.push(props.backRoute)
 }
 </script>
