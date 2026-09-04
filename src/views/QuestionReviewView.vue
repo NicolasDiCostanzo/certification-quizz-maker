@@ -5,6 +5,7 @@ import ReviewDetailPanel from '../components/ReviewDetailPanel.vue'
 import ReviewQuestionGrid from '../components/ReviewQuestionGrid.vue'
 import ReviewSummary from '../components/ReviewSummary.vue'
 import PrimaryButton from '../components/PrimaryButton.vue'
+import { useUserProgressStore } from '../stores/userProgress'
 import { texts } from '../texts/en'
 import type { CertBundle, Question, QuestionAnswer } from '../types'
 import { passingScorePercent } from '../utils/examDisplay'
@@ -25,7 +26,9 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
+const progressStore = useUserProgressStore()
 
+const certCode = computed(() => props.cert?.exam.code ?? '')
 const themeGroups = computed(() => Object.keys(props.cert?.themes ?? {}))
 
 const selectedQuestionId = ref<string | null>(null)
@@ -49,8 +52,20 @@ const selectedAnswer = computed(() =>
   selectedQuestionId.value ? props.answers[selectedQuestionId.value] : null,
 )
 
+const flaggedQuestionIds = computed(() =>
+  new Set(props.questions.filter((q) => progressStore.isFlagged(certCode.value, q.id)).map((q) => q.id)),
+)
+
+const selectedQuestionFlagged = computed(() =>
+  selectedQuestion.value ? progressStore.isFlagged(certCode.value, selectedQuestion.value.id) : false,
+)
+
 function toggleSelected(questionId: string) {
   selectedQuestionId.value = selectedQuestionId.value === questionId ? null : questionId
+}
+
+function toggleFlag(questionId: string) {
+  progressStore.toggleFlag(certCode.value, questionId)
 }
 
 function goBack() {
@@ -79,7 +94,7 @@ function goBack() {
     <ReviewQuestionGrid
       :questions="questions"
       :answers="answers"
-      :cert-code="cert?.exam.code ?? ''"
+      :flagged-question-ids="flaggedQuestionIds"
       :selected-question-id="selectedQuestionId"
       @select="toggleSelected"
     />
@@ -87,8 +102,9 @@ function goBack() {
     <ReviewDetailPanel
       :question="selectedQuestion"
       :answer="selectedAnswer"
-      :cert-code="cert?.exam.code ?? ''"
       :theme-groups="themeGroups"
+      :flagged="selectedQuestionFlagged"
+      @toggle-flag="toggleFlag"
     />
 
   </div>

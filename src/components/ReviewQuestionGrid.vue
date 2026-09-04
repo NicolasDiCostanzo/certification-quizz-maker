@@ -1,20 +1,17 @@
 <script setup lang="ts">
-import { useUserProgressStore } from '../stores/userProgress';
 import type { Question, QuestionAnswer } from '../types';
 import QuestionSummaryCard from './QuestionSummaryCard.vue';
 
 defineProps<{
   questions: Question[]
   answers: Record<string, QuestionAnswer>
-  certCode: string
+  flaggedQuestionIds: Set<string>
   selectedQuestionId: string | null
 }>()
 
 const emit = defineEmits<{
   select: [questionId: string]
 }>()
-
-const progressStore = useUserProgressStore()
 </script>
 
 <template>
@@ -26,7 +23,7 @@ const progressStore = useUserProgressStore()
         :question-id="question.id"
         :index="i + 1"
         :correct="answers[question.id]?.correct ?? false"
-        :flagged="progressStore.isFlagged(certCode, question.id)"
+        :flagged="flaggedQuestionIds.has(question.id)"
         :selected="selectedQuestionId === question.id"
         @select="emit('select', $event)"
       />
