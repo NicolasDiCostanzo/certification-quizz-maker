@@ -54,8 +54,18 @@ Single source of truth for every feature discussed for this project, with its cu
 | Flag button on the question screen in **both** modes (like real exams' "mark for review"); review screen allows flagging too | ✅ |
 | Export progress as a versioned JSON file (protection against browser-data clearing) | ✅ |
 | Import progress with merge (per-question, newest `lastSeenAt` wins) | ✅ |
-| Optional cloud sync across devices via Cognito + API Gateway + Lambda + DynamoDB | 🔜 Phase 2 |
-| Accounts strictly opt-in; guest users see no auth UI and lose no functionality | 🔜 Phase 2 |
+| Welcome screen lets a first-time visitor choose "use an account", "sign in", or "continue locally" (`accountMode` in the `userPreferences` store, via `useAccount.ts`); guest ("local") users see no further auth UI and lose no functionality | ✅ |
+| Account creation / sign-in against a real backend (Cognito + API Gateway + Lambda + DynamoDB) for cross-device sync | 🔜 Phase 2 — `useAccount.ts`'s `createAccount`/`signIn` currently only set the local `accountMode` flag (marked `TODO(AWS)`); no backend call is made yet |
+
+## Quiz history & dashboard
+
+| Feature | Status |
+|---|---|
+| Per-cert dashboard (`/certs/:certCode`): all-time score (quizzes taken, overall accuracy, correct/total), score breakdown by topic and by theme across all finished quizzes, start-new-quiz shortcut | ✅ |
+| Every finished quiz is recorded as a history entry (mode, start/finish time, questions, answers, flags, result) in the `quizHistory` Pinia store, persisted to localStorage and keyed by `certCode` | ✅ |
+| Per-cert quiz history list, newest first; review any past attempt in full detail, or delete it | ✅ |
+| Reset all progress for a cert (clears its quiz history and per-question progress), behind a confirmation dialog | ✅ |
+| Browse the full question bank filtered by topic, by a specific theme value, or by flagged-only — independent of any single quiz attempt | ✅ |
 
 ---
 
@@ -79,7 +89,13 @@ Implementation order (each step depends on the previous):
 ✅ src/stores/quizSession.ts — active quiz session state (sessionStorage-persisted)
 ✅ src/utils/scoring.ts — pass/fail + projected scaled score
 ✅ QuizSessionView.vue — question rendering, timer, flag, feedback
-✅ QuizReviewView.vue — score banner, per-question review
+✅ src/stores/quizHistory.ts — per-quiz history (record/delete/reset), all-time stats
+✅ QuestionReviewView.vue — shared review shell (summary + grid + detail panel), reused by quiz review, history review, and question-bank review
+✅ QuizReviewView.vue — score banner, per-question review for the quiz just finished
+✅ QuizHistoryReviewView.vue — review a single past attempt from history
+✅ QuestionBankReviewView.vue — browse the question bank by topic, theme, or flagged-only
+✅ QuizDashboardView.vue — per-cert dashboard (all-time stats, breakdown, history list, reset)
+✅ WelcomeView.vue + useAccount.ts — first-run account-mode choice (account / sign in / continue locally); backend calls still pending, see User progress above
 ✅ Visual polish pass (transitions, cross-screen consistency)
 ☐ Final integration (build/typecheck/lint/test green + full manual smoke test)
 
