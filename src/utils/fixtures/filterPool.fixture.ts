@@ -1,9 +1,4 @@
-import type { Question, QuestionProgress, QuestionThemes, ThemeRegistry } from '../../types'
-
-export const themes: ThemeRegistry = {
-  services: ['lambda', 's3'],
-  concepts: ['encryption'],
-}
+import type { Question, QuestionProgress, QuestionThemes } from '../../types'
 
 const q = (id: string, topic: string, tags: QuestionThemes | undefined): Question => ({
   id,

@@ -3,6 +3,9 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import QuestionCard from '../components/QuestionCard.vue'
 import TimerBar from '../components/TimerBar.vue'
+import Badge from '../components/BaseBadge.vue'
+import PrimaryButton from '../components/PrimaryButton.vue'
+import SecondaryButton from '../components/SecondaryButton.vue'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { useQuizHistoryStore } from '../stores/quizHistory'
 import { useQuizSessionStore } from '../stores/quizSession'
@@ -109,7 +112,7 @@ watch(session, (newSession) => {
     <div class="session-header">
       <div class="progress">
         <span class="progress-text">{{ texts.questionOf(index, total) }}</span>
-        <span v-if="isFlagged" class="flag-badge">{{ texts.flagged }}</span>
+        <span v-if="isFlagged" class="flagged-badge"><Badge variant="flag">{{ texts.flagged }}</Badge></span>
       </div>
       <TimerBar v-if="isExam && session.deadlineAt" :deadline-at="session.deadlineAt" @time-up="handleTimeUp" />
     </div>
@@ -123,28 +126,23 @@ watch(session, (newSession) => {
     />
 
     <div class="session-nav">
-      <button type="button" class="nav-btn" :disabled="isFirst" @click="goPrev()">
+      <SecondaryButton size="lg" :disabled="isFirst" @click="goPrev()">
         {{ texts.previous }}
-      </button>
-      <button
+      </SecondaryButton>
+      <SecondaryButton
         v-if="!isExam"
-        type="button"
-        class="nav-btn submit-btn"
+        size="lg"
         :disabled="!canSubmit"
         @click="submitAnswer()"
       >
         {{ texts.submit }}
-      </button>
-      <button type="button" class="nav-btn flag-btn" :class="{ 'flag-btn--active': isFlagged }" @click="toggleFlag()">
+      </SecondaryButton>
+      <SecondaryButton size="lg" :class="{ 'flag-btn--active': isFlagged }" @click="toggleFlag()">
         {{ isFlagged ? texts.unflag : texts.flag }}
-      </button>
-      <button
-        type="button"
-        class="nav-btn nav-btn--primary"
-        @click="goNext()"
-      >
+      </SecondaryButton>
+      <PrimaryButton size="md" class="next-btn" @click="goNext()">
         {{ isLast ? texts.finish : texts.next }}
-      </button>
+      </PrimaryButton>
     </div>
   </div>
 </template>
@@ -179,13 +177,8 @@ watch(session, (newSession) => {
   color: var(--text-h);
 }
 
-.flag-badge {
-  font-size: 12px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--accent-bg);
-  color: var(--accent);
+.flagged-badge {
+  display: inline-flex;
 }
 
 .session-nav {
@@ -194,48 +187,20 @@ watch(session, (newSession) => {
   gap: 12px;
 }
 
-.nav-btn {
-  padding: 10px 18px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-  font-size: 14px;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-
-.nav-btn:hover:not(:disabled) {
-  border-color: var(--accent);
-}
-
-.nav-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.nav-btn--primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--bg);
-  margin-left: auto;
-}
-
-.nav-btn--primary:hover {
-  border-color: var(--accent);
-  opacity: 0.9;
-}
-
 .flag-btn--active {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.next-btn {
+  margin-left: auto;
 }
 
 @media (max-width: 1024px) {
   .session-nav {
     flex-direction: column;
   }
-  .nav-btn--primary {
+  .next-btn {
     margin-left: 0;
   }
 }

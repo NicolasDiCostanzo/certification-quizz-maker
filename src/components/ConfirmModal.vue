@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import PrimaryButton from './PrimaryButton.vue'
+import SecondaryButton from './SecondaryButton.vue'
+
 defineProps<{
   title: string
   message: string
@@ -18,8 +21,8 @@ const emit = defineEmits<{
       <h2>{{ title }}</h2>
       <p>{{ message }}</p>
       <div class="modal-actions">
-        <button type="button" class="btn-cancel" @click="emit('cancel')">{{ cancelLabel }}</button>
-        <button type="button" class="btn-confirm" @click="emit('confirm')">{{ confirmLabel }}</button>
+        <SecondaryButton @click="emit('cancel')">{{ cancelLabel }}</SecondaryButton>
+        <PrimaryButton @click="emit('confirm')">{{ confirmLabel }}</PrimaryButton>
       </div>
     </div>
   </div>
@@ -39,7 +42,7 @@ const emit = defineEmits<{
 .modal {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-2xl);
   padding: 24px;
   max-width: 400px;
   width: 90%;
@@ -61,30 +64,5 @@ const emit = defineEmits<{
   display: flex;
   gap: 12px;
   justify-content: flex-end;
-}
-
-.btn-cancel,
-.btn-confirm {
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text);
-}
-
-.btn-confirm {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--bg);
-}
-
-.btn-cancel:hover {
-  border-color: var(--accent);
-}
-
-.btn-confirm:hover {
-  opacity: 0.9;
 }
 </style>

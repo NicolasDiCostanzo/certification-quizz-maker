@@ -1,4 +1,5 @@
 <script setup lang="ts" generic="T extends string">
+import Card from './BaseCard.vue'
 import FilterOption from './FilterOption.vue'
 
 defineProps<{
@@ -12,7 +13,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: T] }>()
 </script>
 
 <template>
-  <fieldset class="panel">
+  <Card tag="fieldset" padding="md" radius="xl" bg="none">
     <legend>{{ label }}</legend>
     <FilterOption v-for="option in options" :key="option.value" :text="option.label">
       <input
@@ -22,5 +23,5 @@ const emit = defineEmits<{ 'update:modelValue': [value: T] }>()
         @change="emit('update:modelValue', option.value)"
       />
     </FilterOption>
-  </fieldset>
+  </Card>
 </template>

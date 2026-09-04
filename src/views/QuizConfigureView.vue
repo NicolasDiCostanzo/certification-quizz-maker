@@ -5,6 +5,8 @@ import ChoiceGroup from '../components/ChoiceGroup.vue'
 import CountPicker from '../components/CountPicker.vue'
 import FilterOption from '../components/FilterOption.vue'
 import ThemeFilter from '../components/ThemeFilter.vue'
+import Card from '../components/BaseCard.vue'
+import PrimaryButton from '../components/PrimaryButton.vue'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { useQuizSessionStore } from '../stores/quizSession'
 import { useUserProgressStore } from '../stores/userProgress'
@@ -118,16 +120,16 @@ function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilt
   <section v-if="cert" class="configure-shell">
     <h1 class="page-title">{{ cert.exam.name }}</h1>
 
-    <div class="config-card">
+    <Card padding="xl" radius="3xl" shadow border-top class="config-card">
       <h2 class="section-title">{{ texts.quickSetupLabel }}</h2>
       <div class="quick-grid">
         <ChoiceGroup name="quiz-mode" :label="texts.modeLabel" :options="modeOptions" v-model="mode" />
         <ChoiceGroup name="replay-mode" :label="texts.replayLabel" :options="replayOptions" v-model="replayMode" />
         <CountPicker :max="matchingCount" v-model="count" />
       </div>
-    </div>
+    </Card>
 
-    <details class="config-card filters-card">
+    <Card tag="details" padding="xl" radius="3xl" shadow border-top class="config-card filters-card">
       <summary class="section-title">{{ texts.filterQuestionsLabel }}</summary>
       <div class="advanced-grid">
         <div class="filter-col topics-section">
@@ -164,13 +166,13 @@ function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilt
           </div>
         </details>
       </div>
-    </details>
+    </Card>
 
     <footer class="config-footer">
       <p class="match-preview" :class="{ warning: matchingCount === 0 }">
         {{ matchingCount === 0 ? texts.noMatchWarning : texts.matchingCountValue(matchingCount) }}
       </p>
-      <button type="button" class="start-cta" :disabled="matchingCount === 0" @click="startQuiz">{{ texts.startQuizCta }}</button>
+      <PrimaryButton pill ghost size="lg" :disabled="matchingCount === 0" @click="startQuiz">{{ texts.startQuizCta }}</PrimaryButton>
     </footer>
   </section>
 </template>
@@ -201,12 +203,6 @@ function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilt
   }
 
   .config-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-top: 3px solid var(--accent);
-    border-radius: 14px;
-    padding: 24px;
-    box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -354,35 +350,13 @@ function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilt
     color: var(--text-h);
   }
 
-  .start-cta {
-    padding: 12px 28px;
-    font: inherit;
-    font-weight: 600;
-    font-size: 16px;
-    color: var(--accent);
-    background: var(--accent-bg);
-    border: 1px solid var(--accent-border);
-    border-radius: 999px;
-    cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease;
-  }
-
-  .start-cta:hover:not(:disabled) {
-    border-color: var(--accent);
-  }
-
-  .start-cta:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
   @media (max-width: 1024px) {
     .configure-shell {
       padding: 24px 16px 48px;
       gap: 20px;
     }
 
-    .config-card {
+    .config-card.config-card {
       padding: 20px;
     }
 

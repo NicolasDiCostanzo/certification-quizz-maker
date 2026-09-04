@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import ReviewDetailPanel from '../components/ReviewDetailPanel.vue'
 import ReviewQuestionGrid from '../components/ReviewQuestionGrid.vue'
 import ReviewSummary from '../components/ReviewSummary.vue'
+import PrimaryButton from '../components/PrimaryButton.vue'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { useQuizSessionStore } from '../stores/quizSession'
 import { texts } from '../texts/en'
@@ -94,7 +95,7 @@ function goHome() {
     />
 
     <footer class="review__footer">
-      <button type="button" class="cta" @click="goHome">{{ texts.backToHomeCta }}</button>
+      <PrimaryButton size="lg" @click="goHome">{{ texts.backToHomeCta }}</PrimaryButton>
     </footer>
   </div>
 </template>
@@ -119,19 +120,5 @@ function goHome() {
 .review__footer {
   display: flex;
   justify-content: center;
-}
-
-.cta {
-  padding: 12px 24px;
-  color: var(--cta-text);
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.cta:hover {
-  opacity: 0.9;
 }
 </style>

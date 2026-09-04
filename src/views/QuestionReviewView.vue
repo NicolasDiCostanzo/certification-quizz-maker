@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import ReviewDetailPanel from '../components/ReviewDetailPanel.vue'
 import ReviewQuestionGrid from '../components/ReviewQuestionGrid.vue'
 import ReviewSummary from '../components/ReviewSummary.vue'
+import PrimaryButton from '../components/PrimaryButton.vue'
 import { texts } from '../texts/en'
 import type { CertBundle, Question, QuestionAnswer } from '../types'
 
@@ -59,7 +60,7 @@ function goBack() {
 <template>
   <div v-if="questions.length > 0" class="review">
     <header class="review__header">
-    <button type="button" class="cta" @click="goBack">{{ backLabel ?? texts.backToDashboardCta }}</button>
+    <PrimaryButton size="lg" @click="goBack">{{ backLabel ?? texts.backToDashboardCta }}</PrimaryButton>
       <h1>{{ title }}</h1>
     </header>
 
@@ -96,7 +97,7 @@ function goBack() {
     </header>
     <p class="review__message">{{ texts.noQuestionsFoundMessage }}</p>
     <footer class="review__footer">
-      <button type="button" class="cta" @click="goBack">{{ backLabel ?? texts.backToDashboardCta }}</button>
+      <PrimaryButton size="lg" @click="goBack">{{ backLabel ?? texts.backToDashboardCta }}</PrimaryButton>
     </footer>
   </div>
 </template>
@@ -124,22 +125,6 @@ function goBack() {
 .review__footer {
   display: flex;
   justify-content: center;
-}
-
-.cta {
-  padding: 12px 24px;
-  color: var(--cta-text);
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: var(--cta);
-}
-
-.cta:hover {
-  opacity: 0.9;
 }
 
 .review--not-found {

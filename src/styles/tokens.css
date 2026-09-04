@@ -13,6 +13,15 @@
   --green: #2e5b26;
   --red: #b02e26;
 
+  --radius-none: 0px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-3xl: 14px;
+  --radius-pill: 999px;
+
   --sans: system-ui, 'Segoe UI', roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', roboto, sans-serif;
   --mono: ui-monospace, consolas, monospace;

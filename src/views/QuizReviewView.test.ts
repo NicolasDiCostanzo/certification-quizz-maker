@@ -153,7 +153,7 @@ describe('QuizReviewView', () => {
 
     await router.push('/certs/TEST/quiz/review')
     const wrapper = mount(QuizReviewView, { global: { plugins: [pinia, router] } })
-    expect(wrapper.find('.status-badge--incorrect').exists()).toBe(true)
+    expect(wrapper.find('.badge--status-incorrect').exists()).toBe(true)
   })
 
   it('shows explanation in the detail panel when present', async () => {
@@ -174,7 +174,7 @@ describe('QuizReviewView', () => {
 
     await router.push('/certs/TEST/quiz/review')
     const wrapper = mount(QuizReviewView, { global: { plugins: [pinia, router] } })
-    await wrapper.find('.flag-toggle').trigger('click')
+    await wrapper.find('.btn--secondary').trigger('click')
     expect(progressStore.isFlagged('TEST', 'q1')).toBe(true)
   })
 
@@ -185,7 +185,7 @@ describe('QuizReviewView', () => {
 
     await router.push('/certs/TEST/quiz/review')
     const wrapper = mount(QuizReviewView, { global: { plugins: [pinia, router] } })
-    await wrapper.find('.cta').trigger('click')
+    await wrapper.find('.btn--primary').trigger('click')
     expect(store.hasSession).toBe(false)
   })
 })

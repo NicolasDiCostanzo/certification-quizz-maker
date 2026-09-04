@@ -35,7 +35,7 @@ describe('WelcomeView', () => {
     ['continue locally', 2, 'local'],
   ])('%s stores the account mode and moves on to the cert selector', async (_name, index, mode) => {
     const wrapper = mountWelcome()
-    await wrapper.findAll('.welcome-card__cta')[index].trigger('click')
+    await wrapper.findAll('.btn--primary')[index].trigger('click')
     await flushPromises()
 
     expect(useUserPreferencesStore().accountMode).toBe(mode)

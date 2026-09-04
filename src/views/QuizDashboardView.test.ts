@@ -49,7 +49,7 @@ describe('QuizDashboardView', () => {
     await router.push('/certs/TEST')
     const wrapper = mount(QuizDashboardView, { global: { plugins: [pinia, router] }, props: { certCode: 'TEST' } })
 
-    const button = wrapper.find('.btn-review--flagged')
+    const button = wrapper.find('.flagged-review-btn')
     expect(button.exists()).toBe(true)
     expect(button.attributes('disabled')).toBeUndefined()
   })
@@ -58,6 +58,6 @@ describe('QuizDashboardView', () => {
     await router.push('/certs/TEST')
     const wrapper = mount(QuizDashboardView, { global: { plugins: [pinia, router] }, props: { certCode: 'TEST' } })
 
-    expect(wrapper.find('.btn-review--flagged').exists()).toBe(false)
+    expect(wrapper.find('.flagged-review-btn').exists()).toBe(false)
   })
 })
