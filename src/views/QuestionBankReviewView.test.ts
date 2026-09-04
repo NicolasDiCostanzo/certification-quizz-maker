@@ -16,6 +16,7 @@ vi.mock('../composables/useQuizLoader', () => ({
       questions: [
         { id: 'q1', question: 'Q1?', options: ['A', 'B'], answers: 'A', topic: 'Security', themes: { services: ['lambda'] } },
         { id: 'q2', question: 'Q2?', options: ['A', 'B'], answers: 'B', topic: 'Deployment', themes: { services: ['s3'] } },
+        { id: 'q3', question: 'Q3?', options: ['A', 'B'], answers: 'A', topic: '100% coverage', themes: { services: ['lambda'] } },
       ],
     }),
   }),
@@ -68,5 +69,31 @@ describe('QuestionBankReviewView', () => {
     expect(wrapper.find('.review--not-found').exists()).toBe(false)
     expect(wrapper.findAll('.summary-card')).toHaveLength(1)
     expect(wrapper.find('.detail-panel__question').text()).toContain('Q1?')
+  })
+
+  it('topic review handles encoded topic params containing a literal percent', async () => {
+    const historyStore = useQuizHistoryStore()
+    const entry: QuizHistoryEntry = {
+      id: 'e1',
+      certCode: 'TEST',
+      mode: 'preparation',
+      startedAt: 1,
+      finishedAt: 2,
+      questions: [
+        { id: 'q3', question: 'Q3?', options: ['A', 'B'], answers: 'A', topic: '100% coverage', themes: { services: ['lambda'] } },
+      ],
+      answers: { q3: { selected: ['A'], correct: true, answeredAt: 1 } },
+      flags: [],
+      result: { percentCorrect: 100, passed: true, timesCorrect: 1, totalAnswered: 1 },
+    }
+    historyStore.entries.push(entry)
+
+    await router.push('/certs/TEST/topic/100%25%20coverage')
+    const wrapper = mount({ template: '<router-view />' }, { global: { plugins: [pinia, router] } })
+
+    expect(wrapper.find('.review--not-found').exists()).toBe(false)
+    expect(wrapper.find('.review__header h1').text()).toContain('Topic: 100% coverage')
+    expect(wrapper.findAll('.summary-card')).toHaveLength(1)
+    expect(wrapper.find('.detail-panel__question').text()).toContain('Q3?')
   })
 })

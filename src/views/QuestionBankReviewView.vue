@@ -65,16 +65,16 @@ const title = computed(() =>
   isFlaggedReview.value
     ? texts.flaggedReviewTitle
     : isTopicReview.value
-      ? texts.topicReviewTitle(decodeURIComponent(filterValue.value))
-      : texts.themeReviewTitle(decodeURIComponent(themeGroup.value), decodeURIComponent(filterValue.value)),
+      ? texts.topicReviewTitle(filterValue.value)
+      : texts.themeReviewTitle(themeGroup.value, filterValue.value),
 )
 
 const questionsTitle = computed(() =>
   isFlaggedReview.value
     ? texts.flaggedQuestions
     : isTopicReview.value
-      ? texts.questionsForTopic(decodeURIComponent(filterValue.value))
-      : texts.questionsForTheme(decodeURIComponent(filterValue.value)),
+      ? texts.questionsForTopic(filterValue.value)
+      : texts.questionsForTheme(filterValue.value),
 )
 </script>
 
