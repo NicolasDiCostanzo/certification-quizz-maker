@@ -1,9 +1,9 @@
-export interface TextSegment {
+interface TextSegment {
   type: 'text'
   value: string
 }
 
-export interface ImageSegment {
+interface ImageSegment {
   type: 'image'
   value: string
   alt: string

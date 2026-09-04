@@ -59,7 +59,7 @@ export interface ProgressExportFile {
 export type QuizMode = 'preparation' | 'exam'
 export type ReplayMode = 'all' | 'wrong' | 'flagged' | 'unattempted'
 export type ThemeMatchMode = 'and' | 'or'
-export type ThemeGroupMatch = 'any' | 'all'
+type ThemeGroupMatch = 'any' | 'all'
 
 export interface ThemeGroupFilter {
   values: string[]
