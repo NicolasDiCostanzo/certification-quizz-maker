@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { Question } from '../types';
+import { texts } from '../texts/en';
 import { parseInlineSegments } from '../utils/markdownImage';
 
 const props = defineProps<{
@@ -62,14 +63,14 @@ const displayAnswer = computed(() => {
 
     <ul v-if="question.promptImages?.length" class="prompt-images">
       <li v-for="(img, i) in question.promptImages" :key="i">
-        <img :src="img" alt="Prompt image" />
+        <img :src="img" :alt="texts.promptImageAlt" />
       </li>
     </ul>
 
     <div class="options">
       <label
         v-for="(option, i) in question.options"
-        :key="option"
+        :key="i"
         class="option"
         :class="[letterClass(letters[i]), { 'option--selected': selected.includes(letters[i]) }]"
       >
@@ -92,13 +93,13 @@ const displayAnswer = computed(() => {
     </div>
 
     <div v-if="reveal" class="feedback" :class="isCorrect ? 'feedback--correct' : 'feedback--incorrect'">
-      <span class="feedback-badge">{{ isCorrect ? 'Correct' : 'Incorrect' }}</span>
+      <span class="feedback-badge">{{ isCorrect ? texts.correct : texts.incorrect }}</span>
       <p v-if="!isCorrect || question.explanation" class="feedback-explanation">
         <template v-if="!isCorrect">
-          <strong>Correct answer:</strong> {{ displayAnswer }}<br />
+          <strong>{{ texts.correctAnswer }}:</strong> {{ displayAnswer }}<br />
         </template>
         <template v-if="question.explanation">
-          <strong>Explanation:</strong> {{ question.explanation }}
+          <strong>{{ texts.explanation }}:</strong> {{ question.explanation }}
         </template>
       </p>
     </div>

@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import QuizSessionView from './QuizSessionView.vue'
+import { useQuizHistoryStore } from '../stores/quizHistory'
 import { useQuizSessionStore } from '../stores/quizSession'
 import { useUserProgressStore } from '../stores/userProgress'
 import type { Question } from '../types'
@@ -49,6 +50,7 @@ describe('QuizSessionView', () => {
     store.resetSession()
     progressStore = useUserProgressStore()
     progressStore.byExamCode = {}
+    useQuizHistoryStore().resetAll()
   })
 
   it('renders nothing without a session', () => {
@@ -153,5 +155,24 @@ describe('QuizSessionView', () => {
     await wrapper.findAll('button')[3].trigger('click')
 
     expect(progressStore.byExamCode['TEST']?.q1?.attempts).toBe(firstAttemptCount)
+  })
+
+  it('gives each finished session a unique history entry id even when startedAt collides', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(1_700_000_000_000)
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      store.startSession('TEST', { certCode: 'TEST', mode: 'preparation', includeMatchMode: 'or', replayMode: 'all', count: 'all' }, questions, undefined)
+      const wrapper = mount(QuizSessionView, { global: { plugins: [pinia, router] } })
+      for (let i = 0; i < 3; i++) {
+        await wrapper.find('input').setValue(true)
+        await wrapper.findAll('button')[1].trigger('click')
+        if (i < 2) await wrapper.findAll('button')[3].trigger('click')
+      }
+      await wrapper.findAll('button')[3].trigger('click')
+    }
+
+    vi.restoreAllMocks()
+    const ids = useQuizHistoryStore().entries.map((e) => e.id)
+    expect(new Set(ids).size).toBe(2)
   })
 })

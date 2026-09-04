@@ -58,7 +58,7 @@ function renderSegments(text: string) {
         </template>
       </p>
       <ul class="options">
-        <label v-for="(option, i) in question.options" :key="option" class="option" :class="letterClass(letterForIndex(i))">
+        <label v-for="(option, i) in question.options" :key="i" class="option" :class="letterClass(letterForIndex(i))">
           <span class="option-letter">{{ letterForIndex(i) }}</span>
           <span class="option-text">
             <template v-for="(segment, j) in renderSegments(option)" :key="j">
