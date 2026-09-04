@@ -101,7 +101,7 @@ function goHome() {
     </section>
 
     <ReviewBreakdown
-      v-if="entries.length > 0"
+      v-if="entries.length > 0 || hasFlaggedQuestions"
       :cert-code="certCode"
       :topic-breakdown="topicBreakdown"
       :theme-breakdown="themeBreakdown"
