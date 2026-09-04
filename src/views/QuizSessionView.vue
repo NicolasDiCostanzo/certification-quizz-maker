@@ -75,7 +75,7 @@ function finishQuiz() {
   const result = computeScore(session.value.questions, session.value.answers, cert.exam)
   store.finishSession(result)
   const entry: QuizHistoryEntry = {
-    id: `${session.value.certCode}-${session.value.startedAt}`,
+    id: crypto.randomUUID(),
     certCode: session.value.certCode,
     mode: session.value.mode,
     startedAt: session.value.startedAt,
@@ -92,19 +92,6 @@ function finishQuiz() {
 function handleTimeUp() {
   finishQuiz()
 }
-
-watch(session, (newSession) => {
-  if (!newSession) return
-  const flaggedIds = new Set(newSession.flags)
-  for (const questionId of newSession.questions.map((q) => q.id)) {
-    const isCurrentlyFlagged = progressStore.isFlagged(newSession.certCode, questionId)
-    if (flaggedIds.has(questionId) && !isCurrentlyFlagged) {
-      progressStore.toggleFlag(newSession.certCode, questionId)
-    } else if (!flaggedIds.has(questionId) && isCurrentlyFlagged) {
-      progressStore.toggleFlag(newSession.certCode, questionId)
-    }
-  }
-}, { immediate: true })
 </script>
 
 <template>

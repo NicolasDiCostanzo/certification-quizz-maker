@@ -91,4 +91,18 @@ describe('router', () => {
     expect(router.currentRoute.value.name).toBe('quiz-session')
     expect(router.currentRoute.value.params.certCode).toBe('DVA-C02')
   })
+
+  it('redirects quiz-review to quiz-session when the active session has not finished yet', async () => {
+    const session = useQuizSessionStore()
+    session.startSession(
+      'DVA-C02',
+      { certCode: 'DVA-C02', mode: 'preparation', includeMatchMode: 'or', replayMode: 'all', count: 'all' },
+      sessionQuestions,
+      undefined,
+    )
+
+    await router.push('/certs/DVA-C02/quiz/review')
+    expect(router.currentRoute.value.name).toBe('quiz-session')
+    expect(router.currentRoute.value.params.certCode).toBe('DVA-C02')
+  })
 })

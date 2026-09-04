@@ -48,6 +48,7 @@ export const texts = {
   flag: 'Flag for review',
   unflag: 'Remove flag',
   flagged: 'Flagged',
+  promptImageAlt: 'Prompt image',
   correct: 'Correct',
   incorrect: 'Incorrect',
   explanation: 'Explanation',

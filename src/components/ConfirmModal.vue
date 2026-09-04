@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted, useId } from 'vue'
+import Card from './BaseCard.vue'
 import PrimaryButton from './PrimaryButton.vue'
 import SecondaryButton from './SecondaryButton.vue'
 
@@ -13,18 +15,34 @@ const emit = defineEmits<{
   confirm: []
   cancel: []
 }>()
+
+const titleId = useId()
+
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') emit('cancel')
+}
+
+onMounted(() => window.addEventListener('keydown', handleKeydown))
+onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
 </script>
 
 <template>
   <div class="modal-overlay" @click.self="emit('cancel')">
-    <div class="modal">
-      <h2>{{ title }}</h2>
+    <Card
+      padding="xl"
+      radius="2xl"
+      role="dialog"
+      aria-modal="true"
+      :aria-labelledby="titleId"
+      class="modal"
+    >
+      <h2 :id="titleId">{{ title }}</h2>
       <p>{{ message }}</p>
       <div class="modal-actions">
         <SecondaryButton @click="emit('cancel')">{{ cancelLabel }}</SecondaryButton>
         <PrimaryButton @click="emit('confirm')">{{ confirmLabel }}</PrimaryButton>
       </div>
-    </div>
+    </Card>
   </div>
 </template>
 
@@ -32,7 +50,7 @@ const emit = defineEmits<{
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -40,10 +58,6 @@ const emit = defineEmits<{
 }
 
 .modal {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-2xl);
-  padding: 24px;
   max-width: 400px;
   width: 90%;
 }

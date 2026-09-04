@@ -62,7 +62,7 @@ export const useUserProgressStore = defineStore('userProgress', {
         const examProgress = (this.byExamCode[examCode] ??= {})
         for (const [questionId, incoming] of Object.entries(questions)) {
           const existing = examProgress[questionId]
-          if (!existing || incoming.lastSeenAt >= existing.lastSeenAt) {
+          if (!existing || incoming.lastSeenAt > existing.lastSeenAt) {
             examProgress[questionId] = incoming
           }
         }

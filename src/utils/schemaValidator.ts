@@ -306,8 +306,8 @@ function validateQuestions(
       return
     }
 
-    if (raw.url !== undefined && typeof raw.url !== 'string') {
-      errors.push(`${label}.url must be a string when present.`)
+    if (raw.url !== undefined && (typeof raw.url !== 'string' || raw.url === '')) {
+      errors.push(`${label}.url must be a non-empty string when present.`)
     }
     if (raw.explanation !== undefined && typeof raw.explanation !== 'string') {
       errors.push(`${label}.explanation must be a string when present.`)
