@@ -18,7 +18,7 @@ const props = defineProps<{
 const progressStore = useUserProgressStore()
 
 const route = useRoute()
-const { getCert } = useQuizLoader()
+const { getCert, resolveQuestions } = useQuizLoader()
 const historyStore = useQuizHistoryStore()
 
 const cert = computed(() => getCert(props.certCode))
@@ -34,7 +34,7 @@ const questions = computed((): Question[] => {
   const result: Question[] = []
   const source: Question[] = isFlaggedReview.value
     ? cert.value?.questions ?? []
-    : entries.value.flatMap((entry) => entry.questions)
+    : entries.value.flatMap((entry) => resolveQuestions(props.certCode, entry.questionIds))
   for (const q of source) {
     const matches = isFlaggedReview.value
       ? progressStore.isFlagged(props.certCode, q.id)

@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { useQuizSessionStore } from '../stores/quizSession'
-import { useUserPreferencesStore } from '../stores/userPreferences'
+import { useUserAccountStore } from '../stores/userAccount'
 import CertSelectorView from '../views/CertSelectorView.vue'
 import QuizConfigureView from '../views/QuizConfigureView.vue'
 import QuizDashboardView from '../views/QuizDashboardView.vue'
@@ -38,7 +38,7 @@ router.beforeEach((to) => {
 
 router.beforeEach((to) => {
   if (to.name !== 'cert-selector') return
-  if (useUserPreferencesStore().accountMode) return
+  if (useUserAccountStore().accountMode) return
   return { name: 'welcome' }
 })
 
