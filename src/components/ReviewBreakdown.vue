@@ -12,6 +12,7 @@ const props = defineProps<{
   passingPercent: number
   certCode?: string
   showReviewButton?: boolean
+  hasFlaggedQuestions?: boolean
 }>()
 
 const router = useRouter()
@@ -49,6 +50,12 @@ function navigateToTopic(topic: string) {
 function navigateToTheme(group: string, value: string) {
   if (props.certCode) {
     router.push({ name: 'theme-review', params: { certCode: props.certCode, themeGroup: group, themeValue: value } })
+  }
+}
+
+function navigateToFlagged() {
+  if (props.certCode) {
+    router.push({ name: 'flagged-review', params: { certCode: props.certCode } })
   }
 }
 </script>
@@ -108,6 +115,17 @@ function navigateToTheme(group: string, value: string) {
         </div>
       </div>
     </div>
+  </section>
+
+  <section v-if="showReviewButton" class="breakdown">
+    <button
+      type="button"
+      class="btn-review btn-review--flagged"
+      :disabled="!hasFlaggedQuestions"
+      @click="navigateToFlagged"
+    >
+      {{ texts.reviewFlagged }}
+    </button>
   </section>
 </template>
 
@@ -270,5 +288,10 @@ function navigateToTheme(group: string, value: string) {
 
 .btn-review:hover {
   opacity: 0.9;
+}
+
+.btn-review:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 </style>

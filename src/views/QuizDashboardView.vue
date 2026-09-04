@@ -33,6 +33,8 @@ const topicBreakdown = computed(() => breakdownByTopicAllTime(entries.value))
 const themeGroups = computed(() => Object.keys(cert.value?.themes ?? {}))
 const themeBreakdown = computed(() => breakdownByThemeAllTime(entries.value, themeGroups.value))
 
+const hasFlaggedQuestions = computed(() => progressStore.hasFlagged(props.certCode))
+
 const passingPercent = computed(() => {
   const ps = cert.value?.exam.passingScore
   if (!ps) return 0
@@ -106,6 +108,7 @@ function goHome() {
       :theme-groups="themeGroups"
       :passing-percent="passingPercent"
       :show-review-button="true"
+      :has-flagged-questions="hasFlaggedQuestions"
     />
 
     <section class="history-section">

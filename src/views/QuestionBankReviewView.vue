@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { useQuizHistoryStore } from '../stores/quizHistory'
+import { useUserProgressStore } from '../stores/userProgress'
 import { texts } from '../texts/en'
 import type { Question, QuestionAnswer } from '../types'
 import QuestionReviewView from './QuestionReviewView.vue'
@@ -14,6 +15,8 @@ const props = defineProps<{
   themeValue?: string
 }>()
 
+const progressStore = useUserProgressStore()
+
 const route = useRoute()
 const { getCert } = useQuizLoader()
 const historyStore = useQuizHistoryStore()
@@ -22,21 +25,25 @@ const cert = computed(() => getCert(props.certCode))
 const entries = computed(() => historyStore.byCertCode(props.certCode))
 
 const isTopicReview = computed(() => route.name === 'topic-review')
+const isFlaggedReview = computed(() => route.name === 'flagged-review')
 const filterValue = computed(() => props.topic ?? props.themeValue ?? '')
 const themeGroup = computed(() => props.themeGroup ?? '')
 
 const questions = computed((): Question[] => {
   const seen = new Set<string>()
   const result: Question[] = []
-  for (const entry of entries.value) {
-    for (const q of entry.questions) {
-      const matches = isTopicReview.value
+  const source: Question[] = isFlaggedReview.value
+    ? cert.value?.questions ?? []
+    : entries.value.flatMap((entry) => entry.questions)
+  for (const q of source) {
+    const matches = isFlaggedReview.value
+      ? progressStore.isFlagged(props.certCode, q.id)
+      : isTopicReview.value
         ? q.topic === filterValue.value
         : (q.themes?.[themeGroup.value] ?? []).includes(filterValue.value)
-      if (matches && !seen.has(q.id)) {
-        seen.add(q.id)
-        result.push(q)
-      }
+    if (matches && !seen.has(q.id)) {
+      seen.add(q.id)
+      result.push(q)
     }
   }
   return result
@@ -55,15 +62,19 @@ const answers = computed((): Record<string, QuestionAnswer> => {
 })
 
 const title = computed(() =>
-  isTopicReview.value
-    ? texts.topicReviewTitle(decodeURIComponent(filterValue.value))
-    : texts.themeReviewTitle(decodeURIComponent(themeGroup.value), decodeURIComponent(filterValue.value)),
+  isFlaggedReview.value
+    ? texts.flaggedReviewTitle
+    : isTopicReview.value
+      ? texts.topicReviewTitle(decodeURIComponent(filterValue.value))
+      : texts.themeReviewTitle(decodeURIComponent(themeGroup.value), decodeURIComponent(filterValue.value)),
 )
 
 const questionsTitle = computed(() =>
-  isTopicReview.value
-    ? texts.questionsForTopic(decodeURIComponent(filterValue.value))
-    : texts.questionsForTheme(decodeURIComponent(filterValue.value)),
+  isFlaggedReview.value
+    ? texts.flaggedQuestions
+    : isTopicReview.value
+      ? texts.questionsForTopic(decodeURIComponent(filterValue.value))
+      : texts.questionsForTheme(decodeURIComponent(filterValue.value)),
 )
 </script>
 

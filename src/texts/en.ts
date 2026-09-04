@@ -76,6 +76,7 @@ export const texts = {
   quizHistory: 'Quiz history',
   noQuizzesTaken: 'No quizzes taken yet.',
   review: 'Review',
+  reviewFlagged: 'Review flagged questions only',
   delete: 'Delete',
   deleteQuizTitle: 'Delete quiz',
   deleteQuizMessage: 'Are you sure you want to delete this quiz from your history?',
@@ -88,7 +89,9 @@ export const texts = {
   noQuestionsFoundMessage: 'No questions found for this topic or theme.',
   topicReviewTitle: (topic: string) => `Topic: ${topic}`,
   themeReviewTitle: (theme: string, value: string) => `${theme}: ${value}`,
+  flaggedReviewTitle: 'Flagged questions',
   questionsForTopic: (topic: string) => `Questions for topic "${topic}"`,
   questionsForTheme: (value: string) => `Questions for theme "${value}"`,
-  goBackToDashboard: 'Go back to dashboard',
+  flaggedQuestions: 'Questions you have flagged for review',
+  goBackToDashboard: '← Go back to dashboard',
 }

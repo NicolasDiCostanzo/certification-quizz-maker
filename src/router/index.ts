@@ -20,6 +20,7 @@ export const router = createRouter({
     { path: '/certs/:certCode/history/:entryId', name: 'quiz-history-review', component: QuizHistoryReviewView, props: true },
     { path: '/certs/:certCode/topic/:topic', name: 'topic-review', component: QuestionBankReviewView, props: true },
     { path: '/certs/:certCode/theme/:themeGroup/:themeValue', name: 'theme-review', component: QuestionBankReviewView, props: true },
+    { path: '/certs/:certCode/flagged', name: 'flagged-review', component: QuestionBankReviewView, props: true },
   ],
 })
 
