@@ -74,9 +74,16 @@ export function breakdownByTheme(
   return cells
 }
 
-export function breakdownByTopicAllTime(entries: QuizHistoryEntry[]): TopicBreakdown[] {
+function resolveEntryQuestions(entry: QuizHistoryEntry, byId: Map<string, Question>): Question[] {
+  return entry.questionIds
+    .map((id) => byId.get(id))
+    .filter((q): q is Question => q !== undefined)
+}
+
+export function breakdownByTopicAllTime(entries: QuizHistoryEntry[], questions: Question[]): TopicBreakdown[] {
+  const byId = new Map(questions.map((q) => [q.id, q]))
   const items = entries.flatMap((entry) =>
-    entry.questions.map((q) => ({ key: q.topic, correct: !!entry.answers[q.id]?.correct })),
+    resolveEntryQuestions(entry, byId).map((q) => ({ key: q.topic, correct: !!entry.answers[q.id]?.correct })),
   )
   return [...tally(items).entries()].map(([label, cell]) => ({ label, ...cell, percent: percentOf(cell) }))
 }
@@ -84,11 +91,13 @@ export function breakdownByTopicAllTime(entries: QuizHistoryEntry[]): TopicBreak
 export function breakdownByThemeAllTime(
   entries: QuizHistoryEntry[],
   groups: string[],
+  questions: Question[],
 ): ThemeBreakdown[] {
+  const byId = new Map(questions.map((q) => [q.id, q]))
   const cells: ThemeBreakdown[] = []
   for (const group of groups) {
     const items = entries.flatMap((entry) =>
-      themeItems(entry.questions, group, (q) => !!entry.answers[q.id]?.correct),
+      themeItems(resolveEntryQuestions(entry, byId), group, (q) => !!entry.answers[q.id]?.correct),
     )
     for (const [value, cell] of tally(items)) {
       cells.push({ group, value, ...cell, percent: percentOf(cell) })

@@ -2,7 +2,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { useQuizSessionStore } from '../stores/quizSession'
-import { useUserPreferencesStore } from '../stores/userPreferences'
+import { useUserAccountStore } from '../stores/userAccount'
 import { router } from './index'
 import type { Question } from '../types'
 
@@ -13,7 +13,7 @@ const sessionQuestions: Question[] = [
 describe('router', () => {
   beforeEach(async () => {
     setActivePinia(createPinia())
-    useUserPreferencesStore().accountMode = 'local'
+    useUserAccountStore().accountMode = 'local'
     await router.push({ name: 'cert-selector' })
   })
 
@@ -23,7 +23,7 @@ describe('router', () => {
   })
 
   it('redirects / to the welcome screen while no account mode has been chosen', async () => {
-    useUserPreferencesStore().accountMode = null
+    useUserAccountStore().accountMode = null
     await router.push('/welcome')
     await router.push('/')
     expect(router.currentRoute.value.name).toBe('welcome')

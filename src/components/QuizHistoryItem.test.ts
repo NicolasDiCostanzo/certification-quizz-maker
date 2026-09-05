@@ -11,7 +11,7 @@ function makeEntry(overrides: Partial<QuizHistoryEntry> = {}): QuizHistoryEntry 
     mode: 'exam',
     startedAt: Date.now(),
     finishedAt: Date.now() + 5 * 60_000,
-    questions: [],
+    questionIds: [],
     answers: {},
     flags: [],
     result: { percentCorrect: 80, passed: true, timesCorrect: 8, totalAnswered: 10 },
