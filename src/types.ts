@@ -56,6 +56,13 @@ export interface ProgressExportFile {
   byExamCode: UserProgress['byExamCode']
 }
 
+export interface HistoryExportFile {
+  format: 'quiz-history'
+  version: number
+  exportedAt: string
+  entries: QuizHistoryEntry[]
+}
+
 export type QuizMode = 'preparation' | 'exam'
 export type AccountMode = 'account' | 'local'
 export type ReplayMode = 'all' | 'wrong' | 'flagged' | 'unattempted'
@@ -112,7 +119,7 @@ export interface QuizHistoryEntry {
   mode: QuizMode
   startedAt: number
   finishedAt: number
-  questions: Question[]
+  questionIds: string[]
   answers: Record<string, QuestionAnswer>
   flags: string[]
   result: ScoreResult

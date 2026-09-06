@@ -11,7 +11,7 @@ const props = defineProps<{
   entryId: string
 }>()
 
-const { getCert } = useQuizLoader()
+const { getCert, resolveQuestions } = useQuizLoader()
 const historyStore = useQuizHistoryStore()
 
 const cert = computed(() => getCert(props.certCode))
@@ -19,7 +19,7 @@ const entry = computed(() => historyStore.entries.find((e) => e.id === props.ent
 
 const result = computed(() => entry.value?.result)
 const answers = computed(() => entry.value?.answers ?? {})
-const questions = computed(() => entry.value?.questions ?? [])
+const questions = computed(() => resolveQuestions(props.certCode, entry.value?.questionIds ?? []))
 
 const topicBreakdown = computed(() =>
   breakdownByTopic(questions.value, answers.value),

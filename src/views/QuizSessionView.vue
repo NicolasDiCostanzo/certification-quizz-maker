@@ -80,7 +80,7 @@ function finishQuiz() {
     mode: session.value.mode,
     startedAt: session.value.startedAt,
     finishedAt: Date.now(),
-    questions: session.value.questions,
+    questionIds: session.value.questions.map((q) => q.id),
     answers: session.value.answers,
     flags: session.value.flags,
     result,

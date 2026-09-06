@@ -32,9 +32,9 @@ const allTimePercent = computed(() =>
   allTimeAttempted.value === 0 ? 0 : Math.round((allTimeCorrect.value / allTimeAttempted.value) * 100),
 )
 
-const topicBreakdown = computed(() => breakdownByTopicAllTime(entries.value))
+const topicBreakdown = computed(() => breakdownByTopicAllTime(entries.value, cert.value?.questions ?? []))
 const themeGroups = computed(() => Object.keys(cert.value?.themes ?? {}))
-const themeBreakdown = computed(() => breakdownByThemeAllTime(entries.value, themeGroups.value))
+const themeBreakdown = computed(() => breakdownByThemeAllTime(entries.value, themeGroups.value, cert.value?.questions ?? []))
 
 const hasFlaggedQuestions = computed(() => progressStore.hasFlagged(props.certCode))
 

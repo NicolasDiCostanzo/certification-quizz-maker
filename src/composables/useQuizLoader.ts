@@ -45,10 +45,18 @@ export function useQuizLoader() {
     return getCert(examCode)?.questions.filter(isQuestionAnswerable) ?? []
   }
 
+  function resolveQuestions(examCode: string, questionIds: string[]): Question[] {
+    const cert = getCert(examCode)
+    if (!cert) return []
+    const byId = new Map(cert.questions.map((q) => [q.id, q]))
+    return questionIds.map((id) => byId.get(id)).filter((q): q is Question => q !== undefined)
+  }
+
   return {
     availableCerts,
     certLoadIssues,
     getCert,
     activePool,
+    resolveQuestions,
   }
 }

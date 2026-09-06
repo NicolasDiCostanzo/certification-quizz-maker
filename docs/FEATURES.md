@@ -54,8 +54,8 @@ Single source of truth for every feature discussed for this project, with its cu
 | Flag button on the question screen in **both** modes (like real exams' "mark for review"); review screen allows flagging too | ✅ |
 | Export progress as a versioned JSON file (protection against browser-data clearing) | ✅ |
 | Import progress with merge (per-question, newest `lastSeenAt` wins) | ✅ |
-| Welcome screen lets a first-time visitor choose "use an account", "sign in", or "continue locally" (`accountMode` in the `userPreferences` store, via `useAccount.ts`); guest ("local") users see no further auth UI and lose no functionality | ✅ |
-| Account creation / sign-in against a real backend (Cognito + API Gateway + Lambda + DynamoDB) for cross-device sync | 🔜 Phase 2 — `useAccount.ts`'s `createAccount`/`signIn` currently only set the local `accountMode` flag (marked `TODO(AWS)`); no backend call is made yet |
+| Welcome screen lets a first-time visitor choose "use an account", "sign in", or "continue locally" (`accountMode` in the `userAccount` store, via `useAccount.ts`); guest ("local") users see no further auth UI and lose no functionality | ✅ |
+| Account creation / sign-in against a real backend (Cognito + API Gateway + Lambda + DynamoDB) for cross-device sync | 🔜 Phase 2 — `useAccount.ts`'s `createAccount`/`signIn` currently only set the local `accountMode` flag and pull-merge remote data through the no-op sync adapter (marked `TODO(AWS)`); no backend call is made yet |
 
 ## Quiz history & dashboard
 
