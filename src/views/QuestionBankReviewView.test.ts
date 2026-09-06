@@ -4,21 +4,27 @@ import { describe, expect, it, vi } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { useQuizHistoryStore } from '../stores/quizHistory'
 import { useUserProgressStore } from '../stores/userProgress'
-import type { Question, QuizHistoryEntry } from '../types'
+import type { QuizHistoryEntry } from '../types'
 import QuestionBankReviewView from './QuestionBankReviewView.vue'
+
+const testCert = {
+  version: 1,
+  exam: { name: 'Test', code: 'TEST', totalQuestions: 2, timeLimitMinutes: 10, passingScore: { passingScore: 700, scale: 1000 } },
+  themes: { services: ['lambda', 's3'] },
+  questions: [
+    { id: 'q1', question: 'Q1?', options: ['A', 'B'], answers: 'A', topic: 'Security', themes: { services: ['lambda'] } },
+    { id: 'q2', question: 'Q2?', options: ['A', 'B'], answers: 'B', topic: 'Deployment', themes: { services: ['s3'] } },
+    { id: 'q3', question: 'Q3?', options: ['A', 'B'], answers: 'A', topic: '100% coverage', themes: { services: ['lambda'] } },
+  ],
+}
 
 vi.mock('../composables/useQuizLoader', () => ({
   useQuizLoader: () => ({
-    getCert: () => ({
-      version: 1,
-      exam: { name: 'Test', code: 'TEST', totalQuestions: 2, timeLimitMinutes: 10, passingScore: { passingScore: 700, scale: 1000 } },
-      themes: { services: ['lambda', 's3'] },
-      questions: [
-        { id: 'q1', question: 'Q1?', options: ['A', 'B'], answers: 'A', topic: 'Security', themes: { services: ['lambda'] } },
-        { id: 'q2', question: 'Q2?', options: ['A', 'B'], answers: 'B', topic: 'Deployment', themes: { services: ['s3'] } },
-        { id: 'q3', question: 'Q3?', options: ['A', 'B'], answers: 'A', topic: '100% coverage', themes: { services: ['lambda'] } },
-      ],
-    }),
+    getCert: () => testCert,
+    resolveQuestions: (_examCode: string, ids: string[]) => {
+      const byId = new Map(testCert.questions.map((q) => [q.id, q]))
+      return ids.map((id) => byId.get(id)).filter((q) => q !== undefined)
+    },
   }),
 }))
 
@@ -36,10 +42,6 @@ const router = createRouter({
   ],
 })
 
-function makeQuestion(id: string): Question {
-  return { id, question: `${id.toUpperCase()}?`, options: ['A', 'B'], answers: 'A', topic: 'Security', themes: { services: ['lambda'] } }
-}
-
 describe('QuestionBankReviewView', () => {
   it('flagged review lists bank-flagged questions even when they appear in no history entry', async () => {
     const progressStore = useUserProgressStore()
@@ -53,7 +55,7 @@ describe('QuestionBankReviewView', () => {
       mode: 'preparation',
       startedAt: 1,
       finishedAt: 2,
-      questions: [makeQuestion('q2')],
+      questionIds: ['q2'],
       answers: { q2: { selected: ['A'], correct: true, answeredAt: 1 } },
       flags: [],
       result: { percentCorrect: 100, passed: true, timesCorrect: 1, totalAnswered: 1 },
@@ -79,9 +81,7 @@ describe('QuestionBankReviewView', () => {
       mode: 'preparation',
       startedAt: 1,
       finishedAt: 2,
-      questions: [
-        { id: 'q3', question: 'Q3?', options: ['A', 'B'], answers: 'A', topic: '100% coverage', themes: { services: ['lambda'] } },
-      ],
+      questionIds: ['q3'],
       answers: { q3: { selected: ['A'], correct: true, answeredAt: 1 } },
       flags: [],
       result: { percentCorrect: 100, passed: true, timesCorrect: 1, totalAnswered: 1 },

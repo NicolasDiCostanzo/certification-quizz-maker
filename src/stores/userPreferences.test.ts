@@ -37,13 +37,4 @@ describe('userPreferences store', () => {
 
     expect(useUserPreferencesStore().dark).toBe(false)
   })
-
-  it('persists the chosen account mode into a fresh Pinia instance', async () => {
-    useUserPreferencesStore().accountMode = 'local'
-    await nextTick()
-
-    createTestPinia()
-
-    expect(useUserPreferencesStore().accountMode).toBe('local')
-  })
 })

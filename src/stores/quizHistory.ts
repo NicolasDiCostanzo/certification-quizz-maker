@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import 'pinia-plugin-persistedstate'
-import type { QuizHistoryEntry } from '../types'
+import type { HistoryExportFile, QuizHistoryEntry } from '../types'
+
+const EXPORT_FORMAT = 'quiz-history'
+const EXPORT_VERSION = 1
 
 export const useQuizHistoryStore = defineStore('quizHistory', {
   state: (): { entries: QuizHistoryEntry[] } => ({
@@ -40,6 +43,26 @@ export const useQuizHistoryStore = defineStore('quizHistory', {
 
     resetAll() {
       this.entries = []
+    },
+
+    exportHistory(): HistoryExportFile {
+      return {
+        format: EXPORT_FORMAT,
+        version: EXPORT_VERSION,
+        exportedAt: new Date().toISOString(),
+        entries: JSON.parse(JSON.stringify(this.entries)) as QuizHistoryEntry[],
+      }
+    },
+
+    importHistory(file: HistoryExportFile) {
+      if (file.format !== EXPORT_FORMAT || file.version !== EXPORT_VERSION) return
+      const existingIds = new Set(this.entries.map((e) => e.id))
+      for (const entry of file.entries) {
+        if (!existingIds.has(entry.id)) {
+          this.entries.push(entry)
+          existingIds.add(entry.id)
+        }
+      }
     },
   },
 
