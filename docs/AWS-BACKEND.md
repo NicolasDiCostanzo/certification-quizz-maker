@@ -32,7 +32,7 @@ If a DynamoDB-shaped store does end up being used, the two export formats above 
 
 ## Things worth deciding deliberately, not defaulting into
 
-- **Whether `push` should merge server-side or trust the client to have already merged.** The frontend currently merges locally before it would push (via `importProgress`/`importHistory`), so a naive "last write wins" `push` might be fine for a single device at a time — but it's worth actually deciding this once multi-device usage is a real scenario, not assuming it forever because it wasn't a problem on day one.
+ **Whether `push` should merge server-side or trust the client to have already merged.** The frontend currently merges remote data into local state during pull; push is not wired yet. Define server-side conflict handling separately.
 - **What `accountMode: 'account'` should mean.** Right now it's set the moment someone clicks a Welcome card, before any real auth happens. Whatever auth flow gets built (email confirmation, magic link, social login, whatever) will have its own natural point where "this is now a real account" becomes true — that's worth locating rather than keeping the current optimistic-set-immediately behavior by default.
 - **Token storage and refresh.** Most auth SDKs (Amplify's included) handle this internally — worth checking what the chosen SDK already does before building anything custom in a store.
 - **Sign-out.** Doesn't exist anywhere yet — no button, no function, no state reset. Needed before any of this ships, however it ends up being built.
