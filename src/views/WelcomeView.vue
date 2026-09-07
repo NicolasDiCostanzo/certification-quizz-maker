@@ -1,9 +1,19 @@
 <script setup lang="ts">
+  import { useRouter } from 'vue-router';
   import WelcomeCard from '../components/WelcomeCard.vue';
 import { useAccount } from '../composables/useAccount';
 import { texts } from '../texts/en';
 
-  const { createAccount, signIn, continueLocal } = useAccount()
+  const router = useRouter();
+  const { continueLocal } = useAccount()
+
+  function openSignIn() {
+    router.push({ name: 'auth', query: { mode: 'signin' } })
+  }
+
+  function openSignUp() {
+    router.push({ name: 'auth', query: { mode: 'signup' } })
+  }
 </script>
 
 <template>
@@ -11,9 +21,9 @@ import { texts } from '../texts/en';
     <h1>{{ texts.appTitle }}</h1>
     <div class="welcome__options">
       <WelcomeCard :title="texts.welcomeExistingAccount" :description="texts.welcomeExistingAccountDesc"
-        :cta-label="texts.welcomeExistingAccountCta" @select="signIn" />
+        :cta-label="texts.welcomeExistingAccountCta" @select="openSignIn" />
       <WelcomeCard :title="texts.welcomeNewAccount" :description="texts.welcomeNewAccountDesc"
-        :cta-label="texts.welcomeNewAccountCta" @select="createAccount" />
+        :cta-label="texts.welcomeNewAccountCta" @select="openSignUp" />
       <WelcomeCard variant="warning" :title="texts.welcomeNoAccount" :description="texts.welcomeNoAccountDesc"
         :cta-label="texts.welcomeNoAccountCta" @select="continueLocal" />
     </div>
