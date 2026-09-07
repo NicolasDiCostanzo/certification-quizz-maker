@@ -17,6 +17,10 @@ dist-ssr
 .env.*
 !.env.example
 
+# AWS SAM
+.aws-sam/
+samconfig.toml
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
