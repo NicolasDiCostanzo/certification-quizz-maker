@@ -153,6 +153,21 @@ describe('useAccount session ends', () => {
     expect(pushRoute).toHaveBeenCalledWith({ name: 'welcome' })
   })
 
+  it('a failed server sign-out still clears the local account and returns to the welcome screen', async () => {
+    vi.mocked(auth.signOut).mockRejectedValue(new Error('network down'))
+    const accountStore = useUserAccountStore()
+    accountStore.user = USER
+    accountStore.accountMode = 'account'
+
+    const { signOut, syncError } = useAccount()
+    await signOut()
+
+    expect(syncError.value).toBe(texts.syncFailed)
+    expect(accountStore.user).toBeNull()
+    expect(accountStore.accountMode).toBeNull()
+    expect(pushRoute).toHaveBeenCalledWith({ name: 'welcome' })
+  })
+
   it('continuing locally never syncs and opens the cert selector', async () => {
     await useAccount().continueLocal()
 

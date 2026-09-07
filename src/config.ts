@@ -16,3 +16,7 @@ export const awsConfig: AwsConfig = {
   userPoolClientId: readEnv('VITE_COGNITO_CLIENT_ID'),
   syncApiUrl: readEnv('VITE_SYNC_API_URL'),
 }
+
+export function isAuthConfigured(): boolean {
+  return awsConfig.userPoolId !== undefined && awsConfig.userPoolClientId !== undefined
+}

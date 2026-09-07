@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+import { isAuthConfigured } from '../config'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { useQuizSessionStore } from '../stores/quizSession'
 import { useUserAccountStore } from '../stores/userAccount'
@@ -35,6 +36,12 @@ router.beforeEach((to) => {
   const certCode = to.params.certCode
   if (typeof certCode === 'string' && !getCert(certCode)) {
     return { name: 'cert-selector' }
+  }
+})
+
+router.beforeEach((to) => {
+  if (to.name === 'auth' && !isAuthConfigured()) {
+    return { name: 'welcome' }
   }
 })
 

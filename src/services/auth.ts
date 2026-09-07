@@ -24,6 +24,26 @@ export async function signIn(email: string, password: string): Promise<AuthUser>
   return { userId, email: attributes.email ?? null }
 }
 
+export async function configureAuth(userPoolId: string, userPoolClientId: string): Promise<boolean> {
+  try {
+    const { Amplify } = await import('aws-amplify')
+    Amplify.configure({ Auth: { Cognito: { userPoolId, userPoolClientId } } })
+    return true
+  } catch {
+    return false
+  }
+}
+
+export async function checkSessionStatus(): Promise<'valid' | 'invalid' | 'unknown'> {
+  try {
+    const { fetchAuthSession } = await import('aws-amplify/auth')
+    const { tokens } = await fetchAuthSession()
+    return tokens ? 'valid' : 'invalid'
+  } catch {
+    return navigator.onLine ? 'invalid' : 'unknown'
+  }
+}
+
 export async function signOut(): Promise<void> {
   const { signOut: amplifySignOut } = await import('aws-amplify/auth')
   await amplifySignOut()

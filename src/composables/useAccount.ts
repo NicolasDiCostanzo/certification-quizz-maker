@@ -62,7 +62,11 @@ export function useAccount() {
   }
 
   async function signOut() {
-    await auth.signOut()
+    try {
+      await auth.signOut()
+    } catch {
+      syncError.value = texts.syncFailed
+    }
     account.user = null
     account.accountMode = null
     await router.push({ name: 'welcome' })

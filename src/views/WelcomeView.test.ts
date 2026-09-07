@@ -1,11 +1,18 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createApp } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { useUserAccountStore } from '../stores/userAccount'
+import { texts } from '../texts/en'
 import WelcomeView from './WelcomeView.vue'
+
+let authConfigured = true
+vi.mock('../config', () => ({
+  awsConfig: { region: undefined, userPoolId: undefined, userPoolClientId: undefined, syncApiUrl: undefined },
+  isAuthConfigured: () => authConfigured,
+}))
 
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
@@ -26,6 +33,7 @@ function mountWelcome() {
 }
 
 beforeEach(() => {
+  authConfigured = true
   const account = useUserAccountStore()
   account.accountMode = null
   account.user = null
@@ -51,5 +59,14 @@ describe('WelcomeView', () => {
 
     expect(useUserAccountStore().accountMode).toBe('local')
     expect(router.currentRoute.value.name).toBe('cert-selector')
+  })
+
+  it('offers only the local option when authentication is not configured', () => {
+    authConfigured = false
+    const wrapper = mountWelcome()
+
+    expect(wrapper.findAll('.btn--primary')).toHaveLength(1)
+    expect(wrapper.text()).toContain(texts.welcomeNoAccount)
+    expect(wrapper.text()).not.toContain(texts.welcomeNewAccountCta)
   })
 })

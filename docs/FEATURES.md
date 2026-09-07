@@ -55,7 +55,8 @@ Single source of truth for every feature discussed for this project, with its cu
 | Export progress as a versioned JSON file (protection against browser-data clearing) | ✅ |
 | Import progress with merge (per-question, newest `lastSeenAt` wins) | ✅ |
 | Welcome screen lets a first-time visitor choose "use an account", "sign in", or "continue locally" (`accountMode` in the `userAccount` store, via `useAccount.ts`); guest ("local") users see no further auth UI and lose no functionality | ✅ |
-| Account creation / sign-in against a real backend (Cognito + API Gateway + Lambda + DynamoDB) for cross-device sync | 🔜 Phase 2 — `useAccount.ts`'s `createAccount`/`signIn` currently only set the local `accountMode` flag and pull-merge remote data through the no-op sync adapter (marked `TODO(AWS)`); no backend call is made yet |
+| Real account sign-up / confirmation / sign-in / sign-out against a Cognito User Pool (SAM-managed, see `docs/AWS-SETUP.md`): custom `AuthView` forms, Amplify Auth client loaded lazily, `accountMode` set only after real auth, guest data pushed up on first sign-in | ✅ |
+| Cross-device data sync against a real backend (API Gateway + Lambda + DynamoDB) | 🔜 Phase 2 — the sync adapter is still the local no-op: `pull` returns nothing and `push` sends nothing, so authenticated users' data still lives in localStorage only |
 
 ## Quiz history & dashboard
 
