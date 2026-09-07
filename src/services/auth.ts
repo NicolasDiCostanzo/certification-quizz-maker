@@ -34,16 +34,6 @@ export async function configureAuth(userPoolId: string, userPoolClientId: string
   }
 }
 
-export async function checkSessionStatus(): Promise<'valid' | 'invalid' | 'unknown'> {
-  try {
-    const { fetchAuthSession } = await import('aws-amplify/auth')
-    const { tokens } = await fetchAuthSession()
-    return tokens ? 'valid' : 'invalid'
-  } catch {
-    return navigator.onLine ? 'invalid' : 'unknown'
-  }
-}
-
 export async function signOut(): Promise<void> {
   const { signOut: amplifySignOut } = await import('aws-amplify/auth')
   await amplifySignOut()
