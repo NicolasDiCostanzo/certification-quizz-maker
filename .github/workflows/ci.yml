@@ -54,6 +54,32 @@ jobs:
       - run: npm ci
       - run: npm run knip
 
+  e2e:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Authenticated e2e against the real pool
+        if: ${{ vars.E2E_AUTH_ENABLED == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        env:
+          E2E_MODE: auth
+          VITE_AWS_REGION: ${{ secrets.E2E_AWS_REGION }}
+          VITE_COGNITO_USER_POOL_ID: ${{ secrets.E2E_USER_POOL_ID }}
+          VITE_COGNITO_CLIENT_ID: ${{ secrets.E2E_CLIENT_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
+        run: npm run test:e2e
+
   build:
     runs-on: ubuntu-latest
     steps:

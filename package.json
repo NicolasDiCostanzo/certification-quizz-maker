@@ -12,6 +12,8 @@
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "npm run build && playwright test",
+    "test:e2e:ui": "npm run build && playwright test --ui",
     "prepare": "husky",
     "knip": "knip --exclude cycles --no-progress"
   },
@@ -23,6 +25,8 @@
     "vue-router": "^5.3.0"
   },
   "devDependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.1127.0",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^26.4.0",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/eslint-config-typescript": "^14.9.0",
