@@ -28,6 +28,16 @@ describe('userAccount store', () => {
 
     createTestPinia()
 
+    expect(useUserAccountStore().user).toBeNull()
     expect(useUserAccountStore().accountMode).toBe('local')
+  })
+
+  it('persists the signed-in user into a fresh Pinia instance', async () => {
+    useUserAccountStore().user = { userId: 'sub-1', email: 'dev@example.com' }
+    await nextTick()
+
+    createTestPinia()
+
+    expect(useUserAccountStore().user).toEqual({ userId: 'sub-1', email: 'dev@example.com' })
   })
 })

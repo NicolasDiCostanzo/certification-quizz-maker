@@ -113,6 +113,11 @@ export interface QuizSessionState {
   result?: ScoreResult
 }
 
+export interface AuthUser {
+  userId: string
+  email: string | null
+}
+
 export interface QuizHistoryEntry {
   id: string
   certCode: string

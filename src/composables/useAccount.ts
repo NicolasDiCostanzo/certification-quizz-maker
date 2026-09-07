@@ -1,9 +1,12 @@
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import * as auth from '../services/auth'
 import { getSyncAdapter } from '../services/remoteSync'
+import { texts } from '../texts/en'
 import { useQuizHistoryStore } from '../stores/quizHistory'
 import { useUserAccountStore } from '../stores/userAccount'
 import { useUserProgressStore } from '../stores/userProgress'
-import type { AccountMode } from '../types'
+import type { AuthUser } from '../types'
 
 export function useAccount() {
   const router = useRouter()
@@ -11,34 +14,68 @@ export function useAccount() {
   const progressStore = useUserProgressStore()
   const historyStore = useQuizHistoryStore()
   const sync = getSyncAdapter()
+  const syncError = ref<string | null>(null)
 
-  async function chooseAccountMode(mode: AccountMode) {
-    account.accountMode = mode
+  async function pullRemoteData() {
+    try {
+      const payload = await sync.pull()
+      if (!payload) return
+      progressStore.importProgress(payload.progress)
+      historyStore.importHistory(payload.history)
+    } catch {
+      syncError.value = texts.syncFailed
+    }
+  }
+
+  async function pushLocalData() {
+    try {
+      await sync.push({
+        progress: progressStore.exportProgress(),
+        history: historyStore.exportHistory(),
+      })
+    } catch {
+      syncError.value = texts.syncFailed
+    }
+  }
+
+  async function completeAuthentication(user: AuthUser) {
+    account.user = user
+    account.accountMode = 'account'
+    await pullRemoteData()
+    await pushLocalData()
     await router.push({ name: 'cert-selector' })
   }
 
-  async function pullRemoteData() {
-    const payload = await sync.pull()
-    if (!payload) return
-    progressStore.importProgress(payload.progress)
-    historyStore.importHistory(payload.history)
+  async function signUp(email: string, password: string): Promise<boolean> {
+    return auth.signUp(email, password)
   }
 
-  async function createAccount() {
-    // TODO(AWS): create the account on the backend, then push local progress/history to it.
-    await chooseAccountMode('account')
-    await pullRemoteData()
+  async function confirmSignUp(email: string, code: string, password: string) {
+    await auth.confirmSignUp(email, code)
+    const user = await auth.signIn(email, password)
+    await completeAuthentication(user)
   }
 
-  async function signIn() {
-    // TODO(AWS): sign in on the backend.
-    await chooseAccountMode('account')
-    await pullRemoteData()
+  async function signIn(email: string, password: string) {
+    const user = await auth.signIn(email, password)
+    await completeAuthentication(user)
+  }
+
+  async function signOut() {
+    try {
+      await auth.signOut()
+    } catch {
+      syncError.value = texts.syncFailed
+    }
+    account.user = null
+    account.accountMode = null
+    await router.push({ name: 'welcome' })
   }
 
   async function continueLocal() {
-    await chooseAccountMode('local')
+    account.accountMode = 'local'
+    await router.push({ name: 'cert-selector' })
   }
 
-  return { createAccount, signIn, continueLocal }
+  return { signUp, confirmSignUp, signIn, signOut, continueLocal, syncError }
 }
