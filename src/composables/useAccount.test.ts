@@ -257,6 +257,25 @@ describe('useAccount guest migration', () => {
     expect(useUserAccountStore().guestProgress).not.toBeNull()
     expect(adapter.push).not.toHaveBeenCalled()
   })
+
+  it('a failed push during migration keeps the guest snapshot so sign-out can restore the guest data', async () => {
+    seedDeviceData()
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    adapter.pull.mockResolvedValue(makePayload())
+    adapter.push.mockRejectedValue(new Error('offline'))
+
+    const { signIn, signOut, syncError } = useAccount()
+    await signIn('dev@example.com', 'Passw0rd!', { migrateGuest: true })
+
+    expect(syncError.value).toBe(texts.syncFailed)
+    expect(useUserAccountStore().guestProgress).not.toBeNull()
+
+    await signOut()
+
+    expect(useUserProgressStore().byExamCode['DVA-C02']?.qDev?.attempts).toBe(3)
+    expect(useUserProgressStore().byExamCode['DVA-C02']?.q1).toBeUndefined()
+    expect(useQuizHistoryStore().entries.map((e) => e.id)).toEqual(['hDev'])
+  })
 })
 
 describe('useAccount session ends', () => {

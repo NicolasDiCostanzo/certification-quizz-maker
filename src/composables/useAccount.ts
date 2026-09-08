@@ -67,7 +67,6 @@ export function useAccount() {
     }
     if (remote?.progress) progressStore.importProgress(remote.progress)
     if (remote?.history) historyStore.importHistory(remote.history)
-    account.takeGuestSnapshot()
     try {
       await sync.push({
         progress: progressStore.exportProgress(),
@@ -75,7 +74,9 @@ export function useAccount() {
       })
     } catch {
       syncError.value = texts.syncFailed
+      return
     }
+    account.takeGuestSnapshot()
   }
 
   async function completeAuthentication(user: AuthUser, options: { migrateGuest?: boolean } = {}) {
