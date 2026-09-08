@@ -67,11 +67,15 @@ describe('WelcomeView', () => {
 
   it('offers only the local option when authentication is not configured', () => {
     authConfigured = false
+    useUserProgressStore().byExamCode['DVA-C02'] = {
+      q1: { questionId: 'q1', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 },
+    }
     const wrapper = mountWelcome()
 
     expect(wrapper.findAll('.btn--primary')).toHaveLength(1)
     expect(wrapper.text()).toContain(texts.welcomeNoAccount)
     expect(wrapper.text()).not.toContain(texts.welcomeNewAccountCta)
+    expect(wrapper.text()).not.toContain(texts.welcomeUploadDataCta)
   })
 
   it('offers the upload option only when the device has local data, and routes to auth with the upload flag', async () => {

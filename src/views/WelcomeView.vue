@@ -42,8 +42,8 @@ import { texts } from '../texts/en';
       </template>
       <WelcomeCard variant="warning" :title="texts.welcomeNoAccount" :description="texts.welcomeNoAccountDesc"
         :cta-label="texts.welcomeNoAccountCta" @select="continueLocal" />
-      <WelcomeCard v-if="hasLocalData" :title="texts.welcomeUploadData" :description="texts.welcomeUploadDataDesc"
-        :cta-label="texts.welcomeUploadDataCta" @select="openUpload" />
+      <WelcomeCard v-if="authAvailable && hasLocalData" :title="texts.welcomeUploadData"
+        :description="texts.welcomeUploadDataDesc" :cta-label="texts.welcomeUploadDataCta" @select="openUpload" />
     </div>
   </section>
 </template>
