@@ -17,7 +17,25 @@ export const handler = async (event: {
   const userId = event.requestContext?.authorizer?.jwt?.claims?.sub
   if (!userId) return { statusCode: 401, headers: { 'Content-Type': 'application/json' }, body: '' }
 
-  const payload = (event.body ? JSON.parse(event.body) : {}) as SyncPayload
+  let payload: SyncPayload
+  try {
+    const parsed: unknown = event.body ? JSON.parse(event.body) : {}
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: 'Invalid request body' }),
+      }
+    }
+    payload = parsed as SyncPayload
+  } catch {
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Invalid JSON body' }),
+    }
+  }
+
   const now = new Date().toISOString()
 
   if (payload.progress) {

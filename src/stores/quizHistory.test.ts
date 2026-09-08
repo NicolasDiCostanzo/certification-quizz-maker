@@ -110,5 +110,8 @@ describe('quizHistory store', () => {
     expect(store.entries.map((e) => e.id)).toEqual(['e2', 'e3'])
     incoming.push(makeEntry({ id: 'e4' }))
     expect(store.entries.map((e) => e.id)).toEqual(['e2', 'e3'])
+
+    incoming[0].answers.q1.correct = false
+    expect(store.entries.find((e) => e.id === 'e2')?.answers.q1.correct).toBe(true)
   })
 })
