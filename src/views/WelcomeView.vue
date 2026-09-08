@@ -1,13 +1,21 @@
 <script setup lang="ts">
+  import { computed } from 'vue';
   import { useRouter } from 'vue-router';
   import { isAuthConfigured } from '../config';
   import WelcomeCard from '../components/WelcomeCard.vue';
 import { useAccount } from '../composables/useAccount';
+import { useQuizHistoryStore } from '../stores/quizHistory';
+import { useUserProgressStore } from '../stores/userProgress';
 import { texts } from '../texts/en';
 
   const router = useRouter();
   const { continueLocal } = useAccount()
   const authAvailable = isAuthConfigured()
+  const historyStore = useQuizHistoryStore();
+  const progressStore = useUserProgressStore();
+  const hasLocalData = computed(
+    () => historyStore.entries.length > 0 || Object.keys(progressStore.byExamCode).length > 0,
+  )
 
   function openSignIn() {
     router.push({ name: 'auth', query: { mode: 'signin' } })
@@ -15,6 +23,10 @@ import { texts } from '../texts/en';
 
   function openSignUp() {
     router.push({ name: 'auth', query: { mode: 'signup' } })
+  }
+
+  function openUpload() {
+    router.push({ name: 'auth', query: { mode: 'signin', upload: '1' } })
   }
 </script>
 
@@ -30,6 +42,8 @@ import { texts } from '../texts/en';
       </template>
       <WelcomeCard variant="warning" :title="texts.welcomeNoAccount" :description="texts.welcomeNoAccountDesc"
         :cta-label="texts.welcomeNoAccountCta" @select="continueLocal" />
+      <WelcomeCard v-if="hasLocalData" :title="texts.welcomeUploadData" :description="texts.welcomeUploadDataDesc"
+        :cta-label="texts.welcomeUploadDataCta" @select="openUpload" />
     </div>
   </section>
 </template>

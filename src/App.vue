@@ -1,25 +1,43 @@
 <script setup lang="ts">
-import { useThemeMode } from './composables/useThemeMode'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import SecondaryButton from './components/SecondaryButton.vue'
+import SyncBanner from './components/SyncBanner.vue'
 import IconMoon from './components/icons/IconMoon.vue'
 import IconSun from './components/icons/IconSun.vue'
 import { useAccount } from './composables/useAccount'
-import { texts } from './texts/en'
+import { syncError } from './composables/useSync'
+import { useThemeMode } from './composables/useThemeMode'
 import { useUserAccountStore } from './stores/userAccount'
+import { texts } from './texts/en'
 
+const router = useRouter()
 const preferences = useThemeMode()
 const account = useUserAccountStore()
 const { signOut } = useAccount()
+
+const titleTarget = computed(() => (account.accountMode ? '/' : '/welcome'))
+
+function goToWelcome() {
+  router.push('/welcome')
+}
+
+function dismissSyncError() {
+  syncError.value = null
+}
 </script>
 
 <template>
   <header class="app-header">
-    <RouterLink to="/" class="app-title">{{ texts.appTitle }}</RouterLink>
+    <RouterLink :to="titleTarget" class="app-title">{{ texts.appTitle }}</RouterLink>
     <div class="app-header__actions">
       <div v-if="account.user" class="account-chip">
         <span class="account-chip__email">{{ account.user.email ?? account.user.userId }}</span>
         <SecondaryButton size="sm" @click="signOut">{{ texts.signOut }}</SecondaryButton>
       </div>
+      <SecondaryButton v-else-if="account.accountMode === 'local'" size="sm" @click="goToWelcome">
+        {{ texts.signIn }}
+      </SecondaryButton>
       <button
         type="button"
         class="theme-switch"
@@ -34,6 +52,7 @@ const { signOut } = useAccount()
       </button>
     </div>
   </header>
+    <SyncBanner v-if="syncError" :message="syncError" @dismiss="dismissSyncError" />
   <main>
     <RouterView v-slot="{ Component, route }">
       <Transition name="page" mode="out-in">

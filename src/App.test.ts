@@ -1,8 +1,10 @@
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import App from './App.vue'
 import { router } from './router'
+import { texts } from './texts/en'
+import { useUserAccountStore } from './stores/userAccount'
 import { useUserPreferencesStore } from './stores/userPreferences'
 
 beforeEach(() => {
@@ -39,5 +41,47 @@ describe('theme mode toggle', () => {
     expect(store.dark).toBe(false)
     expect(document.documentElement.dataset.theme).toBe('light')
     expect(wrapper.find('.theme-switch').attributes('aria-checked')).toBe('false')
+  })
+})
+
+describe('app title link', () => {
+  it('points to the cert selector when a session is active', () => {
+    useUserAccountStore().accountMode = 'account'
+    wrapper = mount(App, { global: { plugins: [router] } })
+
+    expect(wrapper.find('.app-title').attributes('href')).toBe('#/')
+  })
+
+  it('points to the cert selector in local mode too', () => {
+    useUserAccountStore().accountMode = 'local'
+    wrapper = mount(App, { global: { plugins: [router] } })
+
+    expect(wrapper.find('.app-title').attributes('href')).toBe('#/')
+  })
+
+  it('points to the welcome page when no session is active', () => {
+    useUserAccountStore().accountMode = null
+    wrapper = mount(App, { global: { plugins: [router] } })
+
+    expect(wrapper.find('.app-title').attributes('href')).toBe('#/welcome')
+  })
+
+  it('offers a way back to the welcome page in local mode', async () => {
+    useUserAccountStore().accountMode = 'local'
+    wrapper = mount(App, { global: { plugins: [router] } })
+
+    await wrapper.findAll('button').find((b) => b.text() === texts.signIn)!.trigger('click')
+    await flushPromises()
+
+    expect(router.currentRoute.value.path).toBe('/welcome')
+  })
+
+  it('hides the sign-in shortcut for a signed-in account', () => {
+    const account = useUserAccountStore()
+    account.accountMode = 'account'
+    account.user = { userId: 'sub-1', email: 'dev@example.com' }
+    wrapper = mount(App, { global: { plugins: [router] } })
+
+    expect(wrapper.findAll('button').some((b) => b.text() === texts.signIn)).toBe(false)
   })
 })

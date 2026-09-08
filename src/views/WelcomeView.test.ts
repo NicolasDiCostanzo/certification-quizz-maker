@@ -4,7 +4,9 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createApp } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
+import { useQuizHistoryStore } from '../stores/quizHistory'
 import { useUserAccountStore } from '../stores/userAccount'
+import { useUserProgressStore } from '../stores/userProgress'
 import { texts } from '../texts/en'
 import WelcomeView from './WelcomeView.vue'
 
@@ -37,6 +39,8 @@ beforeEach(() => {
   const account = useUserAccountStore()
   account.accountMode = null
   account.user = null
+  useUserProgressStore().replaceAll({})
+  useQuizHistoryStore().replaceAll([])
 })
 
 describe('WelcomeView', () => {
@@ -68,5 +72,26 @@ describe('WelcomeView', () => {
     expect(wrapper.findAll('.btn--primary')).toHaveLength(1)
     expect(wrapper.text()).toContain(texts.welcomeNoAccount)
     expect(wrapper.text()).not.toContain(texts.welcomeNewAccountCta)
+  })
+
+  it('offers the upload option only when the device has local data, and routes to auth with the upload flag', async () => {
+    useUserProgressStore().byExamCode['DVA-C02'] = {
+      q1: { questionId: 'q1', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 },
+    }
+    const wrapper = mountWelcome()
+
+    expect(wrapper.text()).toContain(texts.welcomeUploadDataCta)
+
+    await wrapper.findAll('.btn--primary')[3].trigger('click')
+    await flushPromises()
+
+    expect(router.currentRoute.value.name).toBe('auth')
+    expect(router.currentRoute.value.query.upload).toBe('1')
+  })
+
+  it('hides the upload option when the device has no local data', () => {
+    const wrapper = mountWelcome()
+
+    expect(wrapper.text()).not.toContain(texts.welcomeUploadDataCta)
   })
 })

@@ -75,7 +75,7 @@ describe('AuthView', () => {
     await wrapper.find('form').trigger('submit')
     await flushPromises()
 
-    expect(confirmSignUp).toHaveBeenCalledWith('dev@example.com', '123456', 'Passw0rd!')
+    expect(confirmSignUp).toHaveBeenCalledWith('dev@example.com', '123456', 'Passw0rd!', { migrateGuest: false })
   })
 
   it('a sign-up that completes without confirmation goes straight to sign-in', async () => {
@@ -85,7 +85,17 @@ describe('AuthView', () => {
 
     await fillAndSubmit('dev@example.com', 'Passw0rd!')
 
-    expect(signIn).toHaveBeenCalledWith('dev@example.com', 'Passw0rd!')
+    expect(signIn).toHaveBeenCalledWith('dev@example.com', 'Passw0rd!', { migrateGuest: false })
+  })
+
+  it('the upload flag requests guest migration after authentication', async () => {
+    query = { upload: '1' }
+    signIn.mockResolvedValue({ userId: 'sub-1', email: 'dev@example.com' })
+
+    const wrapper = await fillAndSubmit('dev@example.com', 'Passw0rd!')
+
+    expect(signIn).toHaveBeenCalledWith('dev@example.com', 'Passw0rd!', { migrateGuest: true })
+    expect(wrapper.text()).toContain(texts.authUploadHint)
   })
 
   it('a failed sign-in surfaces the error message', async () => {
