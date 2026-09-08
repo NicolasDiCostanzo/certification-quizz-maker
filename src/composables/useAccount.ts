@@ -2,17 +2,20 @@ import { useRouter } from 'vue-router'
 import * as auth from '../services/auth'
 import type { RemoteSyncPayload } from '../services/remoteSync'
 import { getSyncAdapter } from '../services/remoteSync'
-import { syncError } from './useSync'
-import { texts } from '../texts/en'
 import { useQuizHistoryStore } from '../stores/quizHistory'
 import { useUserAccountStore } from '../stores/userAccount'
 import { useUserProgressStore } from '../stores/userProgress'
+import { texts } from '../texts/en'
 import type { AuthUser } from '../types'
+import { syncError } from './useSync'
 
 const PROGRESS_FORMAT = 'quiz-progress'
 const PROGRESS_VERSION = 1
 const HISTORY_FORMAT = 'quiz-history'
 const HISTORY_VERSION = 1
+
+let syncSession: symbol | null = null
+let pendingPush: Promise<void> = Promise.resolve()
 
 export function useAccount() {
   const router = useRouter()
@@ -47,11 +50,21 @@ export function useAccount() {
 
   async function pushLocalData() {
     if (account.accountMode !== 'account') return
-    try {
-      await sync.push({
-        progress: progressStore.exportProgress(),
-        history: historyStore.exportHistory(),
+    const session = syncSession
+    if (session === null) return
+    const payload = {
+      progress: progressStore.exportProgress(),
+      history: historyStore.exportHistory(),
+    }
+    const next = pendingPush
+      .catch(() => undefined)
+      .then(() => {
+        if (syncSession !== session) return
+        return sync.push(payload)
       })
+    pendingPush = next
+    try {
+      await next
     } catch {
       syncError.value = texts.syncFailed
     }
@@ -91,6 +104,7 @@ export function useAccount() {
     } else {
       await loadAccountData()
     }
+    syncSession = Symbol()
     await router.push({ name: 'cert-selector' })
   }
 
@@ -115,6 +129,10 @@ export function useAccount() {
     } catch {
       syncError.value = texts.syncFailed
     }
+    syncSession = null
+    const drain = pendingPush.catch(() => undefined)
+    const timeout = new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), 2000))
+    await Promise.race([drain, timeout])
     const guest = account.takeGuestSnapshot()
     if (guest.progress) {
       progressStore.replaceAll(guest.progress.byExamCode)

@@ -109,7 +109,7 @@ The password policy is the floor (6 characters, no composition rules) on purpose
 
 **$0** for this project's usage, with one honest caveat:
 
-- Cognito free tier covers tens of thousands of monthly active users — a personal study tool uses a rounding error of that.
+- Cognito's Lite tier includes **10,000 free monthly active users** for new user pools (user pools created on or before November 22, 2024 at 10:00 a.m. Pacific Time keep their legacy free tier instead) — a personal study tool uses a rounding error of that.
 - DynamoDB always-free tier: 25 GB of storage. The table uses on-demand (**PAY_PER_REQUEST**) billing, where reads and writes are billed per request rather than through capacity units — at personal-study usage this is pennies-to-zero, but it is not strictly $0 like the storage allowance.
 - Lambda: 1M requests + 400,000 GB-seconds always-free.
 - API Gateway HTTP API: 1M requests/month free for the **first 12 months only** — after that ~$1/million requests, which at personal usage is pennies-to-zero.

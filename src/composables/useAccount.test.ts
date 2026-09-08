@@ -278,6 +278,77 @@ describe('useAccount guest migration', () => {
   })
 })
 
+describe('useAccount push serialization', () => {
+  it('serializes concurrent pushes so the newest state is the last one written remotely', async () => {
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    adapter.pull.mockResolvedValue(null)
+    adapter.push.mockResolvedValue(undefined)
+
+    const { signIn, pushLocalData } = useAccount()
+    await signIn('dev@example.com', 'Passw0rd!')
+
+    let releaseFirst!: () => void
+    const blockedFirst = new Promise<void>((resolve) => {
+      releaseFirst = resolve
+    })
+    adapter.push.mockImplementationOnce(() => blockedFirst)
+
+    const firstCall = pushLocalData()
+    useUserProgressStore().recordAnswer('DVA-C02', 'qNew', true)
+    const secondCall = pushLocalData()
+
+    releaseFirst()
+    await Promise.all([firstCall, secondCall])
+
+    expect(adapter.push).toHaveBeenCalledTimes(2)
+    expect(adapter.push.mock.calls[0][0].progress.byExamCode['DVA-C02']?.qNew).toBeUndefined()
+    expect(adapter.push.mock.calls[1][0].progress.byExamCode['DVA-C02']?.qNew).toBeDefined()
+  })
+
+  it('a failing push does not poison the queue for the next push', async () => {
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    adapter.pull.mockResolvedValue(null)
+    adapter.push.mockRejectedValueOnce(new Error('offline')).mockResolvedValue(undefined)
+
+    const { signIn, pushLocalData, syncError } = useAccount()
+    await signIn('dev@example.com', 'Passw0rd!')
+
+    await pushLocalData()
+    expect(syncError.value).toBe(texts.syncFailed)
+
+    useUserProgressStore().recordAnswer('DVA-C02', 'q1', true)
+    await pushLocalData()
+    expect(adapter.push).toHaveBeenCalledTimes(2)
+  })
+
+  it('queued pushes never run after sign-out and are not sent under the next account', async () => {
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    const userB: AuthUser = { userId: 'sub-2', email: 'other@example.com' }
+    vi.mocked(auth.signOut).mockResolvedValue(undefined)
+    adapter.pull.mockResolvedValue(null)
+    adapter.push.mockResolvedValue(undefined)
+
+    const { signIn, signOut, pushLocalData } = useAccount()
+    await signIn('dev@example.com', 'Passw0rd!')
+
+    adapter.push.mockRejectedValueOnce(new Error('offline'))
+    await pushLocalData()
+
+    void pushLocalData()
+    await Promise.resolve()
+
+    await signOut()
+
+    vi.mocked(auth.signIn).mockResolvedValue(userB)
+    await signIn('other@example.com', 'Passw0rd!')
+
+    await new Promise((resolve) => setTimeout(resolve, 25))
+    await new Promise((resolve) => setTimeout(resolve, 25))
+
+    expect(adapter.push).toHaveBeenCalledTimes(2)
+  })
+})
+
 describe('useAccount session ends', () => {
   it('signing out restores the guest snapshot captured at sign-in', async () => {
     seedDeviceData()

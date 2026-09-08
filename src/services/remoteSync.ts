@@ -19,14 +19,9 @@ const localOnlySyncAdapter: RemoteSyncAdapter = {
 }
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
-  try {
-    const { fetchAuthSession } = await import('aws-amplify/auth')
-    const { tokens } = await fetchAuthSession()
-    const token = tokens?.accessToken?.toString()
-    return token ? { Authorization: `Bearer ${token}` } : {}
-  } catch {
-    return {}
-  }
+  const { fetchAuthSession } = await import('aws-amplify/auth')
+  const { tokens } = await fetchAuthSession()
+  return tokens?.accessToken ? { Authorization: `Bearer ${tokens.accessToken.toString()}` } : {}
 }
 
 function createRemoteSyncAdapter(apiUrl: string): RemoteSyncAdapter {
