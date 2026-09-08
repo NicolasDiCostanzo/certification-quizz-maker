@@ -76,6 +76,10 @@ export const useUserProgressStore = defineStore('userProgress', {
     resetAll() {
       this.byExamCode = {}
     },
+
+    replaceAll(next: UserProgress['byExamCode']) {
+      this.byExamCode = JSON.parse(JSON.stringify(next)) as UserProgress['byExamCode']
+    },
   },
 
   persist: true,

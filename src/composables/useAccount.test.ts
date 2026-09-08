@@ -7,6 +7,7 @@ import { useRouter } from 'vue-router'
 import * as auth from '../services/auth'
 import type { RemoteSyncPayload } from '../services/remoteSync'
 import { texts } from '../texts/en'
+import { useQuizHistoryStore } from '../stores/quizHistory'
 import { useUserAccountStore } from '../stores/userAccount'
 import { useUserProgressStore } from '../stores/userProgress'
 import type { AuthUser } from '../types'
@@ -33,6 +34,18 @@ const pushRoute = useRouter().push as Mock
 
 const USER: AuthUser = { userId: 'sub-1', email: 'dev@example.com' }
 
+const historyEntry = {
+  id: 'h1',
+  certCode: 'DVA-C02',
+  mode: 'preparation' as const,
+  startedAt: 1,
+  finishedAt: 2,
+  questionIds: ['q1'],
+  answers: {},
+  flags: [],
+  result: { percentCorrect: 100, passed: true, timesCorrect: 1, totalAnswered: 1 },
+}
+
 function makePayload(): RemoteSyncPayload {
   const exportedAt = new Date().toISOString()
   return {
@@ -44,8 +57,27 @@ function makePayload(): RemoteSyncPayload {
         'DVA-C02': { q1: { questionId: 'q1', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 } },
       },
     },
-    history: { format: 'quiz-history', version: 1, exportedAt, entries: [] },
+    history: { format: 'quiz-history', version: 1, exportedAt, entries: [historyEntry] },
   }
+}
+
+function seedDeviceData() {
+  const progressStore = useUserProgressStore()
+  progressStore.byExamCode['DVA-C02'] = {
+    qDev: { questionId: 'qDev', attempts: 3, timesCorrect: 1, timesWrong: 2, flagged: true, lastSeenAt: 999 },
+  }
+  const historyStore = useQuizHistoryStore()
+  historyStore.entries.push({
+    id: 'hDev',
+    certCode: 'DVA-C02',
+    mode: 'exam',
+    startedAt: 10,
+    finishedAt: 20,
+    questionIds: ['qDev'],
+    answers: {},
+    flags: ['qDev'],
+    result: { percentCorrect: 0, passed: false, timesCorrect: 0, totalAnswered: 1 },
+  })
 }
 
 beforeEach(() => {
@@ -59,10 +91,10 @@ beforeEach(() => {
 })
 
 describe('useAccount sign-in', () => {
-  it('stores the user, switches to account mode, merges pulled data, pushes local data up and opens the cert selector', async () => {
+  it('replaces device data with the account data pulled from the backend and never pushes at sign-in', async () => {
+    seedDeviceData()
     vi.mocked(auth.signIn).mockResolvedValue(USER)
     adapter.pull.mockResolvedValue(makePayload())
-    adapter.push.mockResolvedValue(undefined)
 
     await useAccount().signIn('dev@example.com', 'Passw0rd!')
 
@@ -70,13 +102,15 @@ describe('useAccount sign-in', () => {
     expect(account.user).toEqual(USER)
     expect(account.accountMode).toBe('account')
     expect(adapter.pull).toHaveBeenCalledOnce()
-    expect(adapter.push).toHaveBeenCalledWith(
-      expect.objectContaining({
-        progress: expect.objectContaining({ format: 'quiz-progress' }),
-        history: expect.objectContaining({ format: 'quiz-history' }),
-      }),
-    )
-    expect(useUserProgressStore().byExamCode['DVA-C02']?.q1?.attempts).toBe(1)
+    expect(adapter.push).not.toHaveBeenCalled()
+
+    const progressStore = useUserProgressStore()
+    expect(progressStore.byExamCode['DVA-C02']?.q1?.attempts).toBe(1)
+    expect(progressStore.byExamCode['DVA-C02']?.qDev).toBeUndefined()
+    expect(useQuizHistoryStore().entries).toEqual([historyEntry])
+
+    expect(account.guestProgress).not.toBeNull()
+    expect(account.guestHistory?.entries.map((e) => e.id)).toEqual(['hDev'])
     expect(pushRoute).toHaveBeenCalledWith({ name: 'cert-selector' })
   })
 
@@ -90,7 +124,8 @@ describe('useAccount sign-in', () => {
     expect(pushRoute).not.toHaveBeenCalled()
   })
 
-  it('a failing pull is reported through syncError without blocking sign-in', async () => {
+  it('a failing pull clears the stores and reports syncError without blocking sign-in', async () => {
+    seedDeviceData()
     vi.mocked(auth.signIn).mockResolvedValue(USER)
     adapter.pull.mockRejectedValue(new Error('offline'))
 
@@ -99,19 +134,49 @@ describe('useAccount sign-in', () => {
 
     expect(syncError.value).toBe(texts.syncFailed)
     expect(useUserAccountStore().accountMode).toBe('account')
+    expect(useUserProgressStore().byExamCode).toEqual({})
+    expect(useQuizHistoryStore().entries).toEqual([])
     expect(pushRoute).toHaveBeenCalledWith({ name: 'cert-selector' })
   })
 
-  it('a failing push is reported through syncError without blocking sign-in', async () => {
+  it('signing in while already signed in does not overwrite the guest snapshot', async () => {
+    seedDeviceData()
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    adapter.pull.mockResolvedValue(makePayload())
+    const { signIn } = useAccount()
+    await signIn('dev@example.com', 'Passw0rd!')
+
+    const progressStore = useUserProgressStore()
+    progressStore.byExamCode['DVA-C02'] = {
+      qAccount: { questionId: 'qAccount', attempts: 1, timesCorrect: 0, timesWrong: 1, flagged: false, lastSeenAt: 50 },
+    }
+    await signIn('dev@example.com', 'Passw0rd!')
+
+    const account = useUserAccountStore()
+    expect(account.guestProgress?.byExamCode['DVA-C02']?.qDev).toBeDefined()
+    expect(account.guestProgress?.byExamCode['DVA-C02']?.qAccount).toBeUndefined()
+  })
+
+  it('a failing push is reported through syncError', async () => {
     vi.mocked(auth.signIn).mockResolvedValue(USER)
     adapter.pull.mockResolvedValue(null)
     adapter.push.mockRejectedValue(new Error('offline'))
 
-    const { signIn, syncError } = useAccount()
+    const { signIn, pushLocalData, syncError } = useAccount()
     await signIn('dev@example.com', 'Passw0rd!')
+    await pushLocalData()
 
     expect(syncError.value).toBe(texts.syncFailed)
     expect(useUserAccountStore().accountMode).toBe('account')
+  })
+
+  it('push is a no-op when not signed in to an account', async () => {
+    await useAccount().continueLocal()
+    seedDeviceData()
+
+    await useAccount().pushLocalData()
+
+    expect(adapter.push).not.toHaveBeenCalled()
   })
 })
 
@@ -138,7 +203,94 @@ describe('useAccount sign-up', () => {
   })
 })
 
+describe('useAccount guest migration', () => {
+  it('upload merges guest and remote data, pushes the union and discards the guest snapshot', async () => {
+    seedDeviceData()
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    adapter.pull.mockResolvedValue(makePayload())
+    adapter.push.mockResolvedValue(undefined)
+
+    await useAccount().signIn('dev@example.com', 'Passw0rd!', { migrateGuest: true })
+
+    const progressStore = useUserProgressStore()
+    expect(progressStore.byExamCode['DVA-C02']?.qDev?.attempts).toBe(3)
+    expect(progressStore.byExamCode['DVA-C02']?.q1?.attempts).toBe(1)
+    expect(useQuizHistoryStore().entries.map((e) => e.id).sort()).toEqual(['h1', 'hDev'])
+    expect(adapter.push).toHaveBeenCalledOnce()
+    expect(useUserAccountStore().guestProgress).toBeNull()
+  })
+
+  it('migration keeps the newest lastSeenAt version of a question present on both sides', async () => {
+    const progressStore = useUserProgressStore()
+    progressStore.byExamCode['DVA-C02'] = {
+      q1: { questionId: 'q1', attempts: 3, timesCorrect: 1, timesWrong: 2, flagged: true, lastSeenAt: 999 },
+    }
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    adapter.pull.mockResolvedValue({
+      ...makePayload(),
+      progress: {
+        format: 'quiz-progress',
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        byExamCode: {
+          'DVA-C02': { q1: { questionId: 'q1', attempts: 9, timesCorrect: 9, timesWrong: 0, flagged: false, lastSeenAt: 1 } },
+        },
+      },
+    })
+    adapter.push.mockResolvedValue(undefined)
+
+    await useAccount().signIn('dev@example.com', 'Passw0rd!', { migrateGuest: true })
+
+    expect(progressStore.byExamCode['DVA-C02']?.q1?.attempts).toBe(3)
+  })
+
+  it('a failed pull during migration keeps the guest data in place and never pushes', async () => {
+    seedDeviceData()
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    adapter.pull.mockRejectedValue(new Error('offline'))
+
+    const { signIn, syncError } = useAccount()
+    await signIn('dev@example.com', 'Passw0rd!', { migrateGuest: true })
+
+    expect(syncError.value).toBe(texts.syncFailed)
+    expect(useUserProgressStore().byExamCode['DVA-C02']?.qDev?.attempts).toBe(3)
+    expect(useUserAccountStore().guestProgress).not.toBeNull()
+    expect(adapter.push).not.toHaveBeenCalled()
+  })
+})
+
 describe('useAccount session ends', () => {
+  it('signing out restores the guest snapshot captured at sign-in', async () => {
+    seedDeviceData()
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    adapter.pull.mockResolvedValue(makePayload())
+    const { signIn, signOut } = useAccount()
+    await signIn('dev@example.com', 'Passw0rd!')
+
+    await signOut()
+
+    const progressStore = useUserProgressStore()
+    expect(progressStore.byExamCode['DVA-C02']?.qDev?.attempts).toBe(3)
+    expect(progressStore.byExamCode['DVA-C02']?.q1).toBeUndefined()
+    expect(useQuizHistoryStore().entries.map((e) => e.id)).toEqual(['hDev'])
+    expect(useUserAccountStore().guestProgress).toBeNull()
+  })
+
+  it('signing out with no guest snapshot clears the stores', async () => {
+    vi.mocked(auth.signOut).mockResolvedValue(undefined)
+    const accountStore = useUserAccountStore()
+    accountStore.user = USER
+    accountStore.accountMode = 'account'
+    useUserProgressStore().byExamCode['DVA-C02'] = {
+      qAccount: { questionId: 'qAccount', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 },
+    }
+
+    await useAccount().signOut()
+
+    expect(useUserProgressStore().byExamCode).toEqual({})
+    expect(useQuizHistoryStore().entries).toEqual([])
+  })
+
   it('signing out clears the account state and returns to the welcome screen', async () => {
     vi.mocked(auth.signOut).mockResolvedValue(undefined)
     const accountStore = useUserAccountStore()

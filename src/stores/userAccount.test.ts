@@ -2,6 +2,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { createApp, nextTick } from 'vue'
+import type { HistoryExportFile, ProgressExportFile } from '../types'
 import { useUserAccountStore } from './userAccount'
 
 function createTestPinia() {
@@ -39,5 +40,26 @@ describe('userAccount store', () => {
     createTestPinia()
 
     expect(useUserAccountStore().user).toEqual({ userId: 'sub-1', email: 'dev@example.com' })
+  })
+
+  it('takeGuestSnapshot returns the stashed guest data and clears it', () => {
+    const store = useUserAccountStore()
+    const progress = { format: 'quiz-progress', version: 1, exportedAt: 'now', byExamCode: {} } as ProgressExportFile
+    const history = { format: 'quiz-history', version: 1, exportedAt: 'now', entries: [] } as HistoryExportFile
+
+    store.stashGuest(progress, history)
+    const snapshot = store.takeGuestSnapshot()
+
+    expect(snapshot.progress).toStrictEqual(progress)
+    expect(snapshot.history).toStrictEqual(history)
+    expect(store.guestProgress).toBeNull()
+    expect(store.guestHistory).toBeNull()
+  })
+
+  it('takeGuestSnapshot returns nulls when nothing was stashed', () => {
+    const snapshot = useUserAccountStore().takeGuestSnapshot()
+
+    expect(snapshot.progress).toBeNull()
+    expect(snapshot.history).toBeNull()
   })
 })
