@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import SecondaryButton from './components/SecondaryButton.vue'
 import SyncBanner from './components/SyncBanner.vue'
@@ -16,7 +16,19 @@ const preferences = useThemeMode()
 const account = useUserAccountStore()
 const { signOut } = useAccount()
 
+const signOutPending = ref(false)
+
 const titleTarget = computed(() => (account.accountMode ? '/' : '/welcome'))
+
+async function handleSignOut() {
+  if (signOutPending.value) return
+  signOutPending.value = true
+  try {
+    await signOut()
+  } finally {
+    signOutPending.value = false
+  }
+}
 
 function goToWelcome() {
   router.push('/welcome')
@@ -33,7 +45,11 @@ function dismissSyncError() {
     <div class="app-header__actions">
       <div v-if="account.user" class="account-chip">
         <span class="account-chip__email">{{ account.user.email ?? account.user.userId }}</span>
-        <SecondaryButton size="sm" @click="signOut">{{ texts.signOut }}</SecondaryButton>
+        <SecondaryButton
+          size="sm"
+          :disabled="signOutPending"
+          @click="handleSignOut"
+        >{{ texts.signOut }}</SecondaryButton>
       </div>
       <SecondaryButton v-else-if="account.accountMode === 'local'" size="sm" @click="goToWelcome">
         {{ texts.signIn }}

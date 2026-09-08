@@ -41,11 +41,11 @@ describe('remote sync adapter', () => {
     })
   })
 
-  it('pull returns null on a 401 response', async () => {
+  it('pull rejects on a 401 response so an auth failure cannot act as an empty account', async () => {
     fetchAuthSessionMock.mockResolvedValue({ tokens: { accessToken: 'token-1' } })
     fetchMock.mockResolvedValue(new Response('', { status: 401 }))
 
-    await expect(adapter.pull()).resolves.toBeNull()
+    await expect(adapter.pull()).rejects.toThrow('sync pull failed: 401')
   })
 
   it('pull rejects when the auth session cannot be retrieved, without sending a tokenless request', async () => {

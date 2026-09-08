@@ -59,6 +59,8 @@ Resources:
           KeyType: HASH
         - AttributeName: SK
           KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
 
   SyncApi:
     Type: AWS::Serverless::HttpApi

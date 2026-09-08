@@ -13,7 +13,10 @@ async function bootstrap() {
 
   const { userPoolId, userPoolClientId } = awsConfig
   if (userPoolId && userPoolClientId) {
-    await configureAuth(userPoolId, userPoolClientId)
+    const configured = await configureAuth(userPoolId, userPoolClientId)
+    if (!configured) {
+      console.warn('Auth configuration failed; falling back to local-only mode')
+    }
   }
 
   createApp(App).use(pinia).use(router).mount('#app')

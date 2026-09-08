@@ -39,12 +39,14 @@ export function useAccount() {
     }
   }
 
-  async function loadAccountData() {
+  async function loadAccountData(): Promise<boolean> {
     try {
       applyRemoteData(await sync.pull())
+      return true
     } catch {
       applyRemoteData(null)
       syncError.value = texts.syncFailed
+      return false
     }
   }
 
@@ -70,13 +72,13 @@ export function useAccount() {
     }
   }
 
-  async function migrateGuestData() {
+  async function migrateGuestData(): Promise<boolean> {
     let remote: RemoteSyncPayload | null = null
     try {
       remote = await sync.pull()
     } catch {
       syncError.value = texts.syncFailed
-      return
+      return false
     }
     if (remote?.progress) progressStore.importProgress(remote.progress)
     if (remote?.history) historyStore.importHistory(remote.history)
@@ -87,9 +89,10 @@ export function useAccount() {
       })
     } catch {
       syncError.value = texts.syncFailed
-      return
+      return false
     }
     account.takeGuestSnapshot()
+    return true
   }
 
   async function completeAuthentication(user: AuthUser, options: { migrateGuest?: boolean } = {}) {
@@ -99,12 +102,13 @@ export function useAccount() {
     if (!wasSignedIn) {
       account.stashGuest(progressStore.exportProgress(), historyStore.exportHistory())
     }
-    if (options.migrateGuest && !wasSignedIn) {
-      await migrateGuestData()
+    const ok =
+      options.migrateGuest && !wasSignedIn ? await migrateGuestData() : await loadAccountData()
+    if (ok) {
+      syncSession = Symbol()
     } else {
-      await loadAccountData()
+      syncSession = null
     }
-    syncSession = Symbol()
     await router.push({ name: 'cert-selector' })
   }
 

@@ -29,7 +29,7 @@ function createRemoteSyncAdapter(apiUrl: string): RemoteSyncAdapter {
     async pull() {
       const headers = await getAuthHeaders()
       const res = await fetch(apiUrl, { headers })
-      if (res.status === 401) return null
+      if (res.status === 401) throw new Error('sync pull failed: 401')
       if (!res.ok) throw new Error(`sync pull failed: ${res.status}`)
       return await res.json()
     },
@@ -42,5 +42,9 @@ function createRemoteSyncAdapter(apiUrl: string): RemoteSyncAdapter {
 }
 
 export function getSyncAdapter(): RemoteSyncAdapter {
-  return awsConfig.syncApiUrl ? createRemoteSyncAdapter(awsConfig.syncApiUrl) : localOnlySyncAdapter
+  const url = awsConfig.syncApiUrl
+  if (url && url.startsWith('https://')) {
+    return createRemoteSyncAdapter(url)
+  }
+  return localOnlySyncAdapter
 }

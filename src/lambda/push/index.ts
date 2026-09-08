@@ -1,5 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
+import { DeleteCommand, DynamoDBDocumentClient, PutCommand, TransactWriteCommand } from '@aws-sdk/lib-dynamodb'
 
 const client = new DynamoDBClient({})
 const docClient = DynamoDBDocumentClient.from(client)
@@ -8,6 +8,24 @@ const tableName = process.env.TABLE_NAME!
 interface SyncPayload {
   progress: unknown
   history: unknown
+}
+
+const now = () => new Date().toISOString()
+
+function recordCommand(
+  kind: 'PROGRESS' | 'HISTORY',
+  payload: unknown,
+  pk: string,
+  timestamp: string,
+): PutCommand | DeleteCommand {
+  const key = { PK: pk, SK: kind }
+  if (payload === null) {
+    return new DeleteCommand({ TableName: tableName, Key: key })
+  }
+  return new PutCommand({
+    TableName: tableName,
+    Item: { ...key, data: payload, updatedAt: timestamp },
+  })
 }
 
 export const handler = async (event: {
@@ -36,24 +54,19 @@ export const handler = async (event: {
     }
   }
 
-  const now = new Date().toISOString()
+  const pk = `SYNC#${userId}`
+  const timestamp = now()
 
-  if (payload.progress) {
-    await docClient.send(
-      new PutCommand({
-        TableName: tableName,
-        Item: { PK: `SYNC#${userId}`, SK: 'PROGRESS', data: payload.progress, updatedAt: now },
-      }),
-    )
+  const commands: (PutCommand | DeleteCommand)[] = []
+  if ('progress' in payload) {
+    commands.push(recordCommand('PROGRESS', payload.progress, pk, timestamp))
+  }
+  if ('history' in payload) {
+    commands.push(recordCommand('HISTORY', payload.history, pk, timestamp))
   }
 
-  if (payload.history) {
-    await docClient.send(
-      new PutCommand({
-        TableName: tableName,
-        Item: { PK: `SYNC#${userId}`, SK: 'HISTORY', data: payload.history, updatedAt: now },
-      }),
-    )
+  if (commands.length > 0) {
+    await docClient.send(new TransactWriteCommand({ TransactItems: commands }))
   }
 
   return {
