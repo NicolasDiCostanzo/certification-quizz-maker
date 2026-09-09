@@ -8,7 +8,7 @@ export interface RemoteSyncPayload {
 
 export interface RemoteSyncAdapter {
   pull(): Promise<RemoteSyncPayload | null>
-  push(payload: RemoteSyncPayload): Promise<void>
+  push(payload: RemoteSyncPayload, isCurrent?: () => boolean): Promise<void>
 }
 
 const localOnlySyncAdapter: RemoteSyncAdapter = {
@@ -33,8 +33,9 @@ function createRemoteSyncAdapter(apiUrl: string): RemoteSyncAdapter {
       if (!res.ok) throw new Error(`sync pull failed: ${res.status}`)
       return await res.json()
     },
-    async push(payload) {
+    async push(payload, isCurrent) {
       const headers = { 'Content-Type': 'application/json', ...(await getAuthHeaders()) }
+      if (isCurrent && !isCurrent()) return
       const res = await fetch(apiUrl, { method: 'PUT', headers, body: JSON.stringify(payload) })
       if (!res.ok) throw new Error(`sync push failed: ${res.status}`)
     },

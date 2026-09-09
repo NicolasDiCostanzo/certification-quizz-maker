@@ -62,4 +62,32 @@ describe('userAccount store', () => {
     expect(snapshot.progress).toBeNull()
     expect(snapshot.history).toBeNull()
   })
+
+  it('caps the stashed guest history to the most recent 50 entries', () => {
+    const store = useUserAccountStore()
+    const progress = { format: 'quiz-progress', version: 1, exportedAt: 'now', byExamCode: {} } as ProgressExportFile
+    const entries = Array.from({ length: 60 }, (_, i) => ({
+      id: `h${i}`,
+      certCode: 'DVA-C02',
+      mode: 'preparation' as const,
+      startedAt: i,
+      finishedAt: i,
+      questionIds: [],
+      answers: {},
+      flags: [],
+      result: { percentCorrect: 100, passed: true, timesCorrect: 1, totalAnswered: 1 },
+    }))
+    const history = { format: 'quiz-history', version: 1, exportedAt: 'now', entries } as HistoryExportFile
+
+    store.stashGuest(progress, history)
+
+    expect(store.guestHistory?.entries).toHaveLength(50)
+    expect(store.guestHistory?.entries.map((e) => e.id)).toEqual(
+      entries
+        .slice()
+        .sort((a, b) => b.finishedAt - a.finishedAt)
+        .slice(0, 50)
+        .map((e) => e.id),
+    )
+  })
 })

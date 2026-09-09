@@ -8,7 +8,7 @@ export default defineConfigWithVueTs(
     files: ['**/*.{ts,vue}'],
   },
 
-  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**', 'src/assets/**']),
+  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/.aws-sam/**', 'src/assets/**']),
 
   pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,

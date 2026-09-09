@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { computed } from 'vue';
   import { useRouter } from 'vue-router';
-  import { isAuthConfigured } from '../config';
+  import { isAuthAvailable } from '../config';
   import WelcomeCard from '../components/WelcomeCard.vue';
 import { useAccount } from '../composables/useAccount';
 import { useQuizHistoryStore } from '../stores/quizHistory';
@@ -10,7 +10,7 @@ import { texts } from '../texts/en';
 
   const router = useRouter();
   const { continueLocal } = useAccount()
-  const authAvailable = isAuthConfigured()
+  const authAvailable = isAuthAvailable()
   const historyStore = useQuizHistoryStore();
   const progressStore = useUserProgressStore();
   const hasLocalData = computed(

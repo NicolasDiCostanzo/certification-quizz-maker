@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import 'pinia-plugin-persistedstate'
 import type { AccountMode, AuthUser, HistoryExportFile, ProgressExportFile } from '../types'
 
+const MAX_GUEST_HISTORY_ENTRIES = 50
+
 export const useUserAccountStore = defineStore('userAccount', {
   state: (): {
     accountMode: AccountMode | null
@@ -18,7 +20,15 @@ export const useUserAccountStore = defineStore('userAccount', {
   actions: {
     stashGuest(progress: ProgressExportFile, history: HistoryExportFile) {
       this.guestProgress = progress
-      this.guestHistory = history
+      this.guestHistory =
+        history.entries.length > MAX_GUEST_HISTORY_ENTRIES
+          ? {
+              ...history,
+              entries: [...history.entries]
+                .sort((a, b) => b.finishedAt - a.finishedAt)
+                .slice(0, MAX_GUEST_HISTORY_ENTRIES),
+            }
+          : history
     },
 
     takeGuestSnapshot(): { progress: ProgressExportFile | null; history: HistoryExportFile | null } {

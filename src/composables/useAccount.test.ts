@@ -258,7 +258,7 @@ describe('useAccount guest migration', () => {
     expect(adapter.push).not.toHaveBeenCalled()
   })
 
-  it('a failed push during migration keeps the guest snapshot so sign-out can restore the guest data', async () => {
+  it('a failed push during migration prevents sign-out from discarding the unsynced merged data', async () => {
     seedDeviceData()
     vi.mocked(auth.signIn).mockResolvedValue(USER)
     adapter.pull.mockResolvedValue(makePayload())
@@ -272,9 +272,45 @@ describe('useAccount guest migration', () => {
 
     await signOut()
 
+    expect(auth.signOut).not.toHaveBeenCalled()
+    expect(useUserAccountStore().accountMode).toBe('account')
+    expect(useUserAccountStore().guestProgress).not.toBeNull()
     expect(useUserProgressStore().byExamCode['DVA-C02']?.qDev?.attempts).toBe(3)
-    expect(useUserProgressStore().byExamCode['DVA-C02']?.q1).toBeUndefined()
-    expect(useQuizHistoryStore().entries.map((e) => e.id)).toEqual(['hDev'])
+    expect(useUserProgressStore().byExamCode['DVA-C02']?.q1?.attempts).toBe(1)
+  })
+
+  it('a migration push is invalidated if a different sign-in completes before it resolves', async () => {
+    seedDeviceData()
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    adapter.pull.mockResolvedValue(makePayload())
+
+    let releasePush!: () => void
+    const blockedPush = new Promise<void>((resolve) => {
+      releasePush = resolve
+    })
+    let capturedIsCurrent: (() => boolean) | undefined
+    adapter.push.mockImplementationOnce((_payload: unknown, isCurrent: () => boolean) => {
+      capturedIsCurrent = isCurrent
+      return blockedPush
+    })
+
+    const { signIn } = useAccount()
+    const migrationSignIn = signIn('dev@example.com', 'Passw0rd!', { migrateGuest: true })
+    await new Promise((resolve) => setTimeout(resolve, 25))
+    expect(capturedIsCurrent).toBeDefined()
+
+    const userB: AuthUser = { userId: 'sub-2', email: 'other@example.com' }
+    vi.mocked(auth.signIn).mockResolvedValue(userB)
+    adapter.pull.mockResolvedValueOnce(null)
+    await signIn('other@example.com', 'Passw0rd!')
+
+    expect(capturedIsCurrent?.()).toBe(false)
+
+    releasePush()
+    await migrationSignIn
+
+    expect(useUserAccountStore().guestProgress).not.toBeNull()
+    expect(useUserAccountStore().user).toEqual(userB)
   })
 })
 
@@ -342,10 +378,52 @@ describe('useAccount push serialization', () => {
     vi.mocked(auth.signIn).mockResolvedValue(userB)
     await signIn('other@example.com', 'Passw0rd!')
 
-    await new Promise((resolve) => setTimeout(resolve, 25))
+    expect(adapter.push).toHaveBeenCalledTimes(2)
+  })
+
+  it('queued account-A pushes are cancelled when account B signs in directly (no sign-out)', async () => {
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    const userB: AuthUser = { userId: 'sub-2', email: 'other@example.com' }
+    adapter.push.mockResolvedValue(undefined)
+
+    const { signIn, pushLocalData } = useAccount()
+    await signIn('dev@example.com', 'Passw0rd!')
+
+    let releaseFirst!: () => void
+    const blockedFirst = new Promise<void>((resolve) => {
+      releaseFirst = resolve
+    })
+    let capturedIsCurrent: (() => boolean) | undefined
+    adapter.push.mockImplementationOnce((_payload: unknown, isCurrent: () => boolean) => {
+      capturedIsCurrent = isCurrent
+      return blockedFirst
+    })
+
+    void pushLocalData()
+    void pushLocalData()
+    await Promise.resolve()
+
+    let releasePull!: () => void
+    const blockedPull = new Promise<void>((resolve) => {
+      releasePull = resolve
+    })
+    adapter.pull.mockImplementationOnce(() => blockedPull)
+
+    vi.mocked(auth.signIn).mockResolvedValue(userB)
+    const bSignIn = signIn('other@example.com', 'Passw0rd!')
+    await Promise.resolve()
+
+    // Guards A's in-flight push from sending under B's freshly retrieved credentials.
+    expect(capturedIsCurrent?.()).toBe(false)
+
+    releaseFirst()
     await new Promise((resolve) => setTimeout(resolve, 25))
 
-    expect(adapter.push).toHaveBeenCalledTimes(2)
+    releasePull()
+    await bSignIn
+    await new Promise((resolve) => setTimeout(resolve, 25))
+
+    expect(adapter.push).toHaveBeenCalledTimes(1)
   })
 })
 
@@ -418,5 +496,67 @@ describe('useAccount session ends', () => {
     expect(adapter.pull).not.toHaveBeenCalled()
     expect(adapter.push).not.toHaveBeenCalled()
     expect(pushRoute).toHaveBeenCalledWith({ name: 'cert-selector' })
+  })
+})
+
+describe('useAccount pushLocalDataDebounced', () => {
+  it('coalesces a burst of calls into a single push of the latest state', async () => {
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    adapter.pull.mockResolvedValue(null)
+    adapter.push.mockResolvedValue(undefined)
+
+    const { signIn, pushLocalDataDebounced } = useAccount()
+    await signIn('dev@example.com', 'Passw0rd!')
+
+    void pushLocalDataDebounced(10)
+    useUserProgressStore().recordAnswer('DVA-C02', 'q1', true)
+    void pushLocalDataDebounced(10)
+    useUserProgressStore().recordAnswer('DVA-C02', 'q2', true)
+    const last = pushLocalDataDebounced(10)
+    await last
+
+    expect(adapter.push).toHaveBeenCalledTimes(1)
+    const [pushedPayload] = adapter.push.mock.calls[0]
+    expect(pushedPayload.progress.byExamCode['DVA-C02']?.q1).toBeDefined()
+    expect(pushedPayload.progress.byExamCode['DVA-C02']?.q2).toBeDefined()
+  })
+
+  it('signing out flushes a still-pending debounced push, completing it before auth.signOut is invoked', async () => {
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    vi.mocked(auth.signOut).mockResolvedValue(undefined)
+    adapter.pull.mockResolvedValue(null)
+    adapter.push.mockResolvedValue(undefined)
+
+    const { signIn, signOut, pushLocalDataDebounced } = useAccount()
+    await signIn('dev@example.com', 'Passw0rd!')
+
+    void pushLocalDataDebounced(10_000)
+    await signOut()
+
+    expect(adapter.push).toHaveBeenCalledTimes(1)
+    expect(auth.signOut).toHaveBeenCalledOnce()
+    expect(adapter.push.mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(auth.signOut).mock.invocationCallOrder[0],
+    )
+  })
+
+  it('a pending push that fails to sync aborts sign-out instead of discarding the unsynced data', async () => {
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    vi.mocked(auth.signOut).mockResolvedValue(undefined)
+    adapter.pull.mockResolvedValue(null)
+    adapter.push.mockRejectedValue(new Error('offline'))
+
+    const { signIn, signOut, pushLocalDataDebounced, syncError } = useAccount()
+    await signIn('dev@example.com', 'Passw0rd!')
+
+    void pushLocalDataDebounced(10)
+    await signOut()
+
+    expect(syncError.value).toBe(texts.syncFailed)
+    expect(auth.signOut).not.toHaveBeenCalled()
+    const account = useUserAccountStore()
+    expect(account.accountMode).toBe('account')
+    expect(account.user).toEqual(USER)
+    expect(pushRoute).not.toHaveBeenCalledWith({ name: 'welcome' })
   })
 })

@@ -16,7 +16,7 @@ import { computeScore } from '../utils/scoring'
 import type { QuizHistoryEntry } from '../types'
 
 const router = useRouter()
-const { pushLocalData } = useAccount()
+const { pushLocalData, pushLocalDataDebounced } = useAccount()
 const store = useQuizSessionStore()
 const progressStore = useUserProgressStore()
 const historyStore = useQuizHistoryStore()
@@ -53,6 +53,7 @@ function toggleFlag() {
   if (!question.value) return
   store.toggleFlag(question.value.id)
   progressStore.toggleFlag(certCode.value, question.value.id)
+  void pushLocalDataDebounced()
 }
 
 function goNext() {

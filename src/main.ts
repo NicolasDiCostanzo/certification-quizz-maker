@@ -2,7 +2,7 @@ import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { createApp } from 'vue'
 import App from './App.vue'
-import { awsConfig } from './config'
+import { awsConfig, setAuthRuntimeAvailable } from './config'
 import { router } from './router'
 import { configureAuth } from './services/auth'
 import './style.css'
@@ -16,6 +16,7 @@ async function bootstrap() {
     const configured = await configureAuth(userPoolId, userPoolClientId)
     if (!configured) {
       console.warn('Auth configuration failed; falling back to local-only mode')
+      setAuthRuntimeAvailable(false)
     }
   }
 

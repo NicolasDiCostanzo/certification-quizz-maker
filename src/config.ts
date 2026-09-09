@@ -17,6 +17,16 @@ export const awsConfig: AwsConfig = {
   syncApiUrl: readEnv('VITE_SYNC_API_URL'),
 }
 
-export function isAuthConfigured(): boolean {
+function isAuthConfigured(): boolean {
   return awsConfig.userPoolId !== undefined && awsConfig.userPoolClientId !== undefined
+}
+
+let authRuntimeAvailable = true
+
+export function setAuthRuntimeAvailable(available: boolean): void {
+  authRuntimeAvailable = available
+}
+
+export function isAuthAvailable(): boolean {
+  return isAuthConfigured() && authRuntimeAvailable
 }

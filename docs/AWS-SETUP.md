@@ -52,13 +52,23 @@ CloudFormation creates IAM resources (the Lambdas' execution roles), so the depl
         "iam:GetRolePolicy",
         "iam:PutRolePolicy",
         "iam:DeleteRolePolicy",
-        "iam:ListAttachedRolePolicies",
-        "iam:PassRole"
+        "iam:ListAttachedRolePolicies"
       ],
       "Resource": [
-        "arn:aws:iam::<ACCOUNT_ID>:role/cert-quiz-maker-*",
+        "arn:aws:iam::<ACCOUNT_ID>:role/cert-quizz-maker-*",
         "arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess"
       ]
+    },
+    {
+      "Sid": "PassExecutionRolesToLambda",
+      "Effect": "Allow",
+      "Action": ["iam:PassRole"],
+      "Resource": ["arn:aws:iam::<ACCOUNT_ID>:role/cert-quizz-maker-*"],
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "lambda.amazonaws.com"
+        }
+      }
     }
   ]
 }
@@ -68,6 +78,7 @@ Two details that are easy to get wrong and produce confusing 403s:
 
 - `iam:AttachRolePolicy`/`DetachRolePolicy` are **multi-resource actions**: the `Allow` must cover *both* the role ARNs and the managed-policy ARN being attached (the SAM `DynamoDBReadPolicy` template attaches `AmazonDynamoDBReadOnlyAccess`).
 - The **rollback cleanup calls run as the deploy user too** (`DetachRolePolicy`, `DeleteRole`) — a deployer missing those leaves undeletable orphan roles in `UPDATE_ROLLBACK_COMPLETE`; they are cleaned up automatically on the next deploy once the permission exists.
+- `iam:PassRole` sits in its **own statement with the `iam:PassedToService` condition** narrowing it to handing the execution role to Lambda only. Without the condition, a compromised deploy credential could pass a stack role to any service it controls; with it, the grant is `pass to lambda.amazonaws.com` and nothing else. If a future deploy ever fails with a `PassRole` denial, that condition is the first suspect.
 
 Without this policy the deploy fails with *"User … is not authorized to perform: iam:CreateRole / iam:AttachRolePolicy … because no identity-based policy allows the action"* and rolls back.
 
@@ -90,7 +101,7 @@ Phase 2 connects the app to the backend through `src/services/remoteSync.ts`. Th
 
 - **On sign-in**: the current (guest) data is stashed in `userAccount`, then `GET /sync` returns the account's stored `{ progress, history }` and the local stores are **replaced** with it. A pull failure clears the stores (never shows another account's data) and surfaces the sync-error banner. A brand-new account pulls nothing, so it starts empty.
 - **Guest migration (opt-in)**: when the device has local data, the welcome screen offers "Upload my local data to an account". It opens the usual auth flow (sign in *or* create an account — the flag survives both the mode switch and email verification) and, after authentication, **merges** the guest data with the account's remote data (progress: newest `lastSeenAt` wins per question; history: dedup by entry id) and pushes the union. Non-destructive in both directions: nothing already on the account is lost, and the guest data moves up intact. On success the guest snapshot is discarded (the data now belongs to the account); if the pull fails, migration aborts, the guest data stays local and nothing is pushed.
-- **While signed in**, every mutation pushes the full local state up (`PUT /sync`): after each finished quiz, after deleting a history entry, after resetting a cert's data, and after toggling a question flag in the review views (flags toggled mid-quiz are pushed together with the quiz result). Push is a no-op in local mode. The server stores the payload verbatim — **last-write-wins per record**.
+- **While signed in**, every mutation pushes the full local state up (`PUT /sync`): after each finished quiz, after deleting a history entry, after resetting a cert's data, and after toggling a question flag (in-quiz and in the review views alike — each toggle debounces and coalesces rapid ones into a single push, in addition to the push already triggered by finishing the quiz). Push is a no-op in local mode. The server stores the payload verbatim — **last-write-wins per record**.
 - **On sign-out**: the guest stash is restored into the local stores, so "Continue without an account" finds the device's own data again.
 
 Authentication on every request is a bearer token that Amplify attaches automatically from the Cognito session — no custom token handling.

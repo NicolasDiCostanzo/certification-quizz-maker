@@ -139,6 +139,7 @@ Resources:
               Action:
                 - dynamodb:GetItem
                 - dynamodb:PutItem
+                - dynamodb:DeleteItem
               Resource: !GetAtt SyncTable.Arn
     Metadata:
       BuildMethod: esbuild

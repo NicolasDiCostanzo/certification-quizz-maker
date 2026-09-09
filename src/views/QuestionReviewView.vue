@@ -27,7 +27,7 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
-const { pushLocalData } = useAccount()
+const { pushLocalDataDebounced } = useAccount()
 const progressStore = useUserProgressStore()
 
 const certCode = computed(() => props.cert?.exam.code ?? '')
@@ -68,7 +68,7 @@ function toggleSelected(questionId: string) {
 
 function toggleFlag(questionId: string) {
   progressStore.toggleFlag(certCode.value, questionId)
-  void pushLocalData()
+  void pushLocalDataDebounced()
 }
 
 function goBack() {

@@ -14,8 +14,13 @@ const PROGRESS_VERSION = 1
 const HISTORY_FORMAT = 'quiz-history'
 const HISTORY_VERSION = 1
 
+const FLAG_TOGGLE_DEBOUNCE_MS = 400
+
 let syncSession: symbol | null = null
+let authAttempt = 0
 let pendingPush: Promise<void> = Promise.resolve()
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+let flushDebouncedPush: (() => void) | null = null
 
 export function useAccount() {
   const router = useRouter()
@@ -62,7 +67,7 @@ export function useAccount() {
       .catch(() => undefined)
       .then(() => {
         if (syncSession !== session) return
-        return sync.push(payload)
+        return sync.push(payload, () => syncSession === session)
       })
     pendingPush = next
     try {
@@ -72,7 +77,19 @@ export function useAccount() {
     }
   }
 
-  async function migrateGuestData(): Promise<boolean> {
+  function pushLocalDataDebounced(delayMs = FLAG_TOGGLE_DEBOUNCE_MS): Promise<void> {
+    return new Promise((resolve) => {
+      if (debounceTimer !== null) clearTimeout(debounceTimer)
+      flushDebouncedPush = () => {
+        debounceTimer = null
+        flushDebouncedPush = null
+        void pushLocalData().then(resolve)
+      }
+      debounceTimer = setTimeout(flushDebouncedPush, delayMs)
+    })
+  }
+
+  async function migrateGuestData(attempt: number): Promise<boolean> {
     let remote: RemoteSyncPayload | null = null
     try {
       remote = await sync.pull()
@@ -82,20 +99,28 @@ export function useAccount() {
     }
     if (remote?.progress) progressStore.importProgress(remote.progress)
     if (remote?.history) historyStore.importHistory(remote.history)
-    try {
-      await sync.push({
+    const attemptPush = sync.push(
+      {
         progress: progressStore.exportProgress(),
         history: historyStore.exportHistory(),
-      })
+      },
+      () => authAttempt === attempt,
+    )
+    pendingPush = attemptPush
+    try {
+      await attemptPush
     } catch {
       syncError.value = texts.syncFailed
       return false
     }
+    if (authAttempt !== attempt) return false
     account.takeGuestSnapshot()
     return true
   }
 
   async function completeAuthentication(user: AuthUser, options: { migrateGuest?: boolean } = {}) {
+    const attempt = ++authAttempt
+    syncSession = null
     const wasSignedIn = account.accountMode === 'account'
     account.user = user
     account.accountMode = 'account'
@@ -103,11 +128,9 @@ export function useAccount() {
       account.stashGuest(progressStore.exportProgress(), historyStore.exportHistory())
     }
     const ok =
-      options.migrateGuest && !wasSignedIn ? await migrateGuestData() : await loadAccountData()
-    if (ok) {
-      syncSession = Symbol()
-    } else {
-      syncSession = null
+      options.migrateGuest && !wasSignedIn ? await migrateGuestData(attempt) : await loadAccountData()
+    if (authAttempt === attempt) {
+      syncSession = ok ? Symbol() : null
     }
     await router.push({ name: 'cert-selector' })
   }
@@ -128,15 +151,27 @@ export function useAccount() {
   }
 
   async function signOut() {
+    if (debounceTimer !== null) {
+      clearTimeout(debounceTimer)
+      flushDebouncedPush?.()
+    }
+    const outcome = await Promise.race([
+      pendingPush.then(
+        () => 'ok' as const,
+        () => 'failed' as const,
+      ),
+      new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), 2000)),
+    ])
+    if (outcome !== 'ok') {
+      syncError.value = texts.syncFailed
+      return
+    }
     try {
       await auth.signOut()
     } catch {
       syncError.value = texts.syncFailed
     }
     syncSession = null
-    const drain = pendingPush.catch(() => undefined)
-    const timeout = new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), 2000))
-    await Promise.race([drain, timeout])
     const guest = account.takeGuestSnapshot()
     if (guest.progress) {
       progressStore.replaceAll(guest.progress.byExamCode)
@@ -158,5 +193,14 @@ export function useAccount() {
     await router.push({ name: 'cert-selector' })
   }
 
-  return { signUp, confirmSignUp, signIn, signOut, continueLocal, pushLocalData, syncError }
+  return {
+    signUp,
+    confirmSignUp,
+    signIn,
+    signOut,
+    continueLocal,
+    pushLocalData,
+    pushLocalDataDebounced,
+    syncError,
+  }
 }
