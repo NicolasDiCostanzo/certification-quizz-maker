@@ -20,7 +20,11 @@ const password = 'Passw0rd-E2e'
 const email = `e2e-${Date.now()}@example.com`
 
 test.afterAll(async () => {
-  await client.send(new AdminDeleteUserCommand({ UserPoolId: userPoolId, Username: email }))
+  try {
+    await client.send(new AdminDeleteUserCommand({ UserPoolId: userPoolId, Username: email }))
+  } catch (err) {
+    if (err?.name !== 'UserNotFoundException') throw err
+  }
 })
 
 test('sign-up reaches the confirmation step, then the confirmed user signs in, survives a reload and signs out', async ({ page }) => {

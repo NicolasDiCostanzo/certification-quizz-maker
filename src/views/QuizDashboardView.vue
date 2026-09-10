@@ -13,6 +13,7 @@ import PrimaryButton from '../components/PrimaryButton.vue'
 import QuizHistoryList from '../components/QuizHistoryList.vue'
 import ReviewBreakdown from '../components/ReviewBreakdown.vue'
 import SecondaryButton from '../components/SecondaryButton.vue'
+import { useAccount } from '../composables/useAccount'
 
 const props = defineProps<{
   certCode: string
@@ -20,6 +21,7 @@ const props = defineProps<{
 
 const router = useRouter()
 const { getCert } = useQuizLoader()
+const { pushLocalData } = useAccount()
 const historyStore = useQuizHistoryStore()
 const progressStore = useUserProgressStore()
 
@@ -56,6 +58,7 @@ function confirmDelete() {
   if (deleteTargetId.value) {
     historyStore.deleteById(deleteTargetId.value)
     deleteTargetId.value = null
+    void pushLocalData()
   }
 }
 
@@ -63,6 +66,7 @@ function confirmReset() {
   historyStore.resetByCertCode(props.certCode)
   progressStore.resetByCertCode(props.certCode)
   showResetModal.value = false
+  void pushLocalData()
 }
 
 function startQuiz() {
