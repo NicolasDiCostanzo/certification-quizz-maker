@@ -6,6 +6,12 @@ import { useQuizHistoryStore } from '../stores/quizHistory'
 import { useUserProgressStore } from '../stores/userProgress'
 import QuizDashboardView from './QuizDashboardView.vue'
 
+const { pushLocalData } = vi.hoisted(() => ({ pushLocalData: vi.fn() }))
+
+vi.mock('../composables/useAccount', () => ({
+  useAccount: () => ({ pushLocalData }),
+}))
+
 vi.mock('../composables/useQuizLoader', () => ({
   useQuizLoader: () => ({
     getCert: () => ({
@@ -36,6 +42,7 @@ const router = createRouter({
 
 describe('QuizDashboardView', () => {
   beforeEach(() => {
+    pushLocalData.mockClear()
     useUserProgressStore().byExamCode = {}
     useQuizHistoryStore().entries = []
   })
@@ -59,5 +66,31 @@ describe('QuizDashboardView', () => {
     const wrapper = mount(QuizDashboardView, { global: { plugins: [pinia, router] }, props: { certCode: 'TEST' } })
 
     expect(wrapper.find('.flagged-review-btn').exists()).toBe(false)
+  })
+
+  it('syncs to the backend after deleting a history entry', async () => {
+    const historyStore = useQuizHistoryStore()
+    historyStore.entries.push({
+      id: 'h1',
+      certCode: 'TEST',
+      mode: 'preparation',
+      startedAt: 0,
+      finishedAt: 1,
+      questionIds: ['q1'],
+      answers: {},
+      flags: [],
+      result: { percentCorrect: 100, passed: true, timesCorrect: 1, totalAnswered: 1 },
+    })
+
+    await router.push('/certs/TEST')
+    const wrapper = mount(QuizDashboardView, { global: { plugins: [pinia, router] }, props: { certCode: 'TEST' } })
+
+    wrapper.findComponent({ name: 'QuizHistoryList' }).vm.$emit('request-delete', 'h1')
+    await wrapper.vm.$nextTick()
+    wrapper.findComponent({ name: 'ConfirmModal' }).vm.$emit('confirm')
+    await wrapper.vm.$nextTick()
+
+    expect(historyStore.entries).toHaveLength(0)
+    expect(pushLocalData).toHaveBeenCalledOnce()
   })
 })

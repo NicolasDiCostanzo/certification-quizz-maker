@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import { isAuthConfigured } from '../config'
+import { isAuthAvailable } from '../config'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { useQuizSessionStore } from '../stores/quizSession'
 import { useUserAccountStore } from '../stores/userAccount'
@@ -40,7 +40,7 @@ router.beforeEach((to) => {
 })
 
 router.beforeEach((to) => {
-  if (to.name === 'auth' && !isAuthConfigured()) {
+  if (to.name === 'auth' && !isAuthAvailable()) {
     return { name: 'welcome' }
   }
 })

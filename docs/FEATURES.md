@@ -54,9 +54,12 @@ Single source of truth for every feature discussed for this project, with its cu
 | Flag button on the question screen in **both** modes (like real exams' "mark for review"); review screen allows flagging too | ✅ |
 | Export progress as a versioned JSON file (protection against browser-data clearing) | ✅ |
 | Import progress with merge (per-question, newest `lastSeenAt` wins) | ✅ |
-| Welcome screen lets a first-time visitor choose "use an account", "sign in", or "continue locally" (`accountMode` in the `userAccount` store, via `useAccount.ts`); guest ("local") users see no further auth UI and lose no functionality | ✅ |
-| Real account sign-up / confirmation / sign-in / sign-out against a Cognito User Pool (SAM-managed, see `docs/AWS-SETUP.md`): custom `AuthView` forms, Amplify Auth client loaded lazily, `accountMode` set only after real auth, guest data pushed up on first sign-in | ✅ |
-| Cross-device data sync against a real backend (API Gateway + Lambda + DynamoDB) | 🔜 Phase 2 — the sync adapter is still the local no-op: `pull` returns nothing and `push` sends nothing, so authenticated users' data still lives in localStorage only |
+| Welcome screen lets a first-time visitor choose "use an account", "sign in", or "continue locally" (`accountMode` in the `userAccount` store, via `useAccount.ts`); it also offers "Upload my local data to an account" (see sync below) only when the device has cached data, and the header shows a Sign in shortcut while in local mode | ✅ |
+| Real account sign-up / confirmation / sign-in / sign-out against a Cognito User Pool (SAM-managed, see `docs/AWS-SETUP.md`): custom `AuthView` forms, Amplify Auth client loaded lazily, `accountMode` set only after real auth | ✅ |
+| Cross-device data sync against a real backend (API Gateway + Lambda + DynamoDB): on sign-in the account's data is pulled and **replaces** the local stores — never merged with the device's data, so accounts on a shared device stay isolated (a failed pull clears the stores and shows the sync banner); while signed in, every mutation pushes the full state up (`PUT /sync`: quiz finished, history entry deleted, cert data reset, question flag toggled in the review views); push is a no-op in local mode | ✅ |
+| Opt-in guest migration: the "Upload my local data to an account" welcome card merges the guest data with the account's remote data (progress: newest `lastSeenAt` wins; history: dedup by entry id) and pushes the union — non-destructive in both directions; on success the guest snapshot is discarded, and a failed pull aborts the migration without pushing anything | ✅ |
+| Guest data isolation across sessions: guest data is stashed (persisted) at sign-in and restored at sign-out, so "Continue locally" always finds the device's own data and accounts never inherit each other's history | ✅ |
+| Sync failures surfaced through a dismissible banner (`syncError` in `App.vue`), never blocking sign-in or navigation | ✅ |
 
 ## Quiz history & dashboard
 
@@ -96,7 +99,7 @@ Implementation order (each step depends on the previous):
 ✅ QuizHistoryReviewView.vue — review a single past attempt from history
 ✅ QuestionBankReviewView.vue — browse the question bank by topic, theme, or flagged-only
 ✅ QuizDashboardView.vue — per-cert dashboard (all-time stats, breakdown, history list, reset)
-✅ WelcomeView.vue + useAccount.ts — first-run account-mode choice (account / sign in / continue locally); backend calls still pending, see User progress above
+✅ WelcomeView.vue + useAccount.ts — first-run account-mode choice (account / sign in / continue locally); backend calls landed in Phase 2, see User progress above
 ✅ Visual polish pass (transitions, cross-screen consistency)
 ☐ Final integration (build/typecheck/lint/test green + full manual smoke test)
 

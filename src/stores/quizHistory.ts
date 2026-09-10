@@ -45,6 +45,10 @@ export const useQuizHistoryStore = defineStore('quizHistory', {
       this.entries = []
     },
 
+    replaceAll(next: QuizHistoryEntry[]) {
+      this.entries = JSON.parse(JSON.stringify(next)) as QuizHistoryEntry[]
+    },
+
     exportHistory(): HistoryExportFile {
       return {
         format: EXPORT_FORMAT,

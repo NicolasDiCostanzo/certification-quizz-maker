@@ -1,13 +1,22 @@
 <script setup lang="ts">
+  import { computed } from 'vue';
   import { useRouter } from 'vue-router';
-  import { isAuthConfigured } from '../config';
+  import { isAuthAvailable, isSyncConfigured } from '../config';
   import WelcomeCard from '../components/WelcomeCard.vue';
 import { useAccount } from '../composables/useAccount';
+import { useQuizHistoryStore } from '../stores/quizHistory';
+import { useUserProgressStore } from '../stores/userProgress';
 import { texts } from '../texts/en';
 
   const router = useRouter();
   const { continueLocal } = useAccount()
-  const authAvailable = isAuthConfigured()
+  const authAvailable = isAuthAvailable()
+  const syncAvailable = isSyncConfigured()
+  const historyStore = useQuizHistoryStore();
+  const progressStore = useUserProgressStore();
+  const hasLocalData = computed(
+    () => historyStore.entries.length > 0 || Object.keys(progressStore.byExamCode).length > 0,
+  )
 
   function openSignIn() {
     router.push({ name: 'auth', query: { mode: 'signin' } })
@@ -16,6 +25,10 @@ import { texts } from '../texts/en';
   function openSignUp() {
     router.push({ name: 'auth', query: { mode: 'signup' } })
   }
+
+  function openUpload() {
+    router.push({ name: 'auth', query: { mode: 'signin', upload: '1' } })
+  }
 </script>
 
 <template>
@@ -23,13 +36,17 @@ import { texts } from '../texts/en';
     <h1>{{ texts.appTitle }}</h1>
     <div class="welcome__options">
       <template v-if="authAvailable">
-        <WelcomeCard :title="texts.welcomeExistingAccount" :description="texts.welcomeExistingAccountDesc"
+        <WelcomeCard :title="texts.welcomeExistingAccount"
+          :description="syncAvailable ? texts.welcomeExistingAccountDesc : texts.welcomeExistingAccountDescNoSync"
           :cta-label="texts.welcomeExistingAccountCta" @select="openSignIn" />
-        <WelcomeCard :title="texts.welcomeNewAccount" :description="texts.welcomeNewAccountDesc"
+        <WelcomeCard :title="texts.welcomeNewAccount"
+          :description="syncAvailable ? texts.welcomeNewAccountDesc : texts.welcomeNewAccountDescNoSync"
           :cta-label="texts.welcomeNewAccountCta" @select="openSignUp" />
       </template>
       <WelcomeCard variant="warning" :title="texts.welcomeNoAccount" :description="texts.welcomeNoAccountDesc"
         :cta-label="texts.welcomeNoAccountCta" @select="continueLocal" />
+      <WelcomeCard v-if="authAvailable && syncAvailable && hasLocalData" :title="texts.welcomeUploadData"
+        :description="texts.welcomeUploadDataDesc" :cta-label="texts.welcomeUploadDataCta" @select="openUpload" />
     </div>
   </section>
 </template>

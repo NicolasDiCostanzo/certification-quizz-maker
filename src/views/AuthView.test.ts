@@ -75,7 +75,7 @@ describe('AuthView', () => {
     await wrapper.find('form').trigger('submit')
     await flushPromises()
 
-    expect(confirmSignUp).toHaveBeenCalledWith('dev@example.com', '123456', 'Passw0rd!')
+    expect(confirmSignUp).toHaveBeenCalledWith('dev@example.com', '123456', 'Passw0rd!', { migrateGuest: false })
   })
 
   it('a sign-up that completes without confirmation goes straight to sign-in', async () => {
@@ -85,7 +85,17 @@ describe('AuthView', () => {
 
     await fillAndSubmit('dev@example.com', 'Passw0rd!')
 
-    expect(signIn).toHaveBeenCalledWith('dev@example.com', 'Passw0rd!')
+    expect(signIn).toHaveBeenCalledWith('dev@example.com', 'Passw0rd!', { migrateGuest: false })
+  })
+
+  it('the upload flag requests guest migration after authentication', async () => {
+    query = { upload: '1' }
+    signIn.mockResolvedValue({ userId: 'sub-1', email: 'dev@example.com' })
+
+    const wrapper = await fillAndSubmit('dev@example.com', 'Passw0rd!')
+
+    expect(signIn).toHaveBeenCalledWith('dev@example.com', 'Passw0rd!', { migrateGuest: true })
+    expect(wrapper.text()).toContain(texts.authUploadHint)
   })
 
   it('a failed sign-in surfaces the error message', async () => {
@@ -94,6 +104,24 @@ describe('AuthView', () => {
     const wrapper = await fillAndSubmit('dev@example.com', 'wrong')
 
     expect(wrapper.find('[role="alert"]').text()).toBe(texts.authSignInError)
+  })
+
+  it('a weak password on sign-up surfaces the password requirement message', async () => {
+    query = { mode: 'signup' }
+    signUp.mockRejectedValue(Object.assign(new Error('Password did not conform with policy'), { name: 'InvalidPasswordException' }))
+
+    const wrapper = await fillAndSubmit('dev@example.com', 'weak')
+
+    expect(wrapper.find('[role="alert"]').text()).toBe(texts.authWeakPasswordError)
+  })
+
+  it('a non-password sign-up failure keeps the generic sign-up error', async () => {
+    query = { mode: 'signup' }
+    signUp.mockRejectedValue(new Error('UsernameExistsException'))
+
+    const wrapper = await fillAndSubmit('dev@example.com', 'Passw0rd!')
+
+    expect(wrapper.find('[role="alert"]').text()).toBe(texts.authSignUpError)
   })
 
   it('the switch link flips between sign-in and sign-up', async () => {

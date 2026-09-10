@@ -9,7 +9,7 @@ import type { Question } from '../types'
 let authConfigured = true
 vi.mock('../config', () => ({
   awsConfig: { region: undefined, userPoolId: undefined, userPoolClientId: undefined, syncApiUrl: undefined },
-  isAuthConfigured: () => authConfigured,
+  isAuthAvailable: () => authConfigured,
 }))
 
 const sessionQuestions: Question[] = [

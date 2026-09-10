@@ -9,6 +9,8 @@ import { texts } from '../texts/en'
 const route = useRoute()
 const { signUp, confirmSignUp, signIn } = useAccount()
 
+const uploadAfterAuth = route.query.upload === '1'
+
 const mode = ref<'signin' | 'signup'>(route.query.mode === 'signup' ? 'signup' : 'signin')
 const step = ref<'credentials' | 'confirmation'>('credentials')
 const email = ref('')
@@ -30,9 +32,13 @@ async function submitCredentials() {
         return
       }
     }
-    await signIn(email.value, password.value)
-  } catch {
-    error.value = isSignUp.value ? texts.authSignUpError : texts.authSignInError
+    await signIn(email.value, password.value, { migrateGuest: uploadAfterAuth })
+  } catch (err) {
+    if (isSignUp.value && err instanceof Error && err.name === 'InvalidPasswordException') {
+      error.value = texts.authWeakPasswordError
+    } else {
+      error.value = isSignUp.value ? texts.authSignUpError : texts.authSignInError
+    }
   } finally {
     busy.value = false
   }
@@ -42,7 +48,7 @@ async function submitConfirmation() {
   busy.value = true
   error.value = null
   try {
-    await confirmSignUp(email.value, code.value, password.value)
+    await confirmSignUp(email.value, code.value, password.value, { migrateGuest: uploadAfterAuth })
   } catch {
     error.value = texts.authConfirmError
   } finally {
@@ -77,6 +83,7 @@ function switchMode() {
             :autocomplete="isSignUp ? 'new-password' : 'current-password'"
           />
         </label>
+        <p v-if="uploadAfterAuth" class="auth__hint">{{ texts.authUploadHint }}</p>
         <p v-if="error" class="auth__error" role="alert">{{ error }}</p>
         <PrimaryButton type="submit" :disabled="busy" block>
           {{ isSignUp ? texts.authSignUpCta : texts.authSignInCta }}

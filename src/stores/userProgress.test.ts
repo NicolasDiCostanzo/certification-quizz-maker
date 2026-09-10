@@ -152,5 +152,22 @@ describe('userProgress store', () => {
 
     expect(store.byExamCode['DVA-C02'].q1.attempts).toBe(1)
   })
+
+  it('replaceAll swaps the whole progress map with a deep copy', () => {
+    const store = useUserProgressStore()
+    store.recordAnswer('DVA-C02', 'qOld', true)
+    const incoming = {
+      'DVA-C02': {
+        q1: { questionId: 'q1', attempts: 2, timesCorrect: 2, timesWrong: 0, flagged: false, lastSeenAt: 5 },
+      },
+    }
+
+    store.replaceAll(incoming)
+
+    expect(store.byExamCode['DVA-C02'].q1.attempts).toBe(2)
+    expect(store.byExamCode['DVA-C02'].qOld).toBeUndefined()
+    incoming['DVA-C02'].q1.attempts = 42
+    expect(store.byExamCode['DVA-C02'].q1.attempts).toBe(2)
+  })
 })
 
