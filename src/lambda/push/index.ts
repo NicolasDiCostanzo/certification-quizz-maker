@@ -28,7 +28,8 @@ function isValidProgress(value: unknown): boolean {
     typeof v.version === 'number' &&
     typeof v.exportedAt === 'string' &&
     typeof v.byExamCode === 'object' &&
-    v.byExamCode !== null
+    v.byExamCode !== null &&
+    !Array.isArray(v.byExamCode)
   )
 }
 
