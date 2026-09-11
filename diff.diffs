@@ -1,0 +1,3098 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 5d54f19..f016c48 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -13,8 +13,10 @@ jobs:
+   lint:
+     runs-on: ubuntu-latest
+     steps:
+-      - uses: actions/checkout@v4
+-      - uses: actions/setup-node@v4
++      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
++        with:
++          persist-credentials: false
++      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+         with:
+           node-version: 22
+           cache: npm
+@@ -24,8 +26,10 @@ jobs:
+   typecheck:
+     runs-on: ubuntu-latest
+     steps:
+-      - uses: actions/checkout@v4
+-      - uses: actions/setup-node@v4
++      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
++        with:
++          persist-credentials: false
++      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+         with:
+           node-version: 22
+           cache: npm
+@@ -35,8 +39,10 @@ jobs:
+   test:
+     runs-on: ubuntu-latest
+     steps:
+-      - uses: actions/checkout@v4
+-      - uses: actions/setup-node@v4
++      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
++        with:
++          persist-credentials: false
++      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+         with:
+           node-version: 22
+           cache: npm
+@@ -46,8 +52,10 @@ jobs:
+   knip:
+     runs-on: ubuntu-latest
+     steps:
+-      - uses: actions/checkout@v4
+-      - uses: actions/setup-node@v4
++      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
++        with:
++          persist-credentials: false
++      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+         with:
+           node-version: 22
+           cache: npm
+@@ -59,10 +67,10 @@ jobs:
+     permissions:
+       contents: read
+     steps:
+-      - uses: actions/checkout@v4
++      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+         with:
+           persist-credentials: false
+-      - uses: actions/setup-node@v4
++      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+         with:
+           node-version: 22
+           cache: npm
+@@ -83,8 +91,10 @@ jobs:
+   build:
+     runs-on: ubuntu-latest
+     steps:
+-      - uses: actions/checkout@v4
+-      - uses: actions/setup-node@v4
++      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
++        with:
++          persist-credentials: false
++      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+         with:
+           node-version: 22
+           cache: npm
+@@ -94,8 +104,10 @@ jobs:
+   audit:
+     runs-on: ubuntu-latest
+     steps:
+-      - uses: actions/checkout@v4
+-      - uses: actions/setup-node@v4
++      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
++        with:
++          persist-credentials: false
++      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+         with:
+           node-version: 22
+           cache: npm
+diff --git a/docs/AWS-BACKEND.md b/docs/AWS-BACKEND.md
+index 328fce7..f98a035 100644
+--- a/docs/AWS-BACKEND.md
++++ b/docs/AWS-BACKEND.md
+@@ -1,6 +1,6 @@
+ # AWS backend: context for whoever implements it
+ 
+-This is background and open questions, not a spec. **Phase 1 (identity) is now built**: a Cognito User Pool defined in `template.yaml` and wired to the app through `src/services/auth.ts` and `AuthView` — deploy steps in `docs/AWS-SETUP.md`. The sync backend (API, Lambda, DynamoDB) still does not exist. Treat every remaining architecture note below as *one plausible option*, not the intended design. When you actually sit down to do this, you'll know things this doc doesn't (current AWS/Amplify APIs, your own constraints, whatever changed on the frontend since this was written) — follow that over anything written here. If something below turns out to be a bad fit, ignore it rather than working around it to stay consistent with this file.
++This is background and open questions, not a spec. **Phase 1 (identity) and Phase 2 (data sync) are now built**: a Cognito User Pool, DynamoDB table, HTTP API, and pull/push Lambdas defined in `template.yaml`, wired to the app through `src/services/auth.ts`, `src/services/remoteSync.ts`, and `AuthView` — deploy steps in `docs/AWS-SETUP.md`. Treat every remaining architecture note below as *one plausible option*, not the intended design. When you actually sit down to do this, you'll know things this doc doesn't (current AWS/Amplify APIs, your own constraints, whatever changed on the frontend since this was written) — follow that over anything written here. If something below turns out to be a bad fit, ignore it rather than working around it to stay consistent with this file.
+ 
+ ---
+ 
+@@ -10,17 +10,19 @@ This part is factual — it describes code that's already in the repo, not a pro
+ 
+ | Piece | File | Role |
+ |---|---|---|
+-| `RemoteSyncAdapter` interface | `src/services/remoteSync.ts` | `pull(): Promise<RemoteSyncPayload \| null>`, `push(payload): Promise<void>` — whatever backend gets built, this is the shape the frontend currently expects to talk to it through. Worth re-examining whether it's still the right shape once real requirements show up, rather than assuming it is. |
+-| `localOnlySyncAdapter` | `src/services/remoteSync.ts` | Current no-op implementation, returned by `getSyncAdapter()`. |
++| `RemoteSyncAdapter` interface | `src/services/remoteSync.ts` | `pull(): Promise<RemoteSyncPayload \| null>`, `push(payload): Promise<void>` — the shape the frontend talks to the backend through. A real implementation (bearer-token fetch against the HTTP API) is returned when `VITE_SYNC_API_URL` is set; otherwise the no-op `localOnlySyncAdapter`. |
++| `localOnlySyncAdapter` | `src/services/remoteSync.ts` | No-op implementation, returned by `getSyncAdapter()` when no API URL is configured. |
+ | Auth client | `src/services/auth.ts` | Thin wrapper over `aws-amplify/auth` (dynamically imported, so local-only users never download it): `signUp`, `confirmSignUp`, `signIn`, `signOut`. |
+-| `useAccount()` | `src/composables/useAccount.ts` | Real sign-up/confirm/sign-in/sign-out against Cognito; sets account state only after auth succeeds; after sign-in it pulls remote data, then pushes merged local data up (guest migration); pull/push failures surface through `syncError` instead of unhandled rejections. |
+-| `useUserAccountStore` | `src/stores/userAccount.ts` | Holds `accountMode: 'account' \| 'local' \| null` and the signed-in `user` (`AuthUser`: id + email). Whether this is the right place/shape for real auth tokens is still an open question — Amplify currently manages tokens internally. |
++| `useAccount()` | `src/composables/useAccount.ts` | Real sign-up/confirm/sign-in/sign-out against Cognito; sets account state only after auth succeeds. Sign-in stashes the guest data, then pulls the account's remote data and **replaces** the local stores with it (never merges across accounts). Mutations (quiz finished, history entry deleted, progress reset, flag toggled) push the full local state up — only while signed in. Sign-out restores the guest stash. Pull/push failures surface through `syncError` instead of unhandled rejections. |
++| `useUserAccountStore` | `src/stores/userAccount.ts` | Holds `accountMode: 'account' \| 'local' \| null`, the signed-in `user` (`AuthUser`: id + email), and the persisted guest snapshot (`guestProgress`/`guestHistory`) captured at sign-in and restored at sign-out. Whether this is the right place/shape for real auth tokens is still an open question — Amplify currently manages tokens internally. |
+ | `ProgressExportFile` / `HistoryExportFile` | `src/types.ts` | The versioned JSON shapes the existing local export/import already uses. A candidate wire format for sync, since reusing them avoids a second format — but not mandatory if a real backend needs something else. |
+ | `exportProgress`/`importProgress` | `src/stores/userProgress.ts` | Per-question merge, newest `lastSeenAt` wins. |
+ | `exportHistory`/`importHistory` | `src/stores/quizHistory.ts` | Per-entry merge by id (entries are immutable once recorded). |
+ 
+ ## One possible shape for the backend
+ 
++**Update: this sketch is no longer hypothetical — Phase 2 was implemented exactly along these lines** (Cognito User Pool + HTTP API with a Cognito JWT authorizer + two Lambdas + a single DynamoDB table; see `template.yaml` and `docs/AWS-SETUP.md`). The section is kept for the reasoning behind the shape; treat it as history, not as an open proposal.
++
+ Cognito + API Gateway + Lambda + DynamoDB is what `docs/FEATURES.md` names as the Phase 2 direction, so it's sketched here as a starting point for thinking about it — not a locked-in architecture. Other shapes (AppSync/GraphQL, Amplify Gen 2's backend-as-code, a different auth provider entirely) could just as reasonably fit; whoever does this work should make that call with real requirements in hand, not because a doc said so.
+ 
+ A rough sketch of how the pieces could relate:
+@@ -33,13 +35,13 @@ If a DynamoDB-shaped store does end up being used, the two export formats above
+ 
+ ## Things worth deciding deliberately, not defaulting into
+ 
+- **Whether `push` should merge server-side or trust the client to have already merged.** The frontend now pulls remote data and pushes the merged local state up on every sign-in; the server side (which will receive those pushes) still needs a deliberate conflict policy.
++- **Whether `push` should merge server-side or trust the client to have already merged.** Resolved: last-write-wins on the server (it stores exactly what's pushed). On sign-in the client **replaces** its local state with the account's remote state — no merge, by design, so accounts on a shared device stay isolated. The only remaining merge is the opt-in guest migration (progress: newest `lastSeenAt` wins; history: dedup by entry id). Documented in `docs/AWS-SETUP.md` — the known limitation is concurrent multi-device edits, acceptable for this single-user study app.
+ - **What `accountMode: 'account'` should mean.** ~~Right now it's set the moment someone clicks a Welcome card~~ Resolved: it is now set only after real authentication succeeds, alongside the stored `AuthUser`.
+ - **Token storage and refresh.** Most auth SDKs (Amplify's included) handle this internally — worth checking what the chosen SDK already does before building anything custom in a store.
+ - **Sign-out.** ~~Doesn't exist anywhere yet~~ Resolved: implemented in `useAccount().signOut()`, exposed by the header account chip; clears the stored user and `accountMode` and returns to the welcome screen.
+-- **Error/offline UX for a failed sync.** ~~No error handling at all~~ Partially resolved: failures are caught and surfaced via `syncError` (no unhandled rejections), but nothing *displays* that state yet — the user-visible UX (toast, banner, retry) is still a product decision for Phase 2.
+-- **What happens to a guest's existing local data on first sign-in.** ~~Unresolved~~ Partially resolved: sign-in now pulls remote, merges locally, then pushes the merged state up, so the guest's data is not lost — but until the real backend exists, the push is a no-op, and the server-side merge policy is still open.
+-- **Multi-user devices.** Local progress/history are device-scoped, not account-scoped: sign-out deliberately does not clear them (they are the only copy until the sync backend exists), so a second account signing in on the same browser inherits the device's local data through guest migration. Whether data must be isolated per user, wiped on sign-out, or legitimately stays device-scoped is an open Phase 2 decision — make it once server-side partitioning exists, not before.
++- **Error/offline UX for a failed sync.** ~~No error handling at all~~ Resolved: failures are caught and surfaced via `syncError`, which a dismissible banner in `App.vue` displays.
++- **What happens to a guest's existing local data on first sign-in.** ~~Merged into the account~~ Revisited: guest data is now **stashed** (persisted snapshot in `userAccount`) at sign-in and **restored** at sign-out — it never mixes with the account's data. A guest who signs in sees the account's data, not a merged blob. An explicit opt-in path — "Upload my local data to an account" on the welcome screen, shown only when local data exists — signs the user in (existing or new account) and merges the guest snapshot with the account's remote data before pushing; on success the snapshot is discarded.
++- **Multi-user devices.** Resolved via account isolation: the local stores act as a namespace switch — guest data while in local mode, the signed-in account's data while authenticated. Signing in as a different account loads that account's data from the backend, so accounts on a shared device no longer inherit each other's history. The guest snapshot is the only device-scoped data, and it belongs to no account.
+ 
+ ## Further reading
+ 
+@@ -47,4 +49,4 @@ Current as of when this was written — re-check before relying on specifics, SD
+ 
+ - [Sign-up — AWS Amplify Gen 2 docs](https://docs.amplify.aws/vue/build-a-backend/auth/connect-your-frontend/sign-up/)
+ - [Sign-in — AWS Amplify Gen 2 docs](https://docs.amplify.aws/vue/frontend/auth/sign-in/)
+-- [Control access to REST APIs using Cognito user pools as an authorizer — API Gateway docs](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-integrate-with-cognito.html)
++- [Control access to an HTTP API with a JWT authorizer — API Gateway docs](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-jwt-authorizer.html)
+diff --git a/docs/AWS-SETUP.md b/docs/AWS-SETUP.md
+index bede683..4696d08 100644
+--- a/docs/AWS-SETUP.md
++++ b/docs/AWS-SETUP.md
+@@ -1,6 +1,6 @@
+ # AWS setup guide
+ 
+-How to create and connect the AWS backend for account sign-in. Phase 1 covers identity only (Cognito User Pool); data sync (API Gateway + Lambda + DynamoDB) comes in Phase 2.
++How to create and connect the AWS backend. Phase 1 covers identity (Cognito User Pool); Phase 2 adds data sync (API Gateway + Lambda + DynamoDB) so an account's quiz progress and history follow you across devices.
+ 
+ ## Prerequisites
+ 
+@@ -8,7 +8,7 @@ How to create and connect the AWS backend for account sign-in. Phase 1 covers id
+ - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) configured with credentials (`aws configure`)
+ - [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
+ 
+-## Deploy the identity stack
++## Deploy the stack
+ 
+ ```bash
+ sam build
+@@ -17,15 +17,70 @@ sam deploy --guided
+ 
+ The guided deploy asks for a stack name (e.g. `cert-quizz-maker`), a region (pick one close to you, e.g. `eu-west-3`), and confirms IAM resource creation. It writes `samconfig.toml` locally so later deploys are just `sam build && sam deploy`. Both `samconfig.toml` and `.aws-sam/` are gitignored.
+ 
+-When the deploy finishes, the Outputs section prints three values. Put them in a local `.env.local` file (copy the shape from `.env.example`):
++When the deploy finishes, the Outputs section prints values for both phases. Put them in a local `.env.local` file (copy the shape from `.env.example`):
+ 
+ ```bash
+ VITE_AWS_REGION=eu-west-3
+ VITE_COGNITO_USER_POOL_ID=eu-west-3_XXXXXXXXX
+ VITE_COGNITO_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxx
++VITE_SYNC_API_URL=https://xxxxxxxxxx.execute-api.eu-west-3.amazonaws.com/sync
+ ```
+ 
+-Restart the dev server (`npm run dev`) after creating `.env.local` — Vite only reads env files at startup. Without these variables the app runs in local-only mode: the auth forms are not wired to any backend.
++Restart the dev server (`npm run dev`) after creating `.env.local` — Vite only reads env files at startup. Without the Cognito variables the app runs in local-only mode (no auth forms). Without `VITE_SYNC_API_URL` it runs with auth but no sync — progress stays in the browser, as in Phase 1.
++
++## Deploy-user permissions (required)
++
++CloudFormation creates IAM resources (the Lambdas' execution roles), so the deploy user needs IAM rights that managed policies like `PowerUserAccess` **no longer grant**: its first statement is an `Allow` with `NotAction: ["iam:*", "organizations:*", "account:*"]`, which excludes the entire IAM surface and only re-grants a small allowlist (`CreateServiceLinkedRole`, `ListRoles`, …). Attaching an inline policy to the deploy user is the fix — scoped to this stack's role-name prefix so it stays least-privilege:
++
++```json
++{
++  "Version": "2012-10-17",
++  "Statement": [
++    {
++      "Sid": "ManageCfnLambdaExecutionRoles",
++      "Effect": "Allow",
++      "Action": [
++        "iam:CreateRole",
++        "iam:GetRole",
++        "iam:UpdateRole",
++        "iam:DeleteRole",
++        "iam:TagRole",
++        "iam:UntagRole",
++        "iam:AttachRolePolicy",
++        "iam:DetachRolePolicy",
++        "iam:ListRolePolicies",
++        "iam:GetRolePolicy",
++        "iam:PutRolePolicy",
++        "iam:DeleteRolePolicy",
++        "iam:ListAttachedRolePolicies"
++      ],
++      "Resource": [
++        "arn:aws:iam::<ACCOUNT_ID>:role/cert-quizz-maker-*",
++        "arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess"
++      ]
++    },
++    {
++      "Sid": "PassExecutionRolesToLambda",
++      "Effect": "Allow",
++      "Action": ["iam:PassRole"],
++      "Resource": ["arn:aws:iam::<ACCOUNT_ID>:role/cert-quizz-maker-*"],
++      "Condition": {
++        "StringEquals": {
++          "iam:PassedToService": "lambda.amazonaws.com"
++        }
++      }
++    }
++  ]
++}
++```
++
++Two details that are easy to get wrong and produce confusing 403s:
++
++- `iam:AttachRolePolicy`/`DetachRolePolicy` are **multi-resource actions**: the `Allow` must cover *both* the role ARNs and the managed-policy ARN being attached (the SAM `DynamoDBReadPolicy` template attaches `AmazonDynamoDBReadOnlyAccess`).
++- The **rollback cleanup calls run as the deploy user too** (`DetachRolePolicy`, `DeleteRole`) — a deployer missing those leaves undeletable orphan roles in `UPDATE_ROLLBACK_COMPLETE`; they are cleaned up automatically on the next deploy once the permission exists.
++- `iam:PassRole` sits in its **own statement with the `iam:PassedToService` condition** narrowing it to handing the execution role to Lambda only. Without the condition, a compromised deploy credential could pass a stack role to any service it controls; with it, the grant is `pass to lambda.amazonaws.com` and nothing else. If a future deploy ever fails with a `PassRole` denial, that condition is the first suspect.
++
++Without this policy the deploy fails with *"User … is not authorized to perform: iam:CreateRole / iam:AttachRolePolicy … because no identity-based policy allows the action"* and rolls back.
+ 
+ ## What the stack creates
+ 
+@@ -33,19 +88,43 @@ Restart the dev server (`npm run dev`) after creating `.env.local` — Vite only
+ |---|---|
+ | Cognito User Pool | Holds the users; sends verification emails (Cognito's built-in sender) |
+ | Cognito App Client | The browser's identity; no client secret, SRP + refresh-token flows only |
++| DynamoDB table (`cert-quizz-maker-sync`) | Two items per user (`PROGRESS` and `HISTORY`), keyed by Cognito user id |
++| HTTP API (`/sync`) | GET pulls, PUT pushes; secured by a Cognito JWT authorizer that reuses the pool above |
++| Pull Lambda | Read-only IAM — queries the two items for the signed-in user |
++| Push Lambda | Write-only IAM — writes the two items for the signed-in user |
+ 
+ There are no hosted UI pages: the app's own `AuthView` collects email/password/verification code and calls Cognito through the AWS Amplify Auth library, which is loaded lazily so local-only users never download it.
+ 
+-### Deliberate: minimal password policy
++## How sync works
++
++Phase 2 connects the app to the backend through `src/services/remoteSync.ts`. The local stores (Pinia + localStorage) remain the UI's read path; sync keeps them equal to exactly one namespace at a time — the guest's device data in local mode, or the signed-in account's data while authenticated:
++
++- **On sign-in**: the current (guest) data is stashed in `userAccount`, then `GET /sync` returns the account's stored `{ progress, history }` and the local stores are **replaced** with it. A pull failure clears the stores (never shows another account's data) and surfaces the sync-error banner. A brand-new account pulls nothing, so it starts empty.
++- **Guest migration (opt-in)**: when the device has local data, the welcome screen offers "Upload my local data to an account". It opens the usual auth flow (sign in *or* create an account — the flag survives both the mode switch and email verification) and, after authentication, **merges** the guest data with the account's remote data (progress: newest `lastSeenAt` wins per question; history: dedup by entry id) and pushes the union. Non-destructive in both directions: nothing already on the account is lost, and the guest data moves up intact. On success the guest snapshot is discarded (the data now belongs to the account); if the pull fails, migration aborts, the guest data stays local and nothing is pushed.
++- **While signed in**, every mutation pushes the full local state up (`PUT /sync`): after each finished quiz, after deleting a history entry, after resetting a cert's data, and after toggling a question flag in the review views (flags toggled mid-quiz are pushed together with the quiz result). Push is a no-op in local mode. The server stores the payload verbatim — **last-write-wins per record**.
++- **On sign-out**: the guest stash is restored into the local stores, so "Continue without an account" finds the device's own data again.
++
++Authentication on every request is a bearer token that Amplify attaches automatically from the Cognito session — no custom token handling.
++
++### Conflict resolution policy (chosen)
++
++**Last-write-wins on the server; replace-on-pull.** The server stores exactly what the client pushes (no server-side merge). On sign-in, the client replaces its local state with the account's remote state — there is no merge step, by design, so accounts on a shared device stay isolated.
++
++This is simple and correct for the common case (one user, one device at a time). The known limitation: two devices editing concurrently between syncs can lose the earlier push. For a single-user study app this is acceptable; a production multi-device app would need vector clocks or operational transformation. Documented here rather than silently defaulting.
++
++## Deliberate: minimal password policy
+ 
+ The password policy is the floor (6 characters, no composition rules) on purpose. Accounts exist only to sync quiz progress; there is no payment data, no personal documents, and every feature works without an account — so an account takeover leaks nothing but a quiz history. The remaining load is carried by what matters more here: SRP (the password never crosses the wire), `PreventUserExistenceErrors` (no account enumeration), and email verification (no account squatting). `AuthView`'s `minlength="6"` mirrors the pool so client and server agree. If the app ever stores anything sensitive, revisit this before anything else.
+ 
+ ## Cost
+ 
+-**$0** for this project's usage:
++**$0** for this project's usage, with one honest caveat:
+ 
+-- Cognito free tier covers tens of thousands of monthly active users — a personal study tool uses a rounding error of that.
+-- The built-in email sender is limited to a small number of verification emails per day, which is fine for sign-ups. Upgrading to a verified SES identity for branded emails would still be free tier-eligible, but is not needed.
++- Cognito's Lite tier includes **10,000 free monthly active users** for new user pools (user pools created on or before November 22, 2024 at 10:00 a.m. Pacific Time keep their legacy free tier instead) — a personal study tool uses a rounding error of that.
++- DynamoDB always-free tier: 25 GB of storage. The table uses on-demand (**PAY_PER_REQUEST**) billing, where reads and writes are billed per request rather than through capacity units — at personal-study usage this is pennies-to-zero, but it is not strictly $0 like the storage allowance.
++- Lambda: 1M requests + 400,000 GB-seconds always-free.
++- API Gateway HTTP API: 1M requests/month free for the **first 12 months only** — after that ~$1/million requests, which at personal usage is pennies-to-zero.
++- The built-in email sender is limited to a small number of verification emails per day, which is fine for sign-ups.
+ 
+ ## DVA-C02 topics this phase exercises
+ 
+@@ -54,3 +133,7 @@ The password policy is the floor (6 characters, no composition rules) on purpose
+ - **SRP auth flow**: the password never travels to the server in the clear; the client proves knowledge of it via the Secure Remote Password protocol (`ALLOW_USER_SRP_AUTH` in the app client).
+ - **`PreventUserExistenceErrors: ENABLED`**: sign-in/sign-up errors are generic so attackers can't enumerate registered emails.
+ - **Password policy and self-service sign-up** as User Pool configuration rather than application code.
++- **API Gateway Cognito authorizer**: the API verifies the JWT before the Lambda runs — no custom auth code in the handler. The Lambda reads the user id from `event.requestContext.authorizer.jwt.claims.sub`.
++- **Least-privilege IAM**: the pull function gets read-only access, the push function write-only — a function should only have the permissions it needs.
++- **DynamoDB single-table key design**: partition key scopes data to a user; sort key distinguishes record types within that user.
++- **Lambda proxy integration**: the HTTP API passes the whole request (headers, body, authorizer context) to the Lambda, which returns status code + body directly.
+diff --git a/docs/FEATURES.md b/docs/FEATURES.md
+index a17ab53..0ad3005 100644
+--- a/docs/FEATURES.md
++++ b/docs/FEATURES.md
+@@ -54,9 +54,12 @@ Single source of truth for every feature discussed for this project, with its cu
+ | Flag button on the question screen in **both** modes (like real exams' "mark for review"); review screen allows flagging too | ✅ |
+ | Export progress as a versioned JSON file (protection against browser-data clearing) | ✅ |
+ | Import progress with merge (per-question, newest `lastSeenAt` wins) | ✅ |
+-| Welcome screen lets a first-time visitor choose "use an account", "sign in", or "continue locally" (`accountMode` in the `userAccount` store, via `useAccount.ts`); guest ("local") users see no further auth UI and lose no functionality | ✅ |
+-| Real account sign-up / confirmation / sign-in / sign-out against a Cognito User Pool (SAM-managed, see `docs/AWS-SETUP.md`): custom `AuthView` forms, Amplify Auth client loaded lazily, `accountMode` set only after real auth, guest data pushed up on first sign-in | ✅ |
+-| Cross-device data sync against a real backend (API Gateway + Lambda + DynamoDB) | 🔜 Phase 2 — the sync adapter is still the local no-op: `pull` returns nothing and `push` sends nothing, so authenticated users' data still lives in localStorage only |
++| Welcome screen lets a first-time visitor choose "use an account", "sign in", or "continue locally" (`accountMode` in the `userAccount` store, via `useAccount.ts`); it also offers "Upload my local data to an account" (see sync below) only when the device has cached data, and the header shows a Sign in shortcut while in local mode | ✅ |
++| Real account sign-up / confirmation / sign-in / sign-out against a Cognito User Pool (SAM-managed, see `docs/AWS-SETUP.md`): custom `AuthView` forms, Amplify Auth client loaded lazily, `accountMode` set only after real auth | ✅ |
++| Cross-device data sync against a real backend (API Gateway + Lambda + DynamoDB): on sign-in the account's data is pulled and **replaces** the local stores — never merged with the device's data, so accounts on a shared device stay isolated (a failed pull clears the stores and shows the sync banner); while signed in, every mutation pushes the full state up (`PUT /sync`: quiz finished, history entry deleted, cert data reset, question flag toggled in the review views); push is a no-op in local mode | ✅ |
++| Opt-in guest migration: the "Upload my local data to an account" welcome card merges the guest data with the account's remote data (progress: newest `lastSeenAt` wins; history: dedup by entry id) and pushes the union — non-destructive in both directions; on success the guest snapshot is discarded, and a failed pull aborts the migration without pushing anything | ✅ |
++| Guest data isolation across sessions: guest data is stashed (persisted) at sign-in and restored at sign-out, so "Continue locally" always finds the device's own data and accounts never inherit each other's history | ✅ |
++| Sync failures surfaced through a dismissible banner (`syncError` in `App.vue`), never blocking sign-in or navigation | ✅ |
+ 
+ ## Quiz history & dashboard
+ 
+@@ -96,7 +99,7 @@ Implementation order (each step depends on the previous):
+ ✅ QuizHistoryReviewView.vue — review a single past attempt from history
+ ✅ QuestionBankReviewView.vue — browse the question bank by topic, theme, or flagged-only
+ ✅ QuizDashboardView.vue — per-cert dashboard (all-time stats, breakdown, history list, reset)
+-✅ WelcomeView.vue + useAccount.ts — first-run account-mode choice (account / sign in / continue locally); backend calls still pending, see User progress above
++✅ WelcomeView.vue + useAccount.ts — first-run account-mode choice (account / sign in / continue locally); backend calls landed in Phase 2, see User progress above
+ ✅ Visual polish pass (transitions, cross-screen consistency)
+ ☐ Final integration (build/typecheck/lint/test green + full manual smoke test)
+ 
+diff --git a/eslint.config.js b/eslint.config.js
+index e2f4001..3fedf6f 100644
+--- a/eslint.config.js
++++ b/eslint.config.js
+@@ -8,7 +8,7 @@ export default defineConfigWithVueTs(
+     files: ['**/*.{ts,vue}'],
+   },
+ 
+-  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**', 'src/assets/**']),
++  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/.aws-sam/**', 'src/assets/**']),
+ 
+   pluginVue.configs['flat/essential'],
+   vueTsConfigs.recommended,
+diff --git a/knip.json b/knip.json
+new file mode 100644
+index 0000000..fc48779
+--- /dev/null
++++ b/knip.json
+@@ -0,0 +1,4 @@
++{
++  "$schema": "https://unpkg.com/knip@6/schema.json",
++  "entry": ["src/lambda/pull/index.ts", "src/lambda/push/index.ts"]
++}
+\ No newline at end of file
+diff --git a/package-lock.json b/package-lock.json
+index 8ae7087..c7e77c5 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -16,12 +16,15 @@
+       },
+       "devDependencies": {
+         "@aws-sdk/client-cognito-identity-provider": "^3.1127.0",
++        "@aws-sdk/client-dynamodb": "^3.1127.0",
++        "@aws-sdk/lib-dynamodb": "^3.1127.0",
+         "@playwright/test": "^1.63.0",
+         "@types/node": "^26.4.0",
+         "@vitejs/plugin-vue": "^6.0.8",
+         "@vue/eslint-config-typescript": "^14.9.0",
+         "@vue/test-utils": "^2.5.0",
+         "@vue/tsconfig": "^0.9.1",
++        "esbuild": "^0.28.2",
+         "eslint": "^10.9.1",
+         "eslint-plugin-vue": "^10.10.0",
+         "husky": "^9.1.7",
+@@ -291,6 +294,41 @@
+         "node": ">=18.0.0"
+       }
+     },
++    "node_modules/@aws-sdk/client-dynamodb": {
++      "version": "3.1127.0",
++      "resolved": "https://registry.npmjs.org/@aws-sdk/client-dynamodb/-/client-dynamodb-3.1127.0.tgz",
++      "integrity": "sha512-rV9TC7gqtwekWR9jXBdzuvCG65fnv7jphnYdJmFBfLX1b0Q+ma3xijzZaGGeN+US2pKw/XaQiZapJX/nZqtBJw==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "@aws-sdk/core": "^3.977.9",
++        "@aws-sdk/credential-provider-node": "^3.972.82",
++        "@aws-sdk/dynamodb-codec": "^3.973.44",
++        "@aws-sdk/middleware-endpoint-discovery": "^3.972.30",
++        "@aws-sdk/types": "^3.974.5",
++        "@smithy/core": "^3.33.3",
++        "@smithy/fetch-http-handler": "^5.7.2",
++        "@smithy/node-http-handler": "^4.11.3",
++        "@smithy/types": "^4.17.2",
++        "tslib": "^2.6.2"
++      },
++      "engines": {
++        "node": ">=20.0.0"
++      }
++    },
++    "node_modules/@aws-sdk/client-dynamodb/node_modules/@smithy/types": {
++      "version": "4.18.0",
++      "resolved": "https://registry.npmjs.org/@smithy/types/-/types-4.18.0.tgz",
++      "integrity": "sha512-CgB6HHWer/vrKps24ulRIbpcpb7K4xAU7SkZ7YHzBPlwHsvsrCJFEXK421s+cJzX+ZrqtA/TuU5w1HzI7k9N8A==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "tslib": "^2.6.2"
++      },
++      "engines": {
++        "node": ">=18.0.0"
++      }
++    },
+     "node_modules/@aws-sdk/client-firehose": {
+       "version": "3.1127.0",
+       "resolved": "https://registry.npmjs.org/@aws-sdk/client-firehose/-/client-firehose-3.1127.0.tgz",
+@@ -659,6 +697,112 @@
+         "node": ">=18.0.0"
+       }
+     },
++    "node_modules/@aws-sdk/dynamodb-codec": {
++      "version": "3.973.44",
++      "resolved": "https://registry.npmjs.org/@aws-sdk/dynamodb-codec/-/dynamodb-codec-3.973.44.tgz",
++      "integrity": "sha512-eo27HNeBqMAfy9JBQug6ErU6DeG8OmOH6ou8+KmX3/fWdTmWUsHsfisz2tEQOG+GJ57bBC7kC6AjKAjpcxU4QA==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "@aws-sdk/core": "^3.977.9",
++        "@smithy/core": "^3.33.3",
++        "@smithy/types": "^4.17.2",
++        "tslib": "^2.6.2"
++      },
++      "engines": {
++        "node": ">=20.0.0"
++      }
++    },
++    "node_modules/@aws-sdk/dynamodb-codec/node_modules/@smithy/types": {
++      "version": "4.18.0",
++      "resolved": "https://registry.npmjs.org/@smithy/types/-/types-4.18.0.tgz",
++      "integrity": "sha512-CgB6HHWer/vrKps24ulRIbpcpb7K4xAU7SkZ7YHzBPlwHsvsrCJFEXK421s+cJzX+ZrqtA/TuU5w1HzI7k9N8A==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "tslib": "^2.6.2"
++      },
++      "engines": {
++        "node": ">=18.0.0"
++      }
++    },
++    "node_modules/@aws-sdk/endpoint-cache": {
++      "version": "3.972.11",
++      "resolved": "https://registry.npmjs.org/@aws-sdk/endpoint-cache/-/endpoint-cache-3.972.11.tgz",
++      "integrity": "sha512-8q1ICxcDjHId3bBryuu/j+1L9y5/3uQnwzLDt5j2ElcjZSoWmFtymdJy7OjLrluSMe0Z4mq5bcH4fxBXvlEHfw==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "mnemonist": "0.38.3",
++        "tslib": "^2.6.2"
++      },
++      "engines": {
++        "node": ">=20.0.0"
++      }
++    },
++    "node_modules/@aws-sdk/lib-dynamodb": {
++      "version": "3.1127.0",
++      "resolved": "https://registry.npmjs.org/@aws-sdk/lib-dynamodb/-/lib-dynamodb-3.1127.0.tgz",
++      "integrity": "sha512-IEpeWj3UtcN2Vb/zxI1Zc8G7Vg5/3ypyjZCWxplVcns/NibmbjyKED/La14dYCMsgM2TRBBoyPdtIkCmVVheuQ==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "@aws-sdk/core": "^3.977.9",
++        "@aws-sdk/util-dynamodb": "^3.996.9",
++        "@smithy/core": "^3.33.3",
++        "@smithy/types": "^4.17.2",
++        "tslib": "^2.6.2"
++      },
++      "engines": {
++        "node": ">=20.0.0"
++      },
++      "peerDependencies": {
++        "@aws-sdk/client-dynamodb": "^3.1127.0"
++      }
++    },
++    "node_modules/@aws-sdk/lib-dynamodb/node_modules/@smithy/types": {
++      "version": "4.18.0",
++      "resolved": "https://registry.npmjs.org/@smithy/types/-/types-4.18.0.tgz",
++      "integrity": "sha512-CgB6HHWer/vrKps24ulRIbpcpb7K4xAU7SkZ7YHzBPlwHsvsrCJFEXK421s+cJzX+ZrqtA/TuU5w1HzI7k9N8A==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "tslib": "^2.6.2"
++      },
++      "engines": {
++        "node": ">=18.0.0"
++      }
++    },
++    "node_modules/@aws-sdk/middleware-endpoint-discovery": {
++      "version": "3.972.30",
++      "resolved": "https://registry.npmjs.org/@aws-sdk/middleware-endpoint-discovery/-/middleware-endpoint-discovery-3.972.30.tgz",
++      "integrity": "sha512-0hmD7/NG2NoVOVHvUb6rtY5POQYr+/9gdHvrYhIBA1zmCqKOBd5Gz3dL+iZ15FHOJbs/5kLplGoePc8PHTlzYA==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "@aws-sdk/endpoint-cache": "^3.972.11",
++        "@aws-sdk/types": "^3.974.5",
++        "@smithy/core": "^3.33.3",
++        "@smithy/types": "^4.17.2",
++        "tslib": "^2.6.2"
++      },
++      "engines": {
++        "node": ">=20.0.0"
++      }
++    },
++    "node_modules/@aws-sdk/middleware-endpoint-discovery/node_modules/@smithy/types": {
++      "version": "4.18.0",
++      "resolved": "https://registry.npmjs.org/@smithy/types/-/types-4.18.0.tgz",
++      "integrity": "sha512-CgB6HHWer/vrKps24ulRIbpcpb7K4xAU7SkZ7YHzBPlwHsvsrCJFEXK421s+cJzX+ZrqtA/TuU5w1HzI7k9N8A==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "tslib": "^2.6.2"
++      },
++      "engines": {
++        "node": ">=18.0.0"
++      }
++    },
+     "node_modules/@aws-sdk/nested-clients": {
+       "version": "3.997.44",
+       "resolved": "https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.997.44.tgz",
+@@ -771,6 +915,22 @@
+         "node": ">=18.0.0"
+       }
+     },
++    "node_modules/@aws-sdk/util-dynamodb": {
++      "version": "3.996.9",
++      "resolved": "https://registry.npmjs.org/@aws-sdk/util-dynamodb/-/util-dynamodb-3.996.9.tgz",
++      "integrity": "sha512-16x2tRvl7OYpZ0W/DdFJieFriD13+RvuRBDbe5sj/tCEfK86HSGd7I2s5j0ivz8p6KWGkS+5wKRO9OliJkjUOQ==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "tslib": "^2.6.2"
++      },
++      "engines": {
++        "node": ">=20.0.0"
++      },
++      "peerDependencies": {
++        "@aws-sdk/client-dynamodb": "^3.1111.0"
++      }
++    },
+     "node_modules/@aws-sdk/xml-builder": {
+       "version": "3.972.40",
+       "resolved": "https://registry.npmjs.org/@aws-sdk/xml-builder/-/xml-builder-3.972.40.tgz",
+@@ -1038,6 +1198,422 @@
+         "tslib": "^2.4.0"
+       }
+     },
++    "node_modules/@esbuild/aix-ppc64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/aix-ppc64/-/aix-ppc64-0.28.2.tgz",
++      "integrity": "sha512-XExcO+dvLKvVtNTibSTBej1NCAbaGhWn9Ww1ZPx80qsahhPFe/8jgWP0IchNe0F3HwkU7n8ejhH8bjonqht8mQ==",
++      "cpu": [
++        "ppc64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "aix"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/android-arm": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/android-arm/-/android-arm-0.28.2.tgz",
++      "integrity": "sha512-kXXoiPVVGQcnIYGOeaovwOURpniDBpSq4A03qkQ+BMQqtGG6HYap3xne9C1O1yo4TR3qxlCX5IqqmX6fFo2Lqg==",
++      "cpu": [
++        "arm"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "android"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/android-arm64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/android-arm64/-/android-arm64-0.28.2.tgz",
++      "integrity": "sha512-5YfKeeI8qWfBZIX+u2xZC3Zlb3Os/gLS2sbEKM+I4ZOcsWmHS2WLysCcQZDAFRslDUU5Oiq44gf6PYN1vGwG5A==",
++      "cpu": [
++        "arm64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "android"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/android-x64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/android-x64/-/android-x64-0.28.2.tgz",
++      "integrity": "sha512-O387ite7SzUyCcy3JQX4P4bLtEA7bLLkx+esve5JHnyYfNTxcVpXZo9jhdB0lTKN44gztELTdU7nS8Nr16Fs1Q==",
++      "cpu": [
++        "x64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "android"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/darwin-arm64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.28.2.tgz",
++      "integrity": "sha512-n4KqkOQrraxHJcgjM1RvwbigfQKIKJVpM7xp+KsxiyUSrRdIXnt73VhrPAx0fV44hgfmIVKjxMN9J1t5jySVkw==",
++      "cpu": [
++        "arm64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "darwin"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/darwin-x64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-0.28.2.tgz",
++      "integrity": "sha512-uq6suIWYP37qzGddBKPw5QEQPi6HiLGsO7UmkpfyaYNQ3D+rN6w6WfwH+nuqcGXWvawGwxOEroO4YGnFh95azw==",
++      "cpu": [
++        "x64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "darwin"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/freebsd-arm64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/freebsd-arm64/-/freebsd-arm64-0.28.2.tgz",
++      "integrity": "sha512-n+I0BTSRIoy+d6RPKnEVwql5UwBJolytvY4mAOIEJorKlqgPII8ix6slVVrfZ5Tnj7glIZvloylbB/EJPMWEXw==",
++      "cpu": [
++        "arm64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "freebsd"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/freebsd-x64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/freebsd-x64/-/freebsd-x64-0.28.2.tgz",
++      "integrity": "sha512-78XJTJkvPs0kz2w61301PJjXl4g7q3JqiYMZ/M/yVI73EHBrCRTgkhu9oqG7vPqq+a/yadEW8aD+agKlk5xrmg==",
++      "cpu": [
++        "x64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "freebsd"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-arm": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-arm/-/linux-arm-0.28.2.tgz",
++      "integrity": "sha512-XlDnu2q5yoqems+xay6wSAcg9DDD7K9RLKZEBOMZm3ckNpJBvOX20tSfby8KfrrhINDyv9V2YVZKY/SpoGJI8w==",
++      "cpu": [
++        "arm"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-arm64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-0.28.2.tgz",
++      "integrity": "sha512-pW4AC0P3it8c7do9MVM4p51FzHzdM/TZrerurgRcHJ2WTa1VQ1CIq18xncfpBJw4ojkiZZrKW2yIBWBP92j6Ug==",
++      "cpu": [
++        "arm64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-ia32": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-0.28.2.tgz",
++      "integrity": "sha512-CYbnj78HsIeA+DhgUKgFCfvNsTHFhMMrinUrMZpDXJXKN8T3XViTZ/+wtHeVxEWY8ewSzTFN+nRmSwO2tZaLUQ==",
++      "cpu": [
++        "ia32"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-loong64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-loong64/-/linux-loong64-0.28.2.tgz",
++      "integrity": "sha512-buwkd8nsph4R+ajRvw0qM5Hja/TXQow3ptzWO2EbG/cqcIkHloRrdlBtQlshyYGTNFvfkfJ5tpPLVkY4DtsPfQ==",
++      "cpu": [
++        "loong64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-mips64el": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-mips64el/-/linux-mips64el-0.28.2.tgz",
++      "integrity": "sha512-ZVykbDyk7519VwiNb9Lcj9m8XM6v5V9uKPvrEMkkEedVewf+0itkhahp4HDpgERXhwLRpWFypsGbG/J8s0QjJA==",
++      "cpu": [
++        "mips64el"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-ppc64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-ppc64/-/linux-ppc64-0.28.2.tgz",
++      "integrity": "sha512-CAXl+Dtd9UUuJd8pKKdwh6MLm3MUMiqMPmhZ3tTSXPqfyQ3vDl6R5hZdZ/kYojK4ofXtdfSv1tFq8XzWx3heNQ==",
++      "cpu": [
++        "ppc64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-riscv64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-riscv64/-/linux-riscv64-0.28.2.tgz",
++      "integrity": "sha512-GeXCej4IQtU1B+QlDV8W/RRvbzI3O/Stss+/bCXv4lZls5WGRtu2a+3JkA3i4qIUlMXpcHebWpF8AkJhATowuA==",
++      "cpu": [
++        "riscv64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-s390x": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-s390x/-/linux-s390x-0.28.2.tgz",
++      "integrity": "sha512-3H1weTYZPxt/WOhByszQZybS9w5lKzUn1FDMsgEChbHWQwHYQQRfBxgCcZvPhjHfKyJjIievvMmEUawJrdY9Dg==",
++      "cpu": [
++        "s390x"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-x64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.28.2.tgz",
++      "integrity": "sha512-4xTZr1FUmSoQW4XIWmit3tzQrUTZM+N3P0XV8xROKYF50XfI7xeO90+1bZvNwxIufQ9hDQVRJH5YhgPVF8A/HQ==",
++      "cpu": [
++        "x64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/netbsd-arm64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/netbsd-arm64/-/netbsd-arm64-0.28.2.tgz",
++      "integrity": "sha512-sSATRjPeDBg3pdgHoQfoYBob11Kk1FGa9lui5RIHZCoCkJa9QKlvl3/vKz2usCmYYjs7ymJR/2Nnsqe+Hjt5nw==",
++      "cpu": [
++        "arm64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "netbsd"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/netbsd-x64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/netbsd-x64/-/netbsd-x64-0.28.2.tgz",
++      "integrity": "sha512-lqnzCV+mM0gIADaKihiCg6ifgfU2L3h5E33rNQBN1Y4MaVGnzryzmvvf7UHxprpQdE8hpqLolJ9Rl+SkIRDpyw==",
++      "cpu": [
++        "x64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "netbsd"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/openbsd-arm64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/openbsd-arm64/-/openbsd-arm64-0.28.2.tgz",
++      "integrity": "sha512-AL2qJILH7lNjrDmCQDvdxMfAUIv8KMNZOvrwAQ8i8//ntL9FflhOyMJ8OZSMBb8/AWXe3/5v5S20y3zCoZWKoQ==",
++      "cpu": [
++        "arm64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "openbsd"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/openbsd-x64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/openbsd-x64/-/openbsd-x64-0.28.2.tgz",
++      "integrity": "sha512-QtiuPytchRyC4rwUKhexJdQKvDuZ6hWloi3igqPQNUJCS1/v9EiO3UTOXR6A3FoMo4fnAKbWJdqaIwhOzh8qEw==",
++      "cpu": [
++        "x64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "openbsd"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/openharmony-arm64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/openharmony-arm64/-/openharmony-arm64-0.28.2.tgz",
++      "integrity": "sha512-WkhYDmpTjLvGlScA1rwjRUmhl4k8oXR3cIbtqWmELgU/dFeHHlEllxDvdWcNJV9rbzCexB5vz8gtNewWLgCT7Q==",
++      "cpu": [
++        "arm64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "openharmony"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/sunos-x64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/sunos-x64/-/sunos-x64-0.28.2.tgz",
++      "integrity": "sha512-GPMSkTOtMnv2U2F8gxe4Io6qmVs+YKyp832Etqqxr0hFngmXQ3rzwytelm3GIn7T4VviRUlf3sOgBOiTdvaf7g==",
++      "cpu": [
++        "x64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "sunos"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/win32-arm64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/win32-arm64/-/win32-arm64-0.28.2.tgz",
++      "integrity": "sha512-PIhhEkE9uPBleRBrQEJpUn7MBnibZzbGzYWPmY3x+YoVg/95zbjB4CxPPOQ8l5tYYM4mMaCthF8/1DIfBQQyWQ==",
++      "cpu": [
++        "arm64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "win32"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/win32-ia32": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-0.28.2.tgz",
++      "integrity": "sha512-YmJbfTlvU7Sdn9BB+4PRES4oB6pxgS37MAONj+hBr/cpXS1aBPKXxNnDbu+QCWPj0o9dgyxeq79g6c5P8KeuYA==",
++      "cpu": [
++        "ia32"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "win32"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/win32-x64": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.28.2.tgz",
++      "integrity": "sha512-5ebpxr3nWMzrL/rnUI755Jkuee0bHL/Gq0WTF9lvcpv73wAp5eu8MfBUgWK9bhWvZjj7yX8etf/8tI8Ney695g==",
++      "cpu": [
++        "x64"
++      ],
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "win32"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
+     "node_modules/@eslint-community/eslint-utils": {
+       "version": "4.10.1",
+       "resolved": "https://registry.npmjs.org/@eslint-community/eslint-utils/-/eslint-utils-4.10.1.tgz",
+@@ -3726,6 +4302,48 @@
+       "dev": true,
+       "license": "MIT"
+     },
++    "node_modules/esbuild": {
++      "version": "0.28.2",
++      "resolved": "https://registry.npmjs.org/esbuild/-/esbuild-0.28.2.tgz",
++      "integrity": "sha512-HKVLS8dvII+xoKW9kmqxbRKrnWEXfJJr/FZhhJmiqIB0e053QNYFqOBouTMO/k5sID4MvCiUCvv8b9M4h32wIA==",
++      "devOptional": true,
++      "hasInstallScript": true,
++      "license": "MIT",
++      "bin": {
++        "esbuild": "bin/esbuild"
++      },
++      "engines": {
++        "node": ">=18"
++      },
++      "optionalDependencies": {
++        "@esbuild/aix-ppc64": "0.28.2",
++        "@esbuild/android-arm": "0.28.2",
++        "@esbuild/android-arm64": "0.28.2",
++        "@esbuild/android-x64": "0.28.2",
++        "@esbuild/darwin-arm64": "0.28.2",
++        "@esbuild/darwin-x64": "0.28.2",
++        "@esbuild/freebsd-arm64": "0.28.2",
++        "@esbuild/freebsd-x64": "0.28.2",
++        "@esbuild/linux-arm": "0.28.2",
++        "@esbuild/linux-arm64": "0.28.2",
++        "@esbuild/linux-ia32": "0.28.2",
++        "@esbuild/linux-loong64": "0.28.2",
++        "@esbuild/linux-mips64el": "0.28.2",
++        "@esbuild/linux-ppc64": "0.28.2",
++        "@esbuild/linux-riscv64": "0.28.2",
++        "@esbuild/linux-s390x": "0.28.2",
++        "@esbuild/linux-x64": "0.28.2",
++        "@esbuild/netbsd-arm64": "0.28.2",
++        "@esbuild/netbsd-x64": "0.28.2",
++        "@esbuild/openbsd-arm64": "0.28.2",
++        "@esbuild/openbsd-x64": "0.28.2",
++        "@esbuild/openharmony-arm64": "0.28.2",
++        "@esbuild/sunos-x64": "0.28.2",
++        "@esbuild/win32-arm64": "0.28.2",
++        "@esbuild/win32-ia32": "0.28.2",
++        "@esbuild/win32-x64": "0.28.2"
++      }
++    },
+     "node_modules/escape-string-regexp": {
+       "version": "4.0.0",
+       "resolved": "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-4.0.0.tgz",
+@@ -5009,6 +5627,16 @@
+         "pathe": "^2.0.1"
+       }
+     },
++    "node_modules/mnemonist": {
++      "version": "0.38.3",
++      "resolved": "https://registry.npmjs.org/mnemonist/-/mnemonist-0.38.3.tgz",
++      "integrity": "sha512-2K9QYubXx/NAjv4VLq1d1Ly8pWNC5L3BrixtdkyTegXWJIqY+zLNDhhX/A+ZwWt70tB1S8H4BE8FLYEFyNoOBw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "obliterator": "^1.6.1"
++      }
++    },
+     "node_modules/ms": {
+       "version": "2.1.3",
+       "resolved": "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz",
+@@ -5082,6 +5710,13 @@
+         "url": "https://github.com/fb55/nth-check?sponsor=1"
+       }
+     },
++    "node_modules/obliterator": {
++      "version": "1.6.1",
++      "resolved": "https://registry.npmjs.org/obliterator/-/obliterator-1.6.1.tgz",
++      "integrity": "sha512-9WXswnqINnnhOG/5SLimUlzuU1hFJUc8zkwyD59Sd+dPOMf05PmnYG/d6Q7HZ+KmgkZJa1PxRso6QdM3sTNHig==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/obug": {
+       "version": "2.1.4",
+       "resolved": "https://registry.npmjs.org/obug/-/obug-2.1.4.tgz",
+diff --git a/package.json b/package.json
+index 596fcab..35611b2 100644
+--- a/package.json
++++ b/package.json
+@@ -26,12 +26,15 @@
+   },
+   "devDependencies": {
+     "@aws-sdk/client-cognito-identity-provider": "^3.1127.0",
++    "@aws-sdk/client-dynamodb": "^3.1127.0",
++    "@aws-sdk/lib-dynamodb": "^3.1127.0",
+     "@playwright/test": "^1.63.0",
+     "@types/node": "^26.4.0",
+     "@vitejs/plugin-vue": "^6.0.8",
+     "@vue/eslint-config-typescript": "^14.9.0",
+     "@vue/test-utils": "^2.5.0",
+     "@vue/tsconfig": "^0.9.1",
++    "esbuild": "^0.28.2",
+     "eslint": "^10.9.1",
+     "eslint-plugin-vue": "^10.10.0",
+     "husky": "^9.1.7",
+diff --git a/src/App.test.ts b/src/App.test.ts
+index 836e7a3..ac2dc02 100644
+--- a/src/App.test.ts
++++ b/src/App.test.ts
+@@ -1,8 +1,10 @@
+-import { mount } from '@vue/test-utils'
++import { flushPromises, mount } from '@vue/test-utils'
+ import { createPinia, setActivePinia } from 'pinia'
+ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+ import App from './App.vue'
+ import { router } from './router'
++import { texts } from './texts/en'
++import { useUserAccountStore } from './stores/userAccount'
+ import { useUserPreferencesStore } from './stores/userPreferences'
+ 
+ beforeEach(() => {
+@@ -41,3 +43,45 @@ describe('theme mode toggle', () => {
+     expect(wrapper.find('.theme-switch').attributes('aria-checked')).toBe('false')
+   })
+ })
++
++describe('app title link', () => {
++  it('points to the cert selector when a session is active', () => {
++    useUserAccountStore().accountMode = 'account'
++    wrapper = mount(App, { global: { plugins: [router] } })
++
++    expect(wrapper.find('.app-title').attributes('href')).toBe('#/')
++  })
++
++  it('points to the cert selector in local mode too', () => {
++    useUserAccountStore().accountMode = 'local'
++    wrapper = mount(App, { global: { plugins: [router] } })
++
++    expect(wrapper.find('.app-title').attributes('href')).toBe('#/')
++  })
++
++  it('points to the welcome page when no session is active', () => {
++    useUserAccountStore().accountMode = null
++    wrapper = mount(App, { global: { plugins: [router] } })
++
++    expect(wrapper.find('.app-title').attributes('href')).toBe('#/welcome')
++  })
++
++  it('offers a way back to the welcome page in local mode', async () => {
++    useUserAccountStore().accountMode = 'local'
++    wrapper = mount(App, { global: { plugins: [router] } })
++
++    await wrapper.findAll('button').find((b) => b.text() === texts.signIn)!.trigger('click')
++    await flushPromises()
++
++    expect(router.currentRoute.value.path).toBe('/welcome')
++  })
++
++  it('hides the sign-in shortcut for a signed-in account', () => {
++    const account = useUserAccountStore()
++    account.accountMode = 'account'
++    account.user = { userId: 'sub-1', email: 'dev@example.com' }
++    wrapper = mount(App, { global: { plugins: [router] } })
++
++    expect(wrapper.findAll('button').some((b) => b.text() === texts.signIn)).toBe(false)
++  })
++})
+diff --git a/src/App.vue b/src/App.vue
+index 62a7958..179ac41 100644
+--- a/src/App.vue
++++ b/src/App.vue
+@@ -1,25 +1,59 @@
+ <script setup lang="ts">
+-import { useThemeMode } from './composables/useThemeMode'
++import { computed, ref } from 'vue'
++import { useRouter } from 'vue-router'
+ import SecondaryButton from './components/SecondaryButton.vue'
++import SyncBanner from './components/SyncBanner.vue'
+ import IconMoon from './components/icons/IconMoon.vue'
+ import IconSun from './components/icons/IconSun.vue'
+ import { useAccount } from './composables/useAccount'
+-import { texts } from './texts/en'
++import { syncError } from './composables/useSync'
++import { useThemeMode } from './composables/useThemeMode'
+ import { useUserAccountStore } from './stores/userAccount'
++import { texts } from './texts/en'
+ 
++const router = useRouter()
+ const preferences = useThemeMode()
+ const account = useUserAccountStore()
+ const { signOut } = useAccount()
++
++const signOutPending = ref(false)
++
++const titleTarget = computed(() => (account.accountMode ? '/' : '/welcome'))
++
++async function handleSignOut() {
++  if (signOutPending.value) return
++  signOutPending.value = true
++  try {
++    await signOut()
++  } finally {
++    signOutPending.value = false
++  }
++}
++
++function goToWelcome() {
++  router.push('/welcome')
++}
++
++function dismissSyncError() {
++  syncError.value = null
++}
+ </script>
+ 
+ <template>
+   <header class="app-header">
+-    <RouterLink to="/" class="app-title">{{ texts.appTitle }}</RouterLink>
++    <RouterLink :to="titleTarget" class="app-title">{{ texts.appTitle }}</RouterLink>
+     <div class="app-header__actions">
+       <div v-if="account.user" class="account-chip">
+         <span class="account-chip__email">{{ account.user.email ?? account.user.userId }}</span>
+-        <SecondaryButton size="sm" @click="signOut">{{ texts.signOut }}</SecondaryButton>
++        <SecondaryButton
++          size="sm"
++          :disabled="signOutPending"
++          @click="handleSignOut"
++        >{{ texts.signOut }}</SecondaryButton>
+       </div>
++      <SecondaryButton v-else-if="account.accountMode === 'local'" size="sm" @click="goToWelcome">
++        {{ texts.signIn }}
++      </SecondaryButton>
+       <button
+         type="button"
+         class="theme-switch"
+@@ -34,6 +68,7 @@ const { signOut } = useAccount()
+       </button>
+     </div>
+   </header>
++    <SyncBanner v-if="syncError" :message="syncError" @dismiss="dismissSyncError" />
+   <main>
+     <RouterView v-slot="{ Component, route }">
+       <Transition name="page" mode="out-in">
+diff --git a/src/components/SyncBanner.vue b/src/components/SyncBanner.vue
+new file mode 100644
+index 0000000..cb4bb23
+--- /dev/null
++++ b/src/components/SyncBanner.vue
+@@ -0,0 +1,50 @@
++<template>
++  <div class="sync-banner" role="alert">
++    <span class="sync-banner__message">{{ message }}</span>
++    <button
++      type="button"
++      class="sync-banner__dismiss"
++      aria-label="Dismiss"
++      @click="onDismiss"
++    >&times;</button>
++  </div>
++</template>
++
++<script setup lang="ts">
++defineProps<{
++  message: string
++  onDismiss: () => void
++}>()
++</script>
++
++<style scoped>
++.sync-banner {
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  gap: 12px;
++  padding: 10px 16px;
++  background: var(--red);
++  color: var(--text-inverse, #fff);
++  font-size: 14px;
++}
++
++.sync-banner__message {
++  text-align: center;
++}
++
++.sync-banner__dismiss {
++  font: inherit;
++  font-size: 18px;
++  line-height: 1;
++  background: none;
++  border: none;
++  cursor: pointer;
++  color: inherit;
++  opacity: 0.8;
++}
++
++.sync-banner__dismiss:hover {
++  opacity: 1;
++}
++</style>
+diff --git a/src/composables/useAccount.test.ts b/src/composables/useAccount.test.ts
+index 679e774..580522a 100644
+--- a/src/composables/useAccount.test.ts
++++ b/src/composables/useAccount.test.ts
+@@ -7,6 +7,7 @@ import { useRouter } from 'vue-router'
+ import * as auth from '../services/auth'
+ import type { RemoteSyncPayload } from '../services/remoteSync'
+ import { texts } from '../texts/en'
++import { useQuizHistoryStore } from '../stores/quizHistory'
+ import { useUserAccountStore } from '../stores/userAccount'
+ import { useUserProgressStore } from '../stores/userProgress'
+ import type { AuthUser } from '../types'
+@@ -33,6 +34,18 @@ const pushRoute = useRouter().push as Mock
+ 
+ const USER: AuthUser = { userId: 'sub-1', email: 'dev@example.com' }
+ 
++const historyEntry = {
++  id: 'h1',
++  certCode: 'DVA-C02',
++  mode: 'preparation' as const,
++  startedAt: 1,
++  finishedAt: 2,
++  questionIds: ['q1'],
++  answers: {},
++  flags: [],
++  result: { percentCorrect: 100, passed: true, timesCorrect: 1, totalAnswered: 1 },
++}
++
+ function makePayload(): RemoteSyncPayload {
+   const exportedAt = new Date().toISOString()
+   return {
+@@ -44,10 +57,29 @@ function makePayload(): RemoteSyncPayload {
+         'DVA-C02': { q1: { questionId: 'q1', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 } },
+       },
+     },
+-    history: { format: 'quiz-history', version: 1, exportedAt, entries: [] },
++    history: { format: 'quiz-history', version: 1, exportedAt, entries: [historyEntry] },
+   }
+ }
+ 
++function seedDeviceData() {
++  const progressStore = useUserProgressStore()
++  progressStore.byExamCode['DVA-C02'] = {
++    qDev: { questionId: 'qDev', attempts: 3, timesCorrect: 1, timesWrong: 2, flagged: true, lastSeenAt: 999 },
++  }
++  const historyStore = useQuizHistoryStore()
++  historyStore.entries.push({
++    id: 'hDev',
++    certCode: 'DVA-C02',
++    mode: 'exam',
++    startedAt: 10,
++    finishedAt: 20,
++    questionIds: ['qDev'],
++    answers: {},
++    flags: ['qDev'],
++    result: { percentCorrect: 0, passed: false, timesCorrect: 0, totalAnswered: 1 },
++  })
++}
++
+ beforeEach(() => {
+   localStorage.clear()
+   const pinia = createPinia()
+@@ -59,10 +91,10 @@ beforeEach(() => {
+ })
+ 
+ describe('useAccount sign-in', () => {
+-  it('stores the user, switches to account mode, merges pulled data, pushes local data up and opens the cert selector', async () => {
++  it('replaces device data with the account data pulled from the backend and never pushes at sign-in', async () => {
++    seedDeviceData()
+     vi.mocked(auth.signIn).mockResolvedValue(USER)
+     adapter.pull.mockResolvedValue(makePayload())
+-    adapter.push.mockResolvedValue(undefined)
+ 
+     await useAccount().signIn('dev@example.com', 'Passw0rd!')
+ 
+@@ -70,13 +102,15 @@ describe('useAccount sign-in', () => {
+     expect(account.user).toEqual(USER)
+     expect(account.accountMode).toBe('account')
+     expect(adapter.pull).toHaveBeenCalledOnce()
+-    expect(adapter.push).toHaveBeenCalledWith(
+-      expect.objectContaining({
+-        progress: expect.objectContaining({ format: 'quiz-progress' }),
+-        history: expect.objectContaining({ format: 'quiz-history' }),
+-      }),
+-    )
+-    expect(useUserProgressStore().byExamCode['DVA-C02']?.q1?.attempts).toBe(1)
++    expect(adapter.push).not.toHaveBeenCalled()
++
++    const progressStore = useUserProgressStore()
++    expect(progressStore.byExamCode['DVA-C02']?.q1?.attempts).toBe(1)
++    expect(progressStore.byExamCode['DVA-C02']?.qDev).toBeUndefined()
++    expect(useQuizHistoryStore().entries).toEqual([historyEntry])
++
++    expect(account.guestProgress).not.toBeNull()
++    expect(account.guestHistory?.entries.map((e) => e.id)).toEqual(['hDev'])
+     expect(pushRoute).toHaveBeenCalledWith({ name: 'cert-selector' })
+   })
+ 
+@@ -90,7 +124,8 @@ describe('useAccount sign-in', () => {
+     expect(pushRoute).not.toHaveBeenCalled()
+   })
+ 
+-  it('a failing pull is reported through syncError without blocking sign-in', async () => {
++  it('a failing pull clears the stores and reports syncError without blocking sign-in', async () => {
++    seedDeviceData()
+     vi.mocked(auth.signIn).mockResolvedValue(USER)
+     adapter.pull.mockRejectedValue(new Error('offline'))
+ 
+@@ -99,20 +134,50 @@ describe('useAccount sign-in', () => {
+ 
+     expect(syncError.value).toBe(texts.syncFailed)
+     expect(useUserAccountStore().accountMode).toBe('account')
++    expect(useUserProgressStore().byExamCode).toEqual({})
++    expect(useQuizHistoryStore().entries).toEqual([])
+     expect(pushRoute).toHaveBeenCalledWith({ name: 'cert-selector' })
+   })
+ 
+-  it('a failing push is reported through syncError without blocking sign-in', async () => {
++  it('signing in while already signed in does not overwrite the guest snapshot', async () => {
++    seedDeviceData()
++    vi.mocked(auth.signIn).mockResolvedValue(USER)
++    adapter.pull.mockResolvedValue(makePayload())
++    const { signIn } = useAccount()
++    await signIn('dev@example.com', 'Passw0rd!')
++
++    const progressStore = useUserProgressStore()
++    progressStore.byExamCode['DVA-C02'] = {
++      qAccount: { questionId: 'qAccount', attempts: 1, timesCorrect: 0, timesWrong: 1, flagged: false, lastSeenAt: 50 },
++    }
++    await signIn('dev@example.com', 'Passw0rd!')
++
++    const account = useUserAccountStore()
++    expect(account.guestProgress?.byExamCode['DVA-C02']?.qDev).toBeDefined()
++    expect(account.guestProgress?.byExamCode['DVA-C02']?.qAccount).toBeUndefined()
++  })
++
++  it('a failing push is reported through syncError', async () => {
+     vi.mocked(auth.signIn).mockResolvedValue(USER)
+     adapter.pull.mockResolvedValue(null)
+     adapter.push.mockRejectedValue(new Error('offline'))
+ 
+-    const { signIn, syncError } = useAccount()
++    const { signIn, pushLocalData, syncError } = useAccount()
+     await signIn('dev@example.com', 'Passw0rd!')
++    await pushLocalData()
+ 
+     expect(syncError.value).toBe(texts.syncFailed)
+     expect(useUserAccountStore().accountMode).toBe('account')
+   })
++
++  it('push is a no-op when not signed in to an account', async () => {
++    await useAccount().continueLocal()
++    seedDeviceData()
++
++    await useAccount().pushLocalData()
++
++    expect(adapter.push).not.toHaveBeenCalled()
++  })
+ })
+ 
+ describe('useAccount sign-up', () => {
+@@ -138,7 +203,226 @@ describe('useAccount sign-up', () => {
+   })
+ })
+ 
++describe('useAccount guest migration', () => {
++  it('upload merges guest and remote data, pushes the union and discards the guest snapshot', async () => {
++    seedDeviceData()
++    vi.mocked(auth.signIn).mockResolvedValue(USER)
++    adapter.pull.mockResolvedValue(makePayload())
++    adapter.push.mockResolvedValue(undefined)
++
++    await useAccount().signIn('dev@example.com', 'Passw0rd!', { migrateGuest: true })
++
++    const progressStore = useUserProgressStore()
++    expect(progressStore.byExamCode['DVA-C02']?.qDev?.attempts).toBe(3)
++    expect(progressStore.byExamCode['DVA-C02']?.q1?.attempts).toBe(1)
++    expect(useQuizHistoryStore().entries.map((e) => e.id).sort()).toEqual(['h1', 'hDev'])
++    expect(adapter.push).toHaveBeenCalledOnce()
++    expect(useUserAccountStore().guestProgress).toBeNull()
++  })
++
++  it('migration keeps the newest lastSeenAt version of a question present on both sides', async () => {
++    const progressStore = useUserProgressStore()
++    progressStore.byExamCode['DVA-C02'] = {
++      q1: { questionId: 'q1', attempts: 3, timesCorrect: 1, timesWrong: 2, flagged: true, lastSeenAt: 999 },
++    }
++    vi.mocked(auth.signIn).mockResolvedValue(USER)
++    adapter.pull.mockResolvedValue({
++      ...makePayload(),
++      progress: {
++        format: 'quiz-progress',
++        version: 1,
++        exportedAt: new Date().toISOString(),
++        byExamCode: {
++          'DVA-C02': { q1: { questionId: 'q1', attempts: 9, timesCorrect: 9, timesWrong: 0, flagged: false, lastSeenAt: 1 } },
++        },
++      },
++    })
++    adapter.push.mockResolvedValue(undefined)
++
++    await useAccount().signIn('dev@example.com', 'Passw0rd!', { migrateGuest: true })
++
++    expect(progressStore.byExamCode['DVA-C02']?.q1?.attempts).toBe(3)
++  })
++
++  it('a failed pull during migration keeps the guest data in place and never pushes', async () => {
++    seedDeviceData()
++    vi.mocked(auth.signIn).mockResolvedValue(USER)
++    adapter.pull.mockRejectedValue(new Error('offline'))
++
++    const { signIn, syncError } = useAccount()
++    await signIn('dev@example.com', 'Passw0rd!', { migrateGuest: true })
++
++    expect(syncError.value).toBe(texts.syncFailed)
++    expect(useUserProgressStore().byExamCode['DVA-C02']?.qDev?.attempts).toBe(3)
++    expect(useUserAccountStore().guestProgress).not.toBeNull()
++    expect(adapter.push).not.toHaveBeenCalled()
++  })
++
++  it('a failed push during migration keeps the guest snapshot so sign-out can restore the guest data', async () => {
++    seedDeviceData()
++    vi.mocked(auth.signIn).mockResolvedValue(USER)
++    adapter.pull.mockResolvedValue(makePayload())
++    adapter.push.mockRejectedValue(new Error('offline'))
++
++    const { signIn, signOut, syncError } = useAccount()
++    await signIn('dev@example.com', 'Passw0rd!', { migrateGuest: true })
++
++    expect(syncError.value).toBe(texts.syncFailed)
++    expect(useUserAccountStore().guestProgress).not.toBeNull()
++
++    await signOut()
++
++    expect(useUserProgressStore().byExamCode['DVA-C02']?.qDev?.attempts).toBe(3)
++    expect(useUserProgressStore().byExamCode['DVA-C02']?.q1).toBeUndefined()
++    expect(useQuizHistoryStore().entries.map((e) => e.id)).toEqual(['hDev'])
++  })
++})
++
++describe('useAccount push serialization', () => {
++  it('serializes concurrent pushes so the newest state is the last one written remotely', async () => {
++    vi.mocked(auth.signIn).mockResolvedValue(USER)
++    adapter.pull.mockResolvedValue(null)
++    adapter.push.mockResolvedValue(undefined)
++
++    const { signIn, pushLocalData } = useAccount()
++    await signIn('dev@example.com', 'Passw0rd!')
++
++    let releaseFirst!: () => void
++    const blockedFirst = new Promise<void>((resolve) => {
++      releaseFirst = resolve
++    })
++    adapter.push.mockImplementationOnce(() => blockedFirst)
++
++    const firstCall = pushLocalData()
++    useUserProgressStore().recordAnswer('DVA-C02', 'qNew', true)
++    const secondCall = pushLocalData()
++
++    releaseFirst()
++    await Promise.all([firstCall, secondCall])
++
++    expect(adapter.push).toHaveBeenCalledTimes(2)
++    expect(adapter.push.mock.calls[0][0].progress.byExamCode['DVA-C02']?.qNew).toBeUndefined()
++    expect(adapter.push.mock.calls[1][0].progress.byExamCode['DVA-C02']?.qNew).toBeDefined()
++  })
++
++  it('a failing push does not poison the queue for the next push', async () => {
++    vi.mocked(auth.signIn).mockResolvedValue(USER)
++    adapter.pull.mockResolvedValue(null)
++    adapter.push.mockRejectedValueOnce(new Error('offline')).mockResolvedValue(undefined)
++
++    const { signIn, pushLocalData, syncError } = useAccount()
++    await signIn('dev@example.com', 'Passw0rd!')
++
++    await pushLocalData()
++    expect(syncError.value).toBe(texts.syncFailed)
++
++    useUserProgressStore().recordAnswer('DVA-C02', 'q1', true)
++    await pushLocalData()
++    expect(adapter.push).toHaveBeenCalledTimes(2)
++  })
++
++  it('queued pushes never run after sign-out and are not sent under the next account', async () => {
++    vi.mocked(auth.signIn).mockResolvedValue(USER)
++    const userB: AuthUser = { userId: 'sub-2', email: 'other@example.com' }
++    vi.mocked(auth.signOut).mockResolvedValue(undefined)
++    adapter.pull.mockResolvedValue(null)
++    adapter.push.mockResolvedValue(undefined)
++
++    const { signIn, signOut, pushLocalData } = useAccount()
++    await signIn('dev@example.com', 'Passw0rd!')
++
++    adapter.push.mockRejectedValueOnce(new Error('offline'))
++    await pushLocalData()
++
++    void pushLocalData()
++    await Promise.resolve()
++
++    await signOut()
++
++    vi.mocked(auth.signIn).mockResolvedValue(userB)
++    await signIn('other@example.com', 'Passw0rd!')
++
++    expect(adapter.push).toHaveBeenCalledTimes(2)
++  })
++
++  it('queued account-A pushes are cancelled when account B signs in directly (no sign-out)', async () => {
++    vi.mocked(auth.signIn).mockResolvedValue(USER)
++    const userB: AuthUser = { userId: 'sub-2', email: 'other@example.com' }
++    adapter.push.mockResolvedValue(undefined)
++
++    const { signIn, pushLocalData } = useAccount()
++    await signIn('dev@example.com', 'Passw0rd!')
++
++    let releaseFirst!: () => void
++    const blockedFirst = new Promise<void>((resolve) => {
++      releaseFirst = resolve
++    })
++    let capturedIsCurrent: (() => boolean) | undefined
++    adapter.push.mockImplementationOnce((_payload: unknown, isCurrent: () => boolean) => {
++      capturedIsCurrent = isCurrent
++      return blockedFirst
++    })
++
++    void pushLocalData()
++    void pushLocalData()
++    await Promise.resolve()
++
++    let releasePull!: () => void
++    const blockedPull = new Promise<void>((resolve) => {
++      releasePull = resolve
++    })
++    adapter.pull.mockImplementationOnce(() => blockedPull)
++
++    vi.mocked(auth.signIn).mockResolvedValue(userB)
++    const bSignIn = signIn('other@example.com', 'Passw0rd!')
++    await Promise.resolve()
++
++    // Guards A's in-flight push from sending under B's freshly retrieved credentials.
++    expect(capturedIsCurrent?.()).toBe(false)
++
++    releaseFirst()
++    await new Promise((resolve) => setTimeout(resolve, 25))
++
++    releasePull()
++    await bSignIn
++    await new Promise((resolve) => setTimeout(resolve, 25))
++
++    expect(adapter.push).toHaveBeenCalledTimes(1)
++  })
++})
++
+ describe('useAccount session ends', () => {
++  it('signing out restores the guest snapshot captured at sign-in', async () => {
++    seedDeviceData()
++    vi.mocked(auth.signIn).mockResolvedValue(USER)
++    adapter.pull.mockResolvedValue(makePayload())
++    const { signIn, signOut } = useAccount()
++    await signIn('dev@example.com', 'Passw0rd!')
++
++    await signOut()
++
++    const progressStore = useUserProgressStore()
++    expect(progressStore.byExamCode['DVA-C02']?.qDev?.attempts).toBe(3)
++    expect(progressStore.byExamCode['DVA-C02']?.q1).toBeUndefined()
++    expect(useQuizHistoryStore().entries.map((e) => e.id)).toEqual(['hDev'])
++    expect(useUserAccountStore().guestProgress).toBeNull()
++  })
++
++  it('signing out with no guest snapshot clears the stores', async () => {
++    vi.mocked(auth.signOut).mockResolvedValue(undefined)
++    const accountStore = useUserAccountStore()
++    accountStore.user = USER
++    accountStore.accountMode = 'account'
++    useUserProgressStore().byExamCode['DVA-C02'] = {
++      qAccount: { questionId: 'qAccount', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 },
++    }
++
++    await useAccount().signOut()
++
++    expect(useUserProgressStore().byExamCode).toEqual({})
++    expect(useQuizHistoryStore().entries).toEqual([])
++  })
++
+   it('signing out clears the account state and returns to the welcome screen', async () => {
+     vi.mocked(auth.signOut).mockResolvedValue(undefined)
+     const accountStore = useUserAccountStore()
+@@ -177,4 +461,42 @@ describe('useAccount session ends', () => {
+     expect(adapter.push).not.toHaveBeenCalled()
+     expect(pushRoute).toHaveBeenCalledWith({ name: 'cert-selector' })
+   })
++})
++
++describe('useAccount pushLocalDataDebounced', () => {
++  it('coalesces a burst of calls into a single push of the latest state', async () => {
++    vi.mocked(auth.signIn).mockResolvedValue(USER)
++    adapter.pull.mockResolvedValue(null)
++    adapter.push.mockResolvedValue(undefined)
++
++    const { signIn, pushLocalDataDebounced } = useAccount()
++    await signIn('dev@example.com', 'Passw0rd!')
++
++    void pushLocalDataDebounced(10)
++    useUserProgressStore().recordAnswer('DVA-C02', 'q1', true)
++    void pushLocalDataDebounced(10)
++    useUserProgressStore().recordAnswer('DVA-C02', 'q2', true)
++    const last = pushLocalDataDebounced(10)
++    await last
++
++    expect(adapter.push).toHaveBeenCalledTimes(1)
++    const [pushedPayload] = adapter.push.mock.calls[0]
++    expect(pushedPayload.progress.byExamCode['DVA-C02']?.q1).toBeDefined()
++    expect(pushedPayload.progress.byExamCode['DVA-C02']?.q2).toBeDefined()
++  })
++
++  it('signing out flushes a still-pending debounced push before completing', async () => {
++    vi.mocked(auth.signIn).mockResolvedValue(USER)
++    vi.mocked(auth.signOut).mockResolvedValue(undefined)
++    adapter.pull.mockResolvedValue(null)
++    adapter.push.mockResolvedValue(undefined)
++
++    const { signIn, signOut, pushLocalDataDebounced } = useAccount()
++    await signIn('dev@example.com', 'Passw0rd!')
++
++    void pushLocalDataDebounced(10_000)
++    await signOut()
++
++    expect(adapter.push).toHaveBeenCalledTimes(1)
++  })
+ })
+\ No newline at end of file
+diff --git a/src/composables/useAccount.ts b/src/composables/useAccount.ts
+index e5d46e0..486806e 100644
+--- a/src/composables/useAccount.ts
++++ b/src/composables/useAccount.ts
+@@ -1,12 +1,25 @@
+-import { ref } from 'vue'
+ import { useRouter } from 'vue-router'
+ import * as auth from '../services/auth'
++import type { RemoteSyncPayload } from '../services/remoteSync'
+ import { getSyncAdapter } from '../services/remoteSync'
+-import { texts } from '../texts/en'
+ import { useQuizHistoryStore } from '../stores/quizHistory'
+ import { useUserAccountStore } from '../stores/userAccount'
+ import { useUserProgressStore } from '../stores/userProgress'
++import { texts } from '../texts/en'
+ import type { AuthUser } from '../types'
++import { syncError } from './useSync'
++
++const PROGRESS_FORMAT = 'quiz-progress'
++const PROGRESS_VERSION = 1
++const HISTORY_FORMAT = 'quiz-history'
++const HISTORY_VERSION = 1
++
++const FLAG_TOGGLE_DEBOUNCE_MS = 400
++
++let syncSession: symbol | null = null
++let pendingPush: Promise<void> = Promise.resolve()
++let debounceTimer: ReturnType<typeof setTimeout> | null = null
++let flushDebouncedPush: (() => void) | null = null
+ 
+ export function useAccount() {
+   const router = useRouter()
+@@ -14,20 +27,77 @@ export function useAccount() {
+   const progressStore = useUserProgressStore()
+   const historyStore = useQuizHistoryStore()
+   const sync = getSyncAdapter()
+-  const syncError = ref<string | null>(null)
+ 
+-  async function pullRemoteData() {
++  function applyRemoteData(payload: RemoteSyncPayload | null) {
++    const progress = payload?.progress
++    if (progress && progress.format === PROGRESS_FORMAT && progress.version === PROGRESS_VERSION) {
++      progressStore.replaceAll(progress.byExamCode)
++    } else {
++      progressStore.replaceAll({})
++    }
++    const history = payload?.history
++    if (history && history.format === HISTORY_FORMAT && history.version === HISTORY_VERSION) {
++      historyStore.replaceAll(history.entries)
++    } else {
++      historyStore.replaceAll([])
++    }
++  }
++
++  async function loadAccountData(): Promise<boolean> {
+     try {
+-      const payload = await sync.pull()
+-      if (!payload) return
+-      progressStore.importProgress(payload.progress)
+-      historyStore.importHistory(payload.history)
++      applyRemoteData(await sync.pull())
++      return true
+     } catch {
++      applyRemoteData(null)
+       syncError.value = texts.syncFailed
++      return false
+     }
+   }
+ 
+   async function pushLocalData() {
++    if (account.accountMode !== 'account') return
++    const session = syncSession
++    if (session === null) return
++    const payload = {
++      progress: progressStore.exportProgress(),
++      history: historyStore.exportHistory(),
++    }
++    const next = pendingPush
++      .catch(() => undefined)
++      .then(() => {
++        if (syncSession !== session) return
++        return sync.push(payload, () => syncSession === session)
++      })
++    pendingPush = next
++    try {
++      await next
++    } catch {
++      syncError.value = texts.syncFailed
++    }
++  }
++
++  function pushLocalDataDebounced(delayMs = FLAG_TOGGLE_DEBOUNCE_MS): Promise<void> {
++    return new Promise((resolve) => {
++      if (debounceTimer !== null) clearTimeout(debounceTimer)
++      flushDebouncedPush = () => {
++        debounceTimer = null
++        flushDebouncedPush = null
++        void pushLocalData().then(resolve)
++      }
++      debounceTimer = setTimeout(flushDebouncedPush, delayMs)
++    })
++  }
++
++  async function migrateGuestData(): Promise<boolean> {
++    let remote: RemoteSyncPayload | null = null
++    try {
++      remote = await sync.pull()
++    } catch {
++      syncError.value = texts.syncFailed
++      return false
++    }
++    if (remote?.progress) progressStore.importProgress(remote.progress)
++    if (remote?.history) historyStore.importHistory(remote.history)
+     try {
+       await sync.push({
+         progress: progressStore.exportProgress(),
+@@ -35,14 +105,27 @@ export function useAccount() {
+       })
+     } catch {
+       syncError.value = texts.syncFailed
++      return false
+     }
++    account.takeGuestSnapshot()
++    return true
+   }
+ 
+-  async function completeAuthentication(user: AuthUser) {
++  async function completeAuthentication(user: AuthUser, options: { migrateGuest?: boolean } = {}) {
++    syncSession = null
++    const wasSignedIn = account.accountMode === 'account'
+     account.user = user
+     account.accountMode = 'account'
+-    await pullRemoteData()
+-    await pushLocalData()
++    if (!wasSignedIn) {
++      account.stashGuest(progressStore.exportProgress(), historyStore.exportHistory())
++    }
++    const ok =
++      options.migrateGuest && !wasSignedIn ? await migrateGuestData() : await loadAccountData()
++    if (ok) {
++      syncSession = Symbol()
++    } else {
++      syncSession = null
++    }
+     await router.push({ name: 'cert-selector' })
+   }
+ 
+@@ -50,15 +133,15 @@ export function useAccount() {
+     return auth.signUp(email, password)
+   }
+ 
+-  async function confirmSignUp(email: string, code: string, password: string) {
++  async function confirmSignUp(email: string, code: string, password: string, options: { migrateGuest?: boolean } = {}) {
+     await auth.confirmSignUp(email, code)
+     const user = await auth.signIn(email, password)
+-    await completeAuthentication(user)
++    await completeAuthentication(user, options)
+   }
+ 
+-  async function signIn(email: string, password: string) {
++  async function signIn(email: string, password: string, options: { migrateGuest?: boolean } = {}) {
+     const user = await auth.signIn(email, password)
+-    await completeAuthentication(user)
++    await completeAuthentication(user, options)
+   }
+ 
+   async function signOut() {
+@@ -67,6 +150,25 @@ export function useAccount() {
+     } catch {
+       syncError.value = texts.syncFailed
+     }
++    if (debounceTimer !== null) {
++      clearTimeout(debounceTimer)
++      flushDebouncedPush?.()
++    }
++    const drain = pendingPush.catch(() => undefined)
++    const timeout = new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), 2000))
++    await Promise.race([drain, timeout])
++    syncSession = null
++    const guest = account.takeGuestSnapshot()
++    if (guest.progress) {
++      progressStore.replaceAll(guest.progress.byExamCode)
++    } else {
++      progressStore.replaceAll({})
++    }
++    if (guest.history) {
++      historyStore.replaceAll(guest.history.entries)
++    } else {
++      historyStore.replaceAll([])
++    }
+     account.user = null
+     account.accountMode = null
+     await router.push({ name: 'welcome' })
+@@ -77,5 +179,14 @@ export function useAccount() {
+     await router.push({ name: 'cert-selector' })
+   }
+ 
+-  return { signUp, confirmSignUp, signIn, signOut, continueLocal, syncError }
++  return {
++    signUp,
++    confirmSignUp,
++    signIn,
++    signOut,
++    continueLocal,
++    pushLocalData,
++    pushLocalDataDebounced,
++    syncError,
++  }
+ }
+\ No newline at end of file
+diff --git a/src/composables/useSync.ts b/src/composables/useSync.ts
+new file mode 100644
+index 0000000..2df51f0
+--- /dev/null
++++ b/src/composables/useSync.ts
+@@ -0,0 +1,3 @@
++import { ref } from 'vue'
++
++export const syncError = ref<string | null>(null)
+\ No newline at end of file
+diff --git a/src/config.ts b/src/config.ts
+index df06b8c..091c3e2 100644
+--- a/src/config.ts
++++ b/src/config.ts
+@@ -17,6 +17,16 @@ export const awsConfig: AwsConfig = {
+   syncApiUrl: readEnv('VITE_SYNC_API_URL'),
+ }
+ 
+-export function isAuthConfigured(): boolean {
++function isAuthConfigured(): boolean {
+   return awsConfig.userPoolId !== undefined && awsConfig.userPoolClientId !== undefined
++}
++
++let authRuntimeAvailable = true
++
++export function setAuthRuntimeAvailable(available: boolean): void {
++  authRuntimeAvailable = available
++}
++
++export function isAuthAvailable(): boolean {
++  return isAuthConfigured() && authRuntimeAvailable
+ }
+\ No newline at end of file
+diff --git a/src/lambda/pull/index.ts b/src/lambda/pull/index.ts
+new file mode 100644
+index 0000000..c141625
+--- /dev/null
++++ b/src/lambda/pull/index.ts
+@@ -0,0 +1,38 @@
++import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
++import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb'
++
++const client = new DynamoDBClient({})
++const docClient = DynamoDBDocumentClient.from(client)
++const tableName = process.env.TABLE_NAME!
++
++interface SyncResponse {
++  progress: unknown
++  history: unknown
++}
++
++export const handler = async (event: {
++  requestContext: { authorizer: { jwt: { claims: { sub: string } } } }
++}): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
++  const userId = event.requestContext?.authorizer?.jwt?.claims?.sub
++  if (!userId) return { statusCode: 401, headers: { 'Content-Type': 'application/json' }, body: '' }
++
++  const result = await docClient.send(
++    new QueryCommand({
++      TableName: tableName,
++      KeyConditionExpression: 'PK = :pk',
++      ExpressionAttributeValues: { ':pk': `SYNC#${userId}` },
++    }),
++  )
++
++  const response: SyncResponse = { progress: null, history: null }
++  for (const item of result.Items ?? []) {
++    if (item.SK === 'PROGRESS') response.progress = item.data
++    if (item.SK === 'HISTORY') response.history = item.data
++  }
++
++  return {
++    statusCode: 200,
++    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
++    body: JSON.stringify(response),
++  }
++}
+\ No newline at end of file
+diff --git a/src/lambda/push/index.test.ts b/src/lambda/push/index.test.ts
+new file mode 100644
+index 0000000..b251786
+--- /dev/null
++++ b/src/lambda/push/index.test.ts
+@@ -0,0 +1,61 @@
++import { beforeEach, describe, expect, it, vi } from 'vitest'
++
++const send = vi.fn().mockResolvedValue({})
++vi.mock('@aws-sdk/client-dynamodb', () => ({ DynamoDBClient: vi.fn() }))
++vi.mock('@aws-sdk/lib-dynamodb', () => ({
++  DynamoDBDocumentClient: { from: () => ({ send }) },
++  TransactWriteCommand: class {
++    constructor(public input: unknown) {}
++  },
++}))
++
++const { handler } = await import('./index')
++
++const event = (body: unknown) => ({
++  requestContext: { authorizer: { jwt: { claims: { sub: 'user-1' } } } },
++  body: JSON.stringify(body),
++})
++
++const validProgress = { format: 'quiz-progress', version: 1, exportedAt: 'now', byExamCode: {} }
++const validHistory = { format: 'quiz-history', version: 1, exportedAt: 'now', entries: [] }
++
++describe('push handler payload validation', () => {
++  beforeEach(() => {
++    send.mockClear()
++  })
++
++  it.each([
++    ['missing byExamCode', { ...validProgress, byExamCode: undefined }],
++    ['missing format', { ...validProgress, format: undefined }],
++    ['wrong version type', { ...validProgress, version: '1' }],
++  ])('rejects a progress document with %s', async (_label, progress) => {
++    const result = await handler(event({ progress }))
++
++    expect(result.statusCode).toBe(400)
++    expect(send).not.toHaveBeenCalled()
++  })
++
++  it.each([
++    ['missing entries', { ...validHistory, entries: undefined }],
++    ['entries not an array', { ...validHistory, entries: {} }],
++  ])('rejects a history document with %s', async (_label, history) => {
++    const result = await handler(event({ history }))
++
++    expect(result.statusCode).toBe(400)
++    expect(send).not.toHaveBeenCalled()
++  })
++
++  it('accepts a payload with valid progress and history documents', async () => {
++    const result = await handler(event({ progress: validProgress, history: validHistory }))
++
++    expect(result.statusCode).toBe(200)
++    expect(send).toHaveBeenCalledOnce()
++  })
++
++  it('accepts a payload deleting a document (null value)', async () => {
++    const result = await handler(event({ progress: null }))
++
++    expect(result.statusCode).toBe(200)
++    expect(send).toHaveBeenCalledOnce()
++  })
++})
+diff --git a/src/lambda/push/index.ts b/src/lambda/push/index.ts
+new file mode 100644
+index 0000000..3ac53d5
+--- /dev/null
++++ b/src/lambda/push/index.ts
+@@ -0,0 +1,125 @@
++import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
++import { DynamoDBDocumentClient, TransactWriteCommand } from '@aws-sdk/lib-dynamodb'
++
++const client = new DynamoDBClient({})
++const docClient = DynamoDBDocumentClient.from(client)
++const tableName = process.env.TABLE_NAME!
++
++interface SyncPayload {
++  progress: unknown
++  history: unknown
++}
++
++interface PutTransactItem {
++  Put: { TableName: string; Item: Record<string, unknown> }
++}
++
++interface DeleteTransactItem {
++  Delete: { TableName: string; Key: Record<string, string> }
++}
++
++const now = () => new Date().toISOString()
++
++function isValidProgress(value: unknown): boolean {
++  if (typeof value !== 'object' || value === null) return false
++  const v = value as Record<string, unknown>
++  return (
++    v.format === 'quiz-progress' &&
++    typeof v.version === 'number' &&
++    typeof v.exportedAt === 'string' &&
++    typeof v.byExamCode === 'object' &&
++    v.byExamCode !== null
++  )
++}
++
++function isValidHistory(value: unknown): boolean {
++  if (typeof value !== 'object' || value === null) return false
++  const v = value as Record<string, unknown>
++  return (
++    v.format === 'quiz-history' &&
++    typeof v.version === 'number' &&
++    typeof v.exportedAt === 'string' &&
++    Array.isArray(v.entries)
++  )
++}
++
++function recordCommand(
++  kind: 'PROGRESS' | 'HISTORY',
++  payload: unknown,
++  pk: string,
++  timestamp: string,
++): PutTransactItem | DeleteTransactItem {
++  const key = { PK: pk, SK: kind }
++  if (payload === null) {
++    return { Delete: { TableName: tableName, Key: key } }
++  }
++  return {
++    Put: {
++      TableName: tableName,
++      Item: { ...key, data: payload, updatedAt: timestamp },
++    },
++  }
++}
++
++export const handler = async (event: {
++  requestContext: { authorizer: { jwt: { claims: { sub: string } } } }
++  body: string | null
++}): Promise<{ statusCode: number; body: string; headers: Record<string, string> }> => {
++  const userId = event.requestContext?.authorizer?.jwt?.claims?.sub
++  if (!userId) return { statusCode: 401, headers: { 'Content-Type': 'application/json' }, body: '' }
++
++  let payload: SyncPayload
++  try {
++    const parsed: unknown = event.body ? JSON.parse(event.body) : {}
++    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
++      return {
++        statusCode: 400,
++        headers: { 'Content-Type': 'application/json' },
++        body: JSON.stringify({ message: 'Invalid request body' }),
++      }
++    }
++    payload = parsed as SyncPayload
++  } catch {
++    return {
++      statusCode: 400,
++      headers: { 'Content-Type': 'application/json' },
++      body: JSON.stringify({ message: 'Invalid JSON body' }),
++    }
++  }
++
++  if ('progress' in payload && payload.progress !== null && payload.progress !== undefined && !isValidProgress(payload.progress)) {
++    return {
++      statusCode: 400,
++      headers: { 'Content-Type': 'application/json' },
++      body: JSON.stringify({ message: 'Invalid progress document' }),
++    }
++  }
++  if ('history' in payload && payload.history !== null && payload.history !== undefined && !isValidHistory(payload.history)) {
++    return {
++      statusCode: 400,
++      headers: { 'Content-Type': 'application/json' },
++      body: JSON.stringify({ message: 'Invalid history document' }),
++    }
++  }
++
++  const pk = `SYNC#${userId}`
++  const timestamp = now()
++
++  const commands: (PutTransactItem | DeleteTransactItem)[] = []
++  if ('progress' in payload) {
++    commands.push(recordCommand('PROGRESS', payload.progress, pk, timestamp))
++  }
++  if ('history' in payload) {
++    commands.push(recordCommand('HISTORY', payload.history, pk, timestamp))
++  }
++
++  if (commands.length > 0) {
++    await docClient.send(new TransactWriteCommand({ TransactItems: commands }))
++  }
++
++  return {
++    statusCode: 200,
++    headers: { 'Content-Type': 'application/json' },
++    body: JSON.stringify({ ok: true }),
++  }
++}
+\ No newline at end of file
+diff --git a/src/main.ts b/src/main.ts
+index 92dbc0c..4323e4a 100644
+--- a/src/main.ts
++++ b/src/main.ts
+@@ -2,7 +2,7 @@ import { createPinia } from 'pinia'
+ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+ import { createApp } from 'vue'
+ import App from './App.vue'
+-import { awsConfig } from './config'
++import { awsConfig, setAuthRuntimeAvailable } from './config'
+ import { router } from './router'
+ import { configureAuth } from './services/auth'
+ import './style.css'
+@@ -13,7 +13,11 @@ async function bootstrap() {
+ 
+   const { userPoolId, userPoolClientId } = awsConfig
+   if (userPoolId && userPoolClientId) {
+-    await configureAuth(userPoolId, userPoolClientId)
++    const configured = await configureAuth(userPoolId, userPoolClientId)
++    if (!configured) {
++      console.warn('Auth configuration failed; falling back to local-only mode')
++      setAuthRuntimeAvailable(false)
++    }
+   }
+ 
+   createApp(App).use(pinia).use(router).mount('#app')
+diff --git a/src/router/index.test.ts b/src/router/index.test.ts
+index f5aa049..c90623a 100644
+--- a/src/router/index.test.ts
++++ b/src/router/index.test.ts
+@@ -9,7 +9,7 @@ import type { Question } from '../types'
+ let authConfigured = true
+ vi.mock('../config', () => ({
+   awsConfig: { region: undefined, userPoolId: undefined, userPoolClientId: undefined, syncApiUrl: undefined },
+-  isAuthConfigured: () => authConfigured,
++  isAuthAvailable: () => authConfigured,
+ }))
+ 
+ const sessionQuestions: Question[] = [
+diff --git a/src/router/index.ts b/src/router/index.ts
+index 4be3ff1..0bcbede 100644
+--- a/src/router/index.ts
++++ b/src/router/index.ts
+@@ -1,5 +1,5 @@
+ import { createRouter, createWebHashHistory } from 'vue-router'
+-import { isAuthConfigured } from '../config'
++import { isAuthAvailable } from '../config'
+ import { useQuizLoader } from '../composables/useQuizLoader'
+ import { useQuizSessionStore } from '../stores/quizSession'
+ import { useUserAccountStore } from '../stores/userAccount'
+@@ -40,7 +40,7 @@ router.beforeEach((to) => {
+ })
+ 
+ router.beforeEach((to) => {
+-  if (to.name === 'auth' && !isAuthConfigured()) {
++  if (to.name === 'auth' && !isAuthAvailable()) {
+     return { name: 'welcome' }
+   }
+ })
+diff --git a/src/services/remoteSync.test.ts b/src/services/remoteSync.test.ts
+new file mode 100644
+index 0000000..09a89e6
+--- /dev/null
++++ b/src/services/remoteSync.test.ts
+@@ -0,0 +1,74 @@
++import { beforeEach, describe, expect, it, vi } from 'vitest'
++import { getSyncAdapter } from './remoteSync'
++
++const fetchAuthSessionMock = vi.hoisted(() => vi.fn())
++
++vi.mock('aws-amplify/auth', () => ({
++  fetchAuthSession: fetchAuthSessionMock,
++}))
++
++vi.mock('../config', () => ({
++  awsConfig: {
++    region: 'eu-west-3',
++    userPoolId: 'eu-west-3_TEST',
++    userPoolClientId: 'client-id',
++    syncApiUrl: 'https://sync.example.com/sync',
++  },
++  isAuthConfigured: () => true,
++}))
++
++const fetchMock = vi.fn()
++
++beforeEach(() => {
++  vi.clearAllMocks()
++  vi.stubGlobal('fetch', fetchMock)
++})
++
++describe('remote sync adapter', () => {
++  const adapter = getSyncAdapter()
++
++  it('pull sends the bearer token and returns the remote payload', async () => {
++    fetchAuthSessionMock.mockResolvedValue({ tokens: { accessToken: 'token-1' } })
++    const payload = {
++      progress: { format: 'quiz-progress', version: 1, exportedAt: '', byExamCode: {} },
++      history: null,
++    }
++    fetchMock.mockResolvedValue(new Response(JSON.stringify(payload), { status: 200 }))
++
++    await expect(adapter.pull()).resolves.toEqual(payload)
++    expect(fetchMock).toHaveBeenCalledWith('https://sync.example.com/sync', {
++      headers: { Authorization: 'Bearer token-1' },
++    })
++  })
++
++  it('pull rejects on a 401 response so an auth failure cannot act as an empty account', async () => {
++    fetchAuthSessionMock.mockResolvedValue({ tokens: { accessToken: 'token-1' } })
++    fetchMock.mockResolvedValue(new Response('', { status: 401 }))
++
++    await expect(adapter.pull()).rejects.toThrow('sync pull failed: 401')
++  })
++
++  it('pull rejects when the auth session cannot be retrieved, without sending a tokenless request', async () => {
++    fetchAuthSessionMock.mockRejectedValue(new Error('session expired'))
++    fetchMock.mockResolvedValue(new Response('', { status: 401 }))
++
++    await expect(adapter.pull()).rejects.toThrow('session expired')
++    expect(fetchMock).not.toHaveBeenCalled()
++  })
++
++  it('push sends the payload with the bearer token and throws on failure', async () => {
++    fetchAuthSessionMock.mockResolvedValue({ tokens: { accessToken: 'token-1' } })
++    fetchMock.mockResolvedValue(new Response('', { status: 200 }))
++
++    const payload = { progress: null, history: null }
++    await expect(adapter.push(payload)).resolves.toBeUndefined()
++    expect(fetchMock).toHaveBeenCalledWith('https://sync.example.com/sync', {
++      method: 'PUT',
++      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer token-1' },
++      body: JSON.stringify(payload),
++    })
++
++    fetchMock.mockResolvedValue(new Response('', { status: 401 }))
++    await expect(adapter.push(payload)).rejects.toThrow('sync push failed: 401')
++  })
++})
+\ No newline at end of file
+diff --git a/src/services/remoteSync.ts b/src/services/remoteSync.ts
+index 7c5fd08..5ecee8a 100644
+--- a/src/services/remoteSync.ts
++++ b/src/services/remoteSync.ts
+@@ -1,24 +1,51 @@
++import { awsConfig } from '../config'
+ import type { HistoryExportFile, ProgressExportFile } from '../types'
+ 
+ export interface RemoteSyncPayload {
+-  progress: ProgressExportFile
+-  history: HistoryExportFile
++  progress: ProgressExportFile | null
++  history: HistoryExportFile | null
+ }
+ 
+ export interface RemoteSyncAdapter {
+   pull(): Promise<RemoteSyncPayload | null>
+-  push(payload: RemoteSyncPayload): Promise<void>
++  push(payload: RemoteSyncPayload, isCurrent?: () => boolean): Promise<void>
+ }
+ 
+ const localOnlySyncAdapter: RemoteSyncAdapter = {
+   async pull() {
+     return null
+   },
+-  async push() {
+-    // No-op until the AWS backend (Cognito + API Gateway + Lambda + DynamoDB) exists.
+-  },
++  async push() {},
++}
++
++async function getAuthHeaders(): Promise<Record<string, string>> {
++  const { fetchAuthSession } = await import('aws-amplify/auth')
++  const { tokens } = await fetchAuthSession()
++  return tokens?.accessToken ? { Authorization: `Bearer ${tokens.accessToken.toString()}` } : {}
++}
++
++function createRemoteSyncAdapter(apiUrl: string): RemoteSyncAdapter {
++  return {
++    async pull() {
++      const headers = await getAuthHeaders()
++      const res = await fetch(apiUrl, { headers })
++      if (res.status === 401) throw new Error('sync pull failed: 401')
++      if (!res.ok) throw new Error(`sync pull failed: ${res.status}`)
++      return await res.json()
++    },
++    async push(payload, isCurrent) {
++      const headers = { 'Content-Type': 'application/json', ...(await getAuthHeaders()) }
++      if (isCurrent && !isCurrent()) return
++      const res = await fetch(apiUrl, { method: 'PUT', headers, body: JSON.stringify(payload) })
++      if (!res.ok) throw new Error(`sync push failed: ${res.status}`)
++    },
++  }
+ }
+ 
+ export function getSyncAdapter(): RemoteSyncAdapter {
++  const url = awsConfig.syncApiUrl
++  if (url && url.startsWith('https://')) {
++    return createRemoteSyncAdapter(url)
++  }
+   return localOnlySyncAdapter
+ }
+diff --git a/src/stores/quizHistory.test.ts b/src/stores/quizHistory.test.ts
+index 13a6687..01d6c94 100644
+--- a/src/stores/quizHistory.test.ts
++++ b/src/stores/quizHistory.test.ts
+@@ -99,4 +99,19 @@ describe('quizHistory store', () => {
+ 
+     expect(store.entries.map((e) => e.id)).toEqual(['e1'])
+   })
++
++  it('replaceAll swaps the whole entry list with a deep copy', () => {
++    const store = useQuizHistoryStore()
++    store.record(makeEntry({ id: 'e1' }))
++    const incoming = [makeEntry({ id: 'e2' }), makeEntry({ id: 'e3' })]
++
++    store.replaceAll(incoming)
++
++    expect(store.entries.map((e) => e.id)).toEqual(['e2', 'e3'])
++    incoming.push(makeEntry({ id: 'e4' }))
++    expect(store.entries.map((e) => e.id)).toEqual(['e2', 'e3'])
++
++    incoming[0].answers.q1.correct = false
++    expect(store.entries.find((e) => e.id === 'e2')?.answers.q1.correct).toBe(true)
++  })
+ })
+diff --git a/src/stores/quizHistory.ts b/src/stores/quizHistory.ts
+index bcd3919..fa7b422 100644
+--- a/src/stores/quizHistory.ts
++++ b/src/stores/quizHistory.ts
+@@ -45,6 +45,10 @@ export const useQuizHistoryStore = defineStore('quizHistory', {
+       this.entries = []
+     },
+ 
++    replaceAll(next: QuizHistoryEntry[]) {
++      this.entries = JSON.parse(JSON.stringify(next)) as QuizHistoryEntry[]
++    },
++
+     exportHistory(): HistoryExportFile {
+       return {
+         format: EXPORT_FORMAT,
+diff --git a/src/stores/userAccount.test.ts b/src/stores/userAccount.test.ts
+index f7bcb58..d21dc24 100644
+--- a/src/stores/userAccount.test.ts
++++ b/src/stores/userAccount.test.ts
+@@ -2,6 +2,7 @@ import { createPinia, setActivePinia } from 'pinia'
+ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+ import { beforeEach, describe, expect, it } from 'vitest'
+ import { createApp, nextTick } from 'vue'
++import type { HistoryExportFile, ProgressExportFile } from '../types'
+ import { useUserAccountStore } from './userAccount'
+ 
+ function createTestPinia() {
+@@ -40,4 +41,53 @@ describe('userAccount store', () => {
+ 
+     expect(useUserAccountStore().user).toEqual({ userId: 'sub-1', email: 'dev@example.com' })
+   })
++
++  it('takeGuestSnapshot returns the stashed guest data and clears it', () => {
++    const store = useUserAccountStore()
++    const progress = { format: 'quiz-progress', version: 1, exportedAt: 'now', byExamCode: {} } as ProgressExportFile
++    const history = { format: 'quiz-history', version: 1, exportedAt: 'now', entries: [] } as HistoryExportFile
++
++    store.stashGuest(progress, history)
++    const snapshot = store.takeGuestSnapshot()
++
++    expect(snapshot.progress).toStrictEqual(progress)
++    expect(snapshot.history).toStrictEqual(history)
++    expect(store.guestProgress).toBeNull()
++    expect(store.guestHistory).toBeNull()
++  })
++
++  it('takeGuestSnapshot returns nulls when nothing was stashed', () => {
++    const snapshot = useUserAccountStore().takeGuestSnapshot()
++
++    expect(snapshot.progress).toBeNull()
++    expect(snapshot.history).toBeNull()
++  })
++
++  it('caps the stashed guest history to the most recent 50 entries', () => {
++    const store = useUserAccountStore()
++    const progress = { format: 'quiz-progress', version: 1, exportedAt: 'now', byExamCode: {} } as ProgressExportFile
++    const entries = Array.from({ length: 60 }, (_, i) => ({
++      id: `h${i}`,
++      certCode: 'DVA-C02',
++      mode: 'preparation' as const,
++      startedAt: i,
++      finishedAt: i,
++      questionIds: [],
++      answers: {},
++      flags: [],
++      result: { percentCorrect: 100, passed: true, timesCorrect: 1, totalAnswered: 1 },
++    }))
++    const history = { format: 'quiz-history', version: 1, exportedAt: 'now', entries } as HistoryExportFile
++
++    store.stashGuest(progress, history)
++
++    expect(store.guestHistory?.entries).toHaveLength(50)
++    expect(store.guestHistory?.entries.map((e) => e.id)).toEqual(
++      entries
++        .slice()
++        .sort((a, b) => b.finishedAt - a.finishedAt)
++        .slice(0, 50)
++        .map((e) => e.id),
++    )
++  })
+ })
+diff --git a/src/stores/userAccount.ts b/src/stores/userAccount.ts
+index 3563a7d..8f22607 100644
+--- a/src/stores/userAccount.ts
++++ b/src/stores/userAccount.ts
+@@ -1,12 +1,43 @@
+ import { defineStore } from 'pinia'
+ import 'pinia-plugin-persistedstate'
+-import type { AccountMode, AuthUser } from '../types'
++import type { AccountMode, AuthUser, HistoryExportFile, ProgressExportFile } from '../types'
++
++const MAX_GUEST_HISTORY_ENTRIES = 50
+ 
+ export const useUserAccountStore = defineStore('userAccount', {
+-  state: (): { accountMode: AccountMode | null; user: AuthUser | null } => ({
++  state: (): {
++    accountMode: AccountMode | null
++    user: AuthUser | null
++    guestProgress: ProgressExportFile | null
++    guestHistory: HistoryExportFile | null
++  } => ({
+     accountMode: null,
+     user: null,
++    guestProgress: null,
++    guestHistory: null,
+   }),
+ 
++  actions: {
++    stashGuest(progress: ProgressExportFile, history: HistoryExportFile) {
++      this.guestProgress = progress
++      this.guestHistory =
++        history.entries.length > MAX_GUEST_HISTORY_ENTRIES
++          ? {
++              ...history,
++              entries: [...history.entries]
++                .sort((a, b) => b.finishedAt - a.finishedAt)
++                .slice(0, MAX_GUEST_HISTORY_ENTRIES),
++            }
++          : history
++    },
++
++    takeGuestSnapshot(): { progress: ProgressExportFile | null; history: HistoryExportFile | null } {
++      const snapshot = { progress: this.guestProgress, history: this.guestHistory }
++      this.guestProgress = null
++      this.guestHistory = null
++      return snapshot
++    },
++  },
++
+   persist: true,
+ })
+diff --git a/src/stores/userProgress.test.ts b/src/stores/userProgress.test.ts
+index badcd0d..8dbca33 100644
+--- a/src/stores/userProgress.test.ts
++++ b/src/stores/userProgress.test.ts
+@@ -152,5 +152,22 @@ describe('userProgress store', () => {
+ 
+     expect(store.byExamCode['DVA-C02'].q1.attempts).toBe(1)
+   })
++
++  it('replaceAll swaps the whole progress map with a deep copy', () => {
++    const store = useUserProgressStore()
++    store.recordAnswer('DVA-C02', 'qOld', true)
++    const incoming = {
++      'DVA-C02': {
++        q1: { questionId: 'q1', attempts: 2, timesCorrect: 2, timesWrong: 0, flagged: false, lastSeenAt: 5 },
++      },
++    }
++
++    store.replaceAll(incoming)
++
++    expect(store.byExamCode['DVA-C02'].q1.attempts).toBe(2)
++    expect(store.byExamCode['DVA-C02'].qOld).toBeUndefined()
++    incoming['DVA-C02'].q1.attempts = 42
++    expect(store.byExamCode['DVA-C02'].q1.attempts).toBe(2)
++  })
+ })
+ 
+diff --git a/src/stores/userProgress.ts b/src/stores/userProgress.ts
+index 129f41e..fa45d1a 100644
+--- a/src/stores/userProgress.ts
++++ b/src/stores/userProgress.ts
+@@ -76,6 +76,10 @@ export const useUserProgressStore = defineStore('userProgress', {
+     resetAll() {
+       this.byExamCode = {}
+     },
++
++    replaceAll(next: UserProgress['byExamCode']) {
++      this.byExamCode = JSON.parse(JSON.stringify(next)) as UserProgress['byExamCode']
++    },
+   },
+ 
+   persist: true,
+diff --git a/src/texts/en.ts b/src/texts/en.ts
+index c53bbbb..b55c51c 100644
+--- a/src/texts/en.ts
++++ b/src/texts/en.ts
+@@ -105,6 +105,9 @@ export const texts = {
+   welcomeNoAccount: 'Continue without an account',
+   welcomeNoAccountDesc: 'Your progress is saved in this browser only, on this device. Nothing is synced to a server: switching device or browser, using private browsing, or clearing this site\'s cookies and storage erases it.',
+   welcomeNoAccountCta: 'Continue locally →',
++  welcomeUploadData: 'Upload my local data to an account',
++  welcomeUploadDataDesc: 'This browser already has saved progress. Sign in or create an account to merge it into your account and keep it in sync everywhere.',
++  welcomeUploadDataCta: 'Upload my data →',
+   authSignInTitle: 'Sign in',
+   authSignUpTitle: 'Create an account',
+   authEmailLabel: 'Email',
+@@ -117,7 +120,9 @@ export const texts = {
+   authConfirmCta: 'Verify and continue →',
+   authSwitchToSignUp: 'No account yet? Create one',
+   authSwitchToSignIn: 'Already have an account? Sign in',
++  authUploadHint: 'The progress saved in this browser will be merged into the account you sign in with.',
+   authSignInError: 'Sign-in failed. Check your email and password, then try again.',
++  signIn: 'Sign in',
+   authSignUpError: 'Account creation failed. Check your details and try again.',
+   authConfirmError: 'Verification failed. Check the code and try again.',
+   signOut: 'Sign out',
+diff --git a/src/views/AuthView.test.ts b/src/views/AuthView.test.ts
+index 4f26abc..de69b26 100644
+--- a/src/views/AuthView.test.ts
++++ b/src/views/AuthView.test.ts
+@@ -75,7 +75,7 @@ describe('AuthView', () => {
+     await wrapper.find('form').trigger('submit')
+     await flushPromises()
+ 
+-    expect(confirmSignUp).toHaveBeenCalledWith('dev@example.com', '123456', 'Passw0rd!')
++    expect(confirmSignUp).toHaveBeenCalledWith('dev@example.com', '123456', 'Passw0rd!', { migrateGuest: false })
+   })
+ 
+   it('a sign-up that completes without confirmation goes straight to sign-in', async () => {
+@@ -85,7 +85,17 @@ describe('AuthView', () => {
+ 
+     await fillAndSubmit('dev@example.com', 'Passw0rd!')
+ 
+-    expect(signIn).toHaveBeenCalledWith('dev@example.com', 'Passw0rd!')
++    expect(signIn).toHaveBeenCalledWith('dev@example.com', 'Passw0rd!', { migrateGuest: false })
++  })
++
++  it('the upload flag requests guest migration after authentication', async () => {
++    query = { upload: '1' }
++    signIn.mockResolvedValue({ userId: 'sub-1', email: 'dev@example.com' })
++
++    const wrapper = await fillAndSubmit('dev@example.com', 'Passw0rd!')
++
++    expect(signIn).toHaveBeenCalledWith('dev@example.com', 'Passw0rd!', { migrateGuest: true })
++    expect(wrapper.text()).toContain(texts.authUploadHint)
+   })
+ 
+   it('a failed sign-in surfaces the error message', async () => {
+diff --git a/src/views/AuthView.vue b/src/views/AuthView.vue
+index f83a8a1..dec138b 100644
+--- a/src/views/AuthView.vue
++++ b/src/views/AuthView.vue
+@@ -9,6 +9,8 @@ import { texts } from '../texts/en'
+ const route = useRoute()
+ const { signUp, confirmSignUp, signIn } = useAccount()
+ 
++const uploadAfterAuth = route.query.upload === '1'
++
+ const mode = ref<'signin' | 'signup'>(route.query.mode === 'signup' ? 'signup' : 'signin')
+ const step = ref<'credentials' | 'confirmation'>('credentials')
+ const email = ref('')
+@@ -30,7 +32,7 @@ async function submitCredentials() {
+         return
+       }
+     }
+-    await signIn(email.value, password.value)
++    await signIn(email.value, password.value, { migrateGuest: uploadAfterAuth })
+   } catch {
+     error.value = isSignUp.value ? texts.authSignUpError : texts.authSignInError
+   } finally {
+@@ -42,7 +44,7 @@ async function submitConfirmation() {
+   busy.value = true
+   error.value = null
+   try {
+-    await confirmSignUp(email.value, code.value, password.value)
++    await confirmSignUp(email.value, code.value, password.value, { migrateGuest: uploadAfterAuth })
+   } catch {
+     error.value = texts.authConfirmError
+   } finally {
+@@ -77,6 +79,7 @@ function switchMode() {
+             :autocomplete="isSignUp ? 'new-password' : 'current-password'"
+           />
+         </label>
++        <p v-if="uploadAfterAuth" class="auth__hint">{{ texts.authUploadHint }}</p>
+         <p v-if="error" class="auth__error" role="alert">{{ error }}</p>
+         <PrimaryButton type="submit" :disabled="busy" block>
+           {{ isSignUp ? texts.authSignUpCta : texts.authSignInCta }}
+diff --git a/src/views/QuestionReviewView.vue b/src/views/QuestionReviewView.vue
+index 35d2e1a..72297e0 100644
+--- a/src/views/QuestionReviewView.vue
++++ b/src/views/QuestionReviewView.vue
+@@ -5,6 +5,7 @@ import ReviewDetailPanel from '../components/ReviewDetailPanel.vue'
+ import ReviewQuestionGrid from '../components/ReviewQuestionGrid.vue'
+ import ReviewSummary from '../components/ReviewSummary.vue'
+ import PrimaryButton from '../components/PrimaryButton.vue'
++import { useAccount } from '../composables/useAccount'
+ import { useUserProgressStore } from '../stores/userProgress'
+ import { texts } from '../texts/en'
+ import type { CertBundle, Question, QuestionAnswer } from '../types'
+@@ -26,6 +27,7 @@ const props = defineProps<{
+ }>()
+ 
+ const router = useRouter()
++const { pushLocalDataDebounced } = useAccount()
+ const progressStore = useUserProgressStore()
+ 
+ const certCode = computed(() => props.cert?.exam.code ?? '')
+@@ -66,6 +68,7 @@ function toggleSelected(questionId: string) {
+ 
+ function toggleFlag(questionId: string) {
+   progressStore.toggleFlag(certCode.value, questionId)
++  void pushLocalDataDebounced()
+ }
+ 
+ function goBack() {
+diff --git a/src/views/QuizDashboardView.test.ts b/src/views/QuizDashboardView.test.ts
+index 3dd89cc..b09a689 100644
+--- a/src/views/QuizDashboardView.test.ts
++++ b/src/views/QuizDashboardView.test.ts
+@@ -6,6 +6,12 @@ import { useQuizHistoryStore } from '../stores/quizHistory'
+ import { useUserProgressStore } from '../stores/userProgress'
+ import QuizDashboardView from './QuizDashboardView.vue'
+ 
++const pushLocalData = vi.fn()
++
++vi.mock('../composables/useAccount', () => ({
++  useAccount: () => ({ pushLocalData }),
++}))
++
+ vi.mock('../composables/useQuizLoader', () => ({
+   useQuizLoader: () => ({
+     getCert: () => ({
+@@ -36,6 +42,7 @@ const router = createRouter({
+ 
+ describe('QuizDashboardView', () => {
+   beforeEach(() => {
++    pushLocalData.mockClear()
+     useUserProgressStore().byExamCode = {}
+     useQuizHistoryStore().entries = []
+   })
+@@ -60,4 +67,30 @@ describe('QuizDashboardView', () => {
+ 
+     expect(wrapper.find('.flagged-review-btn').exists()).toBe(false)
+   })
++
++  it('syncs to the backend after deleting a history entry', async () => {
++    const historyStore = useQuizHistoryStore()
++    historyStore.entries.push({
++      id: 'h1',
++      certCode: 'TEST',
++      mode: 'preparation',
++      startedAt: 0,
++      finishedAt: 1,
++      questionIds: ['q1'],
++      answers: {},
++      flags: [],
++      result: { percentCorrect: 100, passed: true, timesCorrect: 1, totalAnswered: 1 },
++    })
++
++    await router.push('/certs/TEST')
++    const wrapper = mount(QuizDashboardView, { global: { plugins: [pinia, router] }, props: { certCode: 'TEST' } })
++
++    wrapper.findComponent({ name: 'QuizHistoryList' }).vm.$emit('request-delete', 'h1')
++    await wrapper.vm.$nextTick()
++    wrapper.findComponent({ name: 'ConfirmModal' }).vm.$emit('confirm')
++    await wrapper.vm.$nextTick()
++
++    expect(historyStore.entries).toHaveLength(0)
++    expect(pushLocalData).toHaveBeenCalledOnce()
++  })
+ })
+diff --git a/src/views/QuizDashboardView.vue b/src/views/QuizDashboardView.vue
+index a070062..ce76d51 100644
+--- a/src/views/QuizDashboardView.vue
++++ b/src/views/QuizDashboardView.vue
+@@ -13,6 +13,7 @@ import PrimaryButton from '../components/PrimaryButton.vue'
+ import QuizHistoryList from '../components/QuizHistoryList.vue'
+ import ReviewBreakdown from '../components/ReviewBreakdown.vue'
+ import SecondaryButton from '../components/SecondaryButton.vue'
++import { useAccount } from '../composables/useAccount'
+ 
+ const props = defineProps<{
+   certCode: string
+@@ -20,6 +21,7 @@ const props = defineProps<{
+ 
+ const router = useRouter()
+ const { getCert } = useQuizLoader()
++const { pushLocalData } = useAccount()
+ const historyStore = useQuizHistoryStore()
+ const progressStore = useUserProgressStore()
+ 
+@@ -56,6 +58,7 @@ function confirmDelete() {
+   if (deleteTargetId.value) {
+     historyStore.deleteById(deleteTargetId.value)
+     deleteTargetId.value = null
++    void pushLocalData()
+   }
+ }
+ 
+@@ -63,6 +66,7 @@ function confirmReset() {
+   historyStore.resetByCertCode(props.certCode)
+   progressStore.resetByCertCode(props.certCode)
+   showResetModal.value = false
++  void pushLocalData()
+ }
+ 
+ function startQuiz() {
+diff --git a/src/views/QuizSessionView.vue b/src/views/QuizSessionView.vue
+index 377de78..daee19a 100644
+--- a/src/views/QuizSessionView.vue
++++ b/src/views/QuizSessionView.vue
+@@ -6,6 +6,7 @@ import TimerBar from '../components/TimerBar.vue'
+ import Badge from '../components/BaseBadge.vue'
+ import PrimaryButton from '../components/PrimaryButton.vue'
+ import SecondaryButton from '../components/SecondaryButton.vue'
++import { useAccount } from '../composables/useAccount'
+ import { useQuizLoader } from '../composables/useQuizLoader'
+ import { useQuizHistoryStore } from '../stores/quizHistory'
+ import { useQuizSessionStore } from '../stores/quizSession'
+@@ -15,6 +16,7 @@ import { computeScore } from '../utils/scoring'
+ import type { QuizHistoryEntry } from '../types'
+ 
+ const router = useRouter()
++const { pushLocalData } = useAccount()
+ const store = useQuizSessionStore()
+ const progressStore = useUserProgressStore()
+ const historyStore = useQuizHistoryStore()
+@@ -51,6 +53,7 @@ function toggleFlag() {
+   if (!question.value) return
+   store.toggleFlag(question.value.id)
+   progressStore.toggleFlag(certCode.value, question.value.id)
++  void pushLocalData()
+ }
+ 
+ function goNext() {
+@@ -86,6 +89,7 @@ function finishQuiz() {
+     result,
+   }
+   historyStore.record(entry)
++  void pushLocalData()
+   router.push({ name: 'quiz-review', params: { certCode: certCode.value } })
+ }
+ 
+diff --git a/src/views/WelcomeView.test.ts b/src/views/WelcomeView.test.ts
+index 86fa164..ffe771b 100644
+--- a/src/views/WelcomeView.test.ts
++++ b/src/views/WelcomeView.test.ts
+@@ -4,14 +4,16 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+ import { beforeEach, describe, expect, it, vi } from 'vitest'
+ import { createApp } from 'vue'
+ import { createMemoryHistory, createRouter } from 'vue-router'
++import { useQuizHistoryStore } from '../stores/quizHistory'
+ import { useUserAccountStore } from '../stores/userAccount'
++import { useUserProgressStore } from '../stores/userProgress'
+ import { texts } from '../texts/en'
+ import WelcomeView from './WelcomeView.vue'
+ 
+ let authConfigured = true
+ vi.mock('../config', () => ({
+   awsConfig: { region: undefined, userPoolId: undefined, userPoolClientId: undefined, syncApiUrl: undefined },
+-  isAuthConfigured: () => authConfigured,
++  isAuthAvailable: () => authConfigured,
+ }))
+ 
+ const pinia = createPinia()
+@@ -37,6 +39,8 @@ beforeEach(() => {
+   const account = useUserAccountStore()
+   account.accountMode = null
+   account.user = null
++  useUserProgressStore().replaceAll({})
++  useQuizHistoryStore().replaceAll([])
+ })
+ 
+ describe('WelcomeView', () => {
+@@ -63,10 +67,35 @@ describe('WelcomeView', () => {
+ 
+   it('offers only the local option when authentication is not configured', () => {
+     authConfigured = false
++    useUserProgressStore().byExamCode['DVA-C02'] = {
++      q1: { questionId: 'q1', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 },
++    }
+     const wrapper = mountWelcome()
+ 
+     expect(wrapper.findAll('.btn--primary')).toHaveLength(1)
+     expect(wrapper.text()).toContain(texts.welcomeNoAccount)
+     expect(wrapper.text()).not.toContain(texts.welcomeNewAccountCta)
++    expect(wrapper.text()).not.toContain(texts.welcomeUploadDataCta)
++  })
++
++  it('offers the upload option only when the device has local data, and routes to auth with the upload flag', async () => {
++    useUserProgressStore().byExamCode['DVA-C02'] = {
++      q1: { questionId: 'q1', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 },
++    }
++    const wrapper = mountWelcome()
++
++    expect(wrapper.text()).toContain(texts.welcomeUploadDataCta)
++
++    await wrapper.findAll('.btn--primary')[3].trigger('click')
++    await flushPromises()
++
++    expect(router.currentRoute.value.name).toBe('auth')
++    expect(router.currentRoute.value.query.upload).toBe('1')
++  })
++
++  it('hides the upload option when the device has no local data', () => {
++    const wrapper = mountWelcome()
++
++    expect(wrapper.text()).not.toContain(texts.welcomeUploadDataCta)
+   })
+ })
+diff --git a/src/views/WelcomeView.vue b/src/views/WelcomeView.vue
+index 8d4e89c..b8388e9 100644
+--- a/src/views/WelcomeView.vue
++++ b/src/views/WelcomeView.vue
+@@ -1,13 +1,21 @@
+ <script setup lang="ts">
++  import { computed } from 'vue';
+   import { useRouter } from 'vue-router';
+-  import { isAuthConfigured } from '../config';
++  import { isAuthAvailable } from '../config';
+   import WelcomeCard from '../components/WelcomeCard.vue';
+ import { useAccount } from '../composables/useAccount';
++import { useQuizHistoryStore } from '../stores/quizHistory';
++import { useUserProgressStore } from '../stores/userProgress';
+ import { texts } from '../texts/en';
+ 
+   const router = useRouter();
+   const { continueLocal } = useAccount()
+-  const authAvailable = isAuthConfigured()
++  const authAvailable = isAuthAvailable()
++  const historyStore = useQuizHistoryStore();
++  const progressStore = useUserProgressStore();
++  const hasLocalData = computed(
++    () => historyStore.entries.length > 0 || Object.keys(progressStore.byExamCode).length > 0,
++  )
+ 
+   function openSignIn() {
+     router.push({ name: 'auth', query: { mode: 'signin' } })
+@@ -16,6 +24,10 @@ import { texts } from '../texts/en';
+   function openSignUp() {
+     router.push({ name: 'auth', query: { mode: 'signup' } })
+   }
++
++  function openUpload() {
++    router.push({ name: 'auth', query: { mode: 'signin', upload: '1' } })
++  }
+ </script>
+ 
+ <template>
+@@ -30,6 +42,8 @@ import { texts } from '../texts/en';
+       </template>
+       <WelcomeCard variant="warning" :title="texts.welcomeNoAccount" :description="texts.welcomeNoAccountDesc"
+         :cta-label="texts.welcomeNoAccountCta" @select="continueLocal" />
++      <WelcomeCard v-if="authAvailable && hasLocalData" :title="texts.welcomeUploadData"
++        :description="texts.welcomeUploadDataDesc" :cta-label="texts.welcomeUploadDataCta" @select="openUpload" />
+     </div>
+   </section>
+ </template>
+diff --git a/template.yaml b/template.yaml
+index a9824f6..1c3d6d9 100644
+--- a/template.yaml
++++ b/template.yaml
+@@ -44,6 +44,111 @@ Resources:
+         IdToken: hours
+         RefreshToken: days
+ 
++  SyncTable:
++    Type: AWS::DynamoDB::Table
++    Properties:
++      TableName: cert-quizz-maker-sync
++      BillingMode: PAY_PER_REQUEST
++      AttributeDefinitions:
++        - AttributeName: PK
++          AttributeType: S
++        - AttributeName: SK
++          AttributeType: S
++      KeySchema:
++        - AttributeName: PK
++          KeyType: HASH
++        - AttributeName: SK
++          KeyType: RANGE
++      PointInTimeRecoverySpecification:
++        PointInTimeRecoveryEnabled: true
++
++  SyncApi:
++    Type: AWS::Serverless::HttpApi
++    Properties:
++      Auth:
++        Authorizers:
++          CognitoAuthorizer:
++            IdentitySource: $request.header.Authorization
++            JwtConfiguration:
++              issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}
++              audience:
++                - !Ref UserPoolClient
++        DefaultAuthorizer: CognitoAuthorizer
++      CorsConfiguration:
++        AllowOrigins:
++          - '*'
++        AllowMethods:
++          - GET
++          - PUT
++          - OPTIONS
++        AllowHeaders:
++          - Authorization
++          - Content-Type
++        MaxAge: 300
++
++  PullFunction:
++    Type: AWS::Serverless::Function
++    Properties:
++      CodeUri: src/lambda/pull/
++      Handler: index.handler
++      Runtime: nodejs22.x
++      Architectures:
++        - arm64
++      Environment:
++        Variables:
++          TABLE_NAME: !Ref SyncTable
++      Events:
++        PullSync:
++          Type: HttpApi
++          Properties:
++            ApiId: !Ref SyncApi
++            Method: GET
++            Path: /sync
++      Policies:
++        - DynamoDBReadPolicy:
++            TableName: !Ref SyncTable
++    Metadata:
++      BuildMethod: esbuild
++      BuildProperties:
++        Minify: true
++        Target: es2022
++        EntryPoints:
++          - index.ts
++
++  PushFunction:
++    Type: AWS::Serverless::Function
++    Properties:
++      CodeUri: src/lambda/push/
++      Handler: index.handler
++      Runtime: nodejs22.x
++      Architectures:
++        - arm64
++      Environment:
++        Variables:
++          TABLE_NAME: !Ref SyncTable
++      Events:
++        PushSync:
++          Type: HttpApi
++          Properties:
++            ApiId: !Ref SyncApi
++            Method: PUT
++            Path: /sync
++      Policies:
++        - Statement:
++            - Effect: Allow
++              Action:
++                - dynamodb:GetItem
++                - dynamodb:PutItem
++                - dynamodb:DeleteItem
++              Resource: !GetAtt SyncTable.Arn
++    Metadata:
++      BuildMethod: esbuild
++      BuildProperties:
++        Minify: true
++        Target: es2022
++        EntryPoints:
++          - index.ts
++
+ Outputs:
+   UserPoolId:
+     Description: Set VITE_COGNITO_USER_POOL_ID to this value
+@@ -53,4 +158,9 @@ Outputs:
+     Value: !Ref UserPoolClient
+   AwsRegion:
+     Description: Set VITE_AWS_REGION to this value
+-    Value: !Ref AWS::Region
+\ No newline at end of file
++    Value: !Ref AWS::Region
++  SyncApiUrl:
++    Description: >-
++      Set VITE_SYNC_API_URL to this value (include the /sync path). The API is
++      already configured with the Cognito authorizer from this stack.
++    Value: !Sub https://${SyncApi}.execute-api.${AWS::Region}.amazonaws.com/sync
+\ No newline at end of file
+diff --git a/tsconfig.app.json b/tsconfig.app.json
+index d72aa75..96df490 100644
+--- a/tsconfig.app.json
++++ b/tsconfig.app.json
+@@ -11,5 +11,6 @@
+     "erasableSyntaxOnly": true,
+     "noFallthroughCasesInSwitch": true
+   },
+-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
++  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
++  "exclude": ["src/lambda/**", "src/**/*.test.ts"]
+ }

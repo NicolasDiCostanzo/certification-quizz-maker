@@ -1,24 +1,50 @@
+import { awsConfig, isSyncConfigured } from '../config'
 import type { HistoryExportFile, ProgressExportFile } from '../types'
 
 export interface RemoteSyncPayload {
-  progress: ProgressExportFile
-  history: HistoryExportFile
+  progress: ProgressExportFile | null
+  history: HistoryExportFile | null
 }
 
 export interface RemoteSyncAdapter {
   pull(): Promise<RemoteSyncPayload | null>
-  push(payload: RemoteSyncPayload): Promise<void>
+  push(payload: RemoteSyncPayload, isCurrent?: () => boolean, signal?: AbortSignal): Promise<void>
 }
 
 const localOnlySyncAdapter: RemoteSyncAdapter = {
   async pull() {
     return null
   },
-  async push() {
-    // No-op until the AWS backend (Cognito + API Gateway + Lambda + DynamoDB) exists.
-  },
+  async push() {},
+}
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const { fetchAuthSession } = await import('aws-amplify/auth')
+  const { tokens } = await fetchAuthSession()
+  return tokens?.accessToken ? { Authorization: `Bearer ${tokens.accessToken.toString()}` } : {}
+}
+
+function createRemoteSyncAdapter(apiUrl: string): RemoteSyncAdapter {
+  return {
+    async pull() {
+      const headers = await getAuthHeaders()
+      const res = await fetch(apiUrl, { headers })
+      if (res.status === 401) throw new Error('sync pull failed: 401')
+      if (!res.ok) throw new Error(`sync pull failed: ${res.status}`)
+      return await res.json()
+    },
+    async push(payload, isCurrent, signal) {
+      const headers = { 'Content-Type': 'application/json', ...(await getAuthHeaders()) }
+      if (isCurrent && !isCurrent()) return
+      const res = await fetch(apiUrl, { method: 'PUT', headers, body: JSON.stringify(payload), signal })
+      if (!res.ok) throw new Error(`sync push failed: ${res.status}`)
+    },
+  }
 }
 
 export function getSyncAdapter(): RemoteSyncAdapter {
+  if (isSyncConfigured() && awsConfig.syncApiUrl) {
+    return createRemoteSyncAdapter(awsConfig.syncApiUrl)
+  }
   return localOnlySyncAdapter
 }

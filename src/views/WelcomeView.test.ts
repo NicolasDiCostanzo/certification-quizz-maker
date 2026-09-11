@@ -4,19 +4,18 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createApp } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import type { RemoteSyncPayload } from '../services/remoteSync'
 import { useQuizHistoryStore } from '../stores/quizHistory'
 import { useUserAccountStore } from '../stores/userAccount'
 import { useUserProgressStore } from '../stores/userProgress'
+import { texts } from '../texts/en'
 import WelcomeView from './WelcomeView.vue'
 
-let pulledPayload: RemoteSyncPayload | null = null
-
-vi.mock('../services/remoteSync', () => ({
-  getSyncAdapter: () => ({
-    pull: async () => pulledPayload,
-    push: async () => {},
-  }),
+let authConfigured = true
+let syncConfigured = true
+vi.mock('../config', () => ({
+  awsConfig: { region: undefined, userPoolId: undefined, userPoolClientId: undefined, syncApiUrl: undefined },
+  isAuthAvailable: () => authConfigured,
+  isSyncConfigured: () => syncConfigured,
 }))
 
 const pinia = createPinia()
@@ -28,6 +27,7 @@ const router = createRouter({
   history: createMemoryHistory(),
   routes: [
     { path: '/welcome', name: 'welcome', component: WelcomeView },
+    { path: '/auth', name: 'auth', component: { template: '<div/>' } },
     { path: '/', name: 'cert-selector', component: { template: '<div/>' } },
   ],
 })
@@ -36,53 +36,84 @@ function mountWelcome() {
   return mount(WelcomeView, { global: { plugins: [pinia, router] } })
 }
 
+beforeEach(() => {
+  authConfigured = true
+  syncConfigured = true
+  const account = useUserAccountStore()
+  account.accountMode = null
+  account.user = null
+  useUserProgressStore().replaceAll({})
+  useQuizHistoryStore().replaceAll([])
+})
+
 describe('WelcomeView', () => {
-  beforeEach(() => {
-    useUserAccountStore().accountMode = null
-    useUserProgressStore().byExamCode = {}
-    useQuizHistoryStore().entries = []
-    pulledPayload = null
-  })
-
   it.each([
-    ['create account', 0, 'account'],
-    ['sign in', 1, 'account'],
-    ['continue locally', 2, 'local'],
-  ])('%s stores the account mode and moves on to the cert selector', async (_name, index, mode) => {
+    ['existing account', 0, 'signin'],
+    ['new account', 1, 'signup'],
+  ])('the %s card opens the auth form in %s mode', async (_name, index, mode) => {
     const wrapper = mountWelcome()
     await wrapper.findAll('.btn--primary')[index].trigger('click')
     await flushPromises()
 
-    expect(useUserAccountStore().accountMode).toBe(mode)
-    expect(router.currentRoute.value.name).toBe('cert-selector')
+    expect(router.currentRoute.value.name).toBe('auth')
+    expect(router.currentRoute.value.query.mode).toBe(mode)
   })
 
-  it.each([
-    ['create account', 0],
-    ['sign in', 1],
-  ])('%s pulls and merges remote data when the sync adapter returns a payload', async (_name, index) => {
-    pulledPayload = {
-      progress: { format: 'quiz-progress', version: 1, exportedAt: new Date().toISOString(), byExamCode: { 'DVA-C02': { q1: { questionId: 'q1', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 } } } },
-      history: { format: 'quiz-history', version: 1, exportedAt: new Date().toISOString(), entries: [] },
-    }
-
-    const wrapper = mountWelcome()
-    await wrapper.findAll('.btn--primary')[index].trigger('click')
-    await flushPromises()
-
-    expect(useUserProgressStore().byExamCode['DVA-C02']?.q1?.attempts).toBe(1)
-  })
-
-  it('continuing locally does not pull remote data', async () => {
-    pulledPayload = {
-      progress: { format: 'quiz-progress', version: 1, exportedAt: new Date().toISOString(), byExamCode: { 'DVA-C02': { q1: { questionId: 'q1', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 } } } },
-      history: { format: 'quiz-history', version: 1, exportedAt: new Date().toISOString(), entries: [] },
-    }
-
+  it('continuing locally goes straight to the cert selector without any auth step', async () => {
     const wrapper = mountWelcome()
     await wrapper.findAll('.btn--primary')[2].trigger('click')
     await flushPromises()
 
-    expect(useUserProgressStore().byExamCode['DVA-C02']).toBeUndefined()
+    expect(useUserAccountStore().accountMode).toBe('local')
+    expect(router.currentRoute.value.name).toBe('cert-selector')
+  })
+
+  it('offers only the local option when authentication is not configured', () => {
+    authConfigured = false
+    useUserProgressStore().byExamCode['DVA-C02'] = {
+      q1: { questionId: 'q1', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 },
+    }
+    const wrapper = mountWelcome()
+
+    expect(wrapper.findAll('.btn--primary')).toHaveLength(1)
+    expect(wrapper.text()).toContain(texts.welcomeNoAccount)
+    expect(wrapper.text()).not.toContain(texts.welcomeNewAccountCta)
+    expect(wrapper.text()).not.toContain(texts.welcomeUploadDataCta)
+  })
+
+  it('offers the upload option only when the device has local data, and routes to auth with the upload flag', async () => {
+    useUserProgressStore().byExamCode['DVA-C02'] = {
+      q1: { questionId: 'q1', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 },
+    }
+    const wrapper = mountWelcome()
+
+    expect(wrapper.text()).toContain(texts.welcomeUploadDataCta)
+
+    await wrapper.findAll('.btn--primary')[3].trigger('click')
+    await flushPromises()
+
+    expect(router.currentRoute.value.name).toBe('auth')
+    expect(router.currentRoute.value.query.upload).toBe('1')
+  })
+
+  it('hides the upload option when the device has no local data', () => {
+    const wrapper = mountWelcome()
+
+    expect(wrapper.text()).not.toContain(texts.welcomeUploadDataCta)
+  })
+
+  it('does not promise cross-device sync or offer the upload option when auth is configured but sync is not', () => {
+    syncConfigured = false
+    useUserProgressStore().byExamCode['DVA-C02'] = {
+      q1: { questionId: 'q1', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 },
+    }
+    const wrapper = mountWelcome()
+
+    expect(wrapper.text()).toContain(texts.welcomeNewAccountCta)
+    expect(wrapper.text()).toContain(texts.welcomeNewAccountDescNoSync)
+    expect(wrapper.text()).toContain(texts.welcomeExistingAccountDescNoSync)
+    expect(wrapper.text()).not.toContain(texts.welcomeNewAccountDesc)
+    expect(wrapper.text()).not.toContain(texts.welcomeExistingAccountDesc)
+    expect(wrapper.text()).not.toContain(texts.welcomeUploadDataCta)
   })
 })

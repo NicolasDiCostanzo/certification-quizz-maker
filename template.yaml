@@ -1,0 +1,166 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: certification-quizz-maker backend - Phase 1 identity (Cognito User Pool)
+
+Resources:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: cert-quizz-maker-users
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      MfaConfiguration: 'OFF'
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 6
+          RequireLowercase: false
+          RequireUppercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      EmailVerificationSubject: 'Your Certification Quiz Maker verification code'
+      EmailVerificationMessage: 'Your Certification Quiz Maker verification code is {####}'
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: cert-quizz-maker-web
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      PreventUserExistenceErrors: ENABLED
+      AccessTokenValidity: 1
+      IdTokenValidity: 1
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: hours
+        IdToken: hours
+        RefreshToken: days
+
+  SyncTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: cert-quizz-maker-sync
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  SyncApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            IdentitySource: $request.header.Authorization
+            JwtConfiguration:
+              issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}
+              audience:
+                - !Ref UserPoolClient
+        DefaultAuthorizer: CognitoAuthorizer
+      CorsConfiguration:
+        AllowOrigins:
+          - '*'
+        AllowMethods:
+          - GET
+          - PUT
+          - OPTIONS
+        AllowHeaders:
+          - Authorization
+          - Content-Type
+        MaxAge: 300
+
+  PullFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/lambda/pull/
+      Handler: index.handler
+      Runtime: nodejs22.x
+      Architectures:
+        - arm64
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref SyncTable
+      Events:
+        PullSync:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref SyncApi
+            Method: GET
+            Path: /sync
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SyncTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2022
+        EntryPoints:
+          - index.ts
+
+  PushFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/lambda/push/
+      Handler: index.handler
+      Runtime: nodejs22.x
+      Architectures:
+        - arm64
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref SyncTable
+      Events:
+        PushSync:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref SyncApi
+            Method: PUT
+            Path: /sync
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:DeleteItem
+              Resource: !GetAtt SyncTable.Arn
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2022
+        EntryPoints:
+          - index.ts
+
+Outputs:
+  UserPoolId:
+    Description: Set VITE_COGNITO_USER_POOL_ID to this value
+    Value: !Ref UserPool
+  UserPoolClientId:
+    Description: Set VITE_COGNITO_CLIENT_ID to this value
+    Value: !Ref UserPoolClient
+  AwsRegion:
+    Description: Set VITE_AWS_REGION to this value
+    Value: !Ref AWS::Region
+  SyncApiUrl:
+    Description: >-
+      Set VITE_SYNC_API_URL to this value (include the /sync path). The API is
+      already configured with the Cognito authorizer from this stack.
+    Value: !Sub https://${SyncApi}.execute-api.${AWS::Region}.amazonaws.com/sync
