@@ -4,13 +4,15 @@
     <button
       type="button"
       class="sync-banner__dismiss"
-      aria-label="Dismiss"
+      :aria-label="texts.dismiss"
       @click="onDismiss"
     >&times;</button>
   </div>
 </template>
 
 <script setup lang="ts">
+import { texts } from '../texts/en'
+
 defineProps<{
   message: string
   onDismiss: () => void
@@ -25,7 +27,7 @@ defineProps<{
   gap: 12px;
   padding: 10px 16px;
   background: var(--red);
-  color: var(--text-inverse, #fff);
+  color: var(--text-inverse);
   font-size: 14px;
 }
 

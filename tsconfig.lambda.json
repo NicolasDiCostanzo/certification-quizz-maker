@@ -17,5 +17,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/lambda/**/*.ts"]
+  "include": ["src/lambda/**/*.ts", "src/utils/syncPayloadValidator.ts"]
 }

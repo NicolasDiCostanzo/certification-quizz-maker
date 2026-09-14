@@ -16,13 +16,24 @@ export const handler = async (event: {
   const userId = event.requestContext?.authorizer?.jwt?.claims?.sub
   if (!userId) return { statusCode: 401, headers: { 'Content-Type': 'application/json' }, body: '' }
 
-  const result = await docClient.send(
-    new QueryCommand({
-      TableName: tableName,
-      KeyConditionExpression: 'PK = :pk',
-      ExpressionAttributeValues: { ':pk': `SYNC#${userId}` },
-    }),
-  )
+  let result
+  try {
+    result = await docClient.send(
+      new QueryCommand({
+        TableName: tableName,
+        KeyConditionExpression: 'PK = :pk',
+        ExpressionAttributeValues: { ':pk': `SYNC#${userId}` },
+        ConsistentRead: true,
+      }),
+    )
+  } catch (err) {
+    console.error('sync pull failed', { userId, error: err instanceof Error ? err.message : err })
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Internal server error' }),
+    }
+  }
 
   const response: SyncResponse = { progress: null, history: null }
   for (const item of result.Items ?? []) {

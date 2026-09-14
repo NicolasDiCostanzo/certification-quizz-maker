@@ -21,6 +21,18 @@ const event = (body: unknown) => ({
 
 const validProgress = { format: 'quiz-progress', version: 1, exportedAt: 'now', byExamCode: {} }
 const validHistory = { format: 'quiz-history', version: 1, exportedAt: 'now', entries: [] }
+const validQuestionProgress = { questionId: 'q1', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 }
+const validHistoryEntry = {
+  id: 'h1',
+  certCode: 'DVA-C02',
+  mode: 'preparation',
+  startedAt: 1,
+  finishedAt: 2,
+  questionIds: ['q1'],
+  answers: {},
+  flags: [],
+  result: { percentCorrect: 100, passed: true, timesCorrect: 1, totalAnswered: 1 },
+}
 
 describe('push handler payload validation', () => {
   beforeEach(() => {
@@ -32,6 +44,12 @@ describe('push handler payload validation', () => {
     ['missing format', { ...validProgress, format: undefined }],
     ['wrong version type', { ...validProgress, version: '1' }],
     ['unsafe version', { ...validProgress, version: 1.5 }],
+    ['unsupported version', { ...validProgress, version: 2 }],
+    [
+      'a malformed nested question-progress record',
+      { ...validProgress, byExamCode: { 'DVA-C02': { q1: { questionId: 'q1' } } } },
+    ],
+    ['a null nested question-progress record', { ...validProgress, byExamCode: { 'DVA-C02': { q1: null } } }],
   ])('rejects a progress document with %s', async (_label, progress) => {
     const result = await handler(event({ progress }))
 
@@ -42,6 +60,8 @@ describe('push handler payload validation', () => {
   it.each([
     ['missing entries', { ...validHistory, entries: undefined }],
     ['entries not an array', { ...validHistory, entries: {} }],
+    ['a malformed history entry', { ...validHistory, entries: [{ id: 'h1' }] }],
+    ['a null history entry', { ...validHistory, entries: [null] }],
   ])('rejects a history document with %s', async (_label, history) => {
     const result = await handler(event({ history }))
 
@@ -50,7 +70,10 @@ describe('push handler payload validation', () => {
   })
 
   it('accepts a payload with valid progress and history documents', async () => {
-    const result = await handler(event({ progress: validProgress, history: validHistory }))
+    const progress = { ...validProgress, byExamCode: { 'DVA-C02': { q1: validQuestionProgress } } }
+    const history = { ...validHistory, entries: [validHistoryEntry] }
+
+    const result = await handler(event({ progress, history }))
 
     expect(result.statusCode).toBe(200)
     expect(send).toHaveBeenCalledOnce()
@@ -64,7 +87,10 @@ describe('push handler payload validation', () => {
   })
 
   it('accepts a document just under the 190 KB DynamoDB item limit', async () => {
-    const progress = { ...validProgress, byExamCode: { padding: 'a'.repeat(180 * 1024) } }
+    const progress = {
+      ...validProgress,
+      byExamCode: { 'DVA-C02': { q1: { ...validQuestionProgress, padding: 'a'.repeat(180 * 1024) } } },
+    }
 
     const result = await handler(event({ progress }))
 
@@ -73,11 +99,22 @@ describe('push handler payload validation', () => {
   })
 
   it('rejects a document over the 190 KB DynamoDB item limit with 413', async () => {
-    const progress = { ...validProgress, byExamCode: { padding: 'a'.repeat(200 * 1024) } }
+    const progress = {
+      ...validProgress,
+      byExamCode: { 'DVA-C02': { q1: { ...validQuestionProgress, padding: 'a'.repeat(200 * 1024) } } },
+    }
 
     const result = await handler(event({ progress }))
 
     expect(result.statusCode).toBe(413)
     expect(send).not.toHaveBeenCalled()
+  })
+
+  it('returns 500 instead of throwing when DynamoDB is unavailable', async () => {
+    send.mockRejectedValueOnce(new Error('ProvisionedThroughputExceededException'))
+
+    const result = await handler(event({ progress: validProgress, history: validHistory }))
+
+    expect(result.statusCode).toBe(500)
   })
 })

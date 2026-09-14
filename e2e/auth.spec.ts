@@ -45,12 +45,14 @@ test('sign-up reaches the confirmation step, then the confirmed user signs in, s
   await page.locator('input[type="password"]').fill(password)
   await page.getByRole('button', { name: texts.authSignInCta }).click()
 
-  await expect(page).toHaveURL(/#\/$/)
+  await expect(page).toHaveURL(/#\/cert$/)
   await expect(page.locator('.account-chip__email')).toHaveText(email)
 
   await page.reload()
   await expect(page.locator('.account-chip__email')).toHaveText(email)
 
   await page.getByRole('button', { name: texts.signOut }).click()
-  await expect(page).toHaveURL(/#\/welcome/)
+  const url = new URL(page.url())
+  await expect(url.pathname).toBe('/')
+  await expect(url.hash).toBe('#/')
 })

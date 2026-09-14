@@ -85,6 +85,9 @@ Resources:
           - Authorization
           - Content-Type
         MaxAge: 300
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 20
+        ThrottlingRateLimit: 10
 
   PullFunction:
     Type: AWS::Serverless::Function
@@ -137,7 +140,6 @@ Resources:
         - Statement:
             - Effect: Allow
               Action:
-                - dynamodb:GetItem
                 - dynamodb:PutItem
                 - dynamodb:DeleteItem
               Resource: !GetAtt SyncTable.Arn

@@ -3,10 +3,10 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createApp } from 'vue'
 import type { RemoteSyncPayload } from '../services/remoteSync'
-import { texts } from '../texts/en'
 import { useQuizHistoryStore } from '../stores/quizHistory'
 import { useUserAccountStore } from '../stores/userAccount'
 import { useUserProgressStore } from '../stores/userProgress'
+import { texts } from '../texts/en'
 import type { AuthUser } from '../types'
 
 const pushRoute = vi.fn()
@@ -22,9 +22,14 @@ vi.mock('../services/auth', () => ({
 }))
 
 const adapter = { pull: vi.fn(), push: vi.fn() }
-vi.mock('../services/remoteSync', () => ({
-  getSyncAdapter: () => adapter,
-}))
+vi.mock('../services/remoteSync', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../services/remoteSync')>()
+  return {
+    ...actual,
+    getSyncAdapter: () => adapter,
+    InvalidPullPayload: actual.InvalidPullPayload,
+  }
+})
 
 let auth!: typeof import('../services/auth')
 let useAccount!: typeof import('./useAccount').useAccount
@@ -141,6 +146,28 @@ describe('useAccount sign-in', () => {
     expect(useQuizHistoryStore().entries).toEqual([])
     expect(pushRoute).toHaveBeenCalledWith({ name: 'cert-selector' })
   })
+
+  it.each([
+    ['progress', (p: RemoteSyncPayload) => ({ ...p, progress: { ...p.progress!, version: 2 } })],
+    ['history', (p: RemoteSyncPayload) => ({ ...p, history: { ...p.history!, format: 'quiz-history-v2' } })],
+  ])(
+    'a %s document in an unsupported format reports syncError, leaves local data untouched, and disables push',
+    async (_doc, mutate) => {
+      seedDeviceData()
+      vi.mocked(auth.signIn).mockResolvedValue(USER)
+      adapter.pull.mockResolvedValue(mutate(makePayload()))
+
+      const { signIn, pushLocalData, syncError } = useAccount()
+      await signIn('dev@example.com', 'Passw0rd!')
+
+      expect(syncError.value).toBe(texts.syncFailed)
+      expect(useUserProgressStore().byExamCode['DVA-C02']?.qDev).toBeDefined()
+      expect(useQuizHistoryStore().entries.map((e) => e.id)).toEqual(['hDev'])
+
+      await pushLocalData()
+      expect(adapter.push).not.toHaveBeenCalled()
+    },
+  )
 
   it('signing out after a failed initial pull keeps local data as-is instead of restoring the stale guest snapshot', async () => {
     seedDeviceData()
@@ -275,6 +302,22 @@ describe('useAccount guest migration', () => {
 
     expect(syncError.value).toBe(texts.syncFailed)
     expect(useUserProgressStore().byExamCode['DVA-C02']?.qDev?.attempts).toBe(3)
+    expect(useUserAccountStore().guestProgress).not.toBeNull()
+    expect(adapter.push).not.toHaveBeenCalled()
+  })
+
+  it('a remote document in an unsupported format aborts migration, keeps the guest data in place and never pushes', async () => {
+    seedDeviceData()
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    const payload = makePayload()
+    adapter.pull.mockResolvedValue({ ...payload, progress: { ...payload.progress!, version: 2 } })
+
+    const { signIn, syncError } = useAccount()
+    await signIn('dev@example.com', 'Passw0rd!', { migrateGuest: true })
+
+    expect(syncError.value).toBe(texts.syncFailed)
+    expect(useUserProgressStore().byExamCode['DVA-C02']?.qDev?.attempts).toBe(3)
+    expect(useUserProgressStore().byExamCode['DVA-C02']?.q1).toBeUndefined()
     expect(useUserAccountStore().guestProgress).not.toBeNull()
     expect(adapter.push).not.toHaveBeenCalled()
   })
@@ -566,6 +609,34 @@ describe('useAccount session ends', () => {
     expect(pushRoute).toHaveBeenCalledWith({ name: 'welcome' })
   })
 
+  it('signing out while a sign-in pull is still in flight is not overridden once that pull settles', async () => {
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    vi.mocked(auth.signOut).mockResolvedValue(undefined)
+
+    let releasePull!: (payload: RemoteSyncPayload | null) => void
+    let capturedSignal: AbortSignal | undefined
+    adapter.pull.mockImplementationOnce((signal: AbortSignal) => {
+      capturedSignal = signal
+      return new Promise((resolve) => {
+        releasePull = resolve
+      })
+    })
+
+    const { signIn, signOut } = useAccount()
+    const signInPromise = signIn('dev@example.com', 'Passw0rd!')
+    await vi.waitFor(() => expect(capturedSignal).toBeDefined())
+    expect(capturedSignal).toBeDefined()
+
+    await signOut()
+    expect(pushRoute).toHaveBeenLastCalledWith({ name: 'welcome' })
+
+    releasePull(makePayload())
+    await signInPromise
+
+    expect(pushRoute).toHaveBeenLastCalledWith({ name: 'welcome' })
+    expect(useUserAccountStore().accountMode).toBeNull()
+  })
+
   it('continuing locally never syncs and opens the cert selector', async () => {
     await useAccount().continueLocal()
 
@@ -574,6 +645,73 @@ describe('useAccount session ends', () => {
     expect(adapter.pull).not.toHaveBeenCalled()
     expect(adapter.push).not.toHaveBeenCalled()
     expect(pushRoute).toHaveBeenCalledWith({ name: 'cert-selector' })
+  })
+})
+
+describe('useAccount loadAccountData with invalid remote payload', () => {
+  it('preserves local progress and history stores when the server returns an invalid progress format', async () => {
+    seedDeviceData()
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+
+    const progressStore = useUserProgressStore()
+    const historyStore = useQuizHistoryStore()
+    const beforeProgress = JSON.parse(JSON.stringify(progressStore.byExamCode))
+    const beforeHistory = JSON.parse(JSON.stringify(historyStore.entries))
+
+    // Adapter returns a payload with an invalid progress.format — this should NOT
+    // clear the local stores, only set syncError.
+    adapter.pull.mockResolvedValue({
+      progress: { format: 'wrong-format', version: 1, exportedAt: '', byExamCode: {} },
+      history: { format: 'quiz-history', version: 1, exportedAt: '', entries: [] },
+    })
+
+    const { signIn, syncError } = useAccount()
+    await signIn('dev@example.com', 'Passw0rd!')
+
+    // Stores must be preserved — invalid remote data should not wipe them.
+    expect(progressStore.byExamCode).toEqual(beforeProgress)
+    expect(historyStore.entries).toEqual(beforeHistory)
+    expect(syncError.value).toBe(texts.syncFailed)
+  })
+
+  it('preserves local progress and history stores when the server returns an invalid history format', async () => {
+    seedDeviceData()
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+
+    const progressStore = useUserProgressStore()
+    const historyStore = useQuizHistoryStore()
+    const beforeProgress = JSON.parse(JSON.stringify(progressStore.byExamCode))
+    const beforeHistory = JSON.parse(JSON.stringify(historyStore.entries))
+
+    adapter.pull.mockResolvedValue({
+      progress: { format: 'quiz-progress', version: 1, exportedAt: '', byExamCode: {} },
+      history: { format: 'wrong-format', version: 1, exportedAt: '', entries: [] },
+    })
+
+    const { signIn, syncError } = useAccount()
+    await signIn('dev@example.com', 'Passw0rd!')
+
+    expect(progressStore.byExamCode).toEqual(beforeProgress)
+    expect(historyStore.entries).toEqual(beforeHistory)
+    expect(syncError.value).toBe(texts.syncFailed)
+  })
+
+  it('still clears stores on a genuine sync failure (network error), not an invalid payload', async () => {
+    seedDeviceData()
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+
+    const progressStore = useUserProgressStore()
+    const historyStore = useQuizHistoryStore()
+
+    // Genuine network failure — stores should be cleared (existing behavior preserved).
+    adapter.pull.mockRejectedValue(new Error('network unreachable'))
+
+    const { signIn, syncError } = useAccount()
+    await signIn('dev@example.com', 'Passw0rd!')
+
+    expect(progressStore.byExamCode).toEqual({})
+    expect(historyStore.entries).toEqual([])
+    expect(syncError.value).toBe(texts.syncFailed)
   })
 })
 

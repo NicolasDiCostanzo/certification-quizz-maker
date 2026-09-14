@@ -1,23 +1,16 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
 import QuizHistoryItem from './QuizHistoryItem.vue'
 import { texts } from '../texts/en'
 import type { QuizHistoryEntry } from '../types'
 
-const props = defineProps<{
-  certCode: string
+defineProps<{
   entries: QuizHistoryEntry[]
 }>()
 
-const router = useRouter()
-
 const emit = defineEmits<{
   requestDelete: [id: string]
+  review: [id: string]
 }>()
-
-function reviewEntry(entry: QuizHistoryEntry) {
-  router.push({ name: 'quiz-history-review', params: { certCode: props.certCode, entryId: entry.id } })
-}
 </script>
 
 <template>
@@ -30,7 +23,7 @@ function reviewEntry(entry: QuizHistoryEntry) {
         v-for="entry in entries"
         :key="entry.id"
         :entry="entry"
-        @review="reviewEntry(entry)"
+        @review="emit('review', entry.id)"
         @request-delete="emit('requestDelete', $event)"
       />
     </div>

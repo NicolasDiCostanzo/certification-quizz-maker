@@ -130,4 +130,5 @@ export const texts = {
   authConfirmError: 'Verification failed. Check the code and try again.',
   signOut: 'Sign out',
   syncFailed: 'Synchronization failed. Your local data is safe; try again later.',
+  dismiss: 'Dismiss',
 }

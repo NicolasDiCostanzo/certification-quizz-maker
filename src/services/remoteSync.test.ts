@@ -128,4 +128,26 @@ describe('remote sync adapter', () => {
 
     await expect(adapter.pull()).rejects.toThrow(expectedError)
   })
+
+  it.each([
+    ['progress.format is wrong', { format: 'other', version: 1, exportedAt: '', byExamCode: {} }, 'sync pull failed: invalid progress.format'],
+    ['progress.version is not a safe integer', { format: 'quiz-progress', version: 1.5, exportedAt: '', byExamCode: {} }, 'sync pull failed: invalid progress.version'],
+    ['progress.exportedAt is missing', { format: 'quiz-progress', version: 1, byExamCode: {} }, 'sync pull failed: invalid progress.exportedAt'],
+  ])('pull rejects a payload whose %s (same envelope check the push Lambda enforces)', async (_label, progress, expectedError) => {
+    fetchAuthSessionMock.mockResolvedValue({ tokens: { accessToken: 'token-1' } })
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ progress, history: null }), { status: 200 }))
+
+    await expect(adapter.pull()).rejects.toThrow(expectedError)
+  })
+
+  it.each([
+    ['history.format is wrong', { format: 'other', version: 1, exportedAt: '', entries: [] }, 'sync pull failed: invalid history.format'],
+    ['history.version is not a safe integer', { format: 'quiz-history', version: 1.5, exportedAt: '', entries: [] }, 'sync pull failed: invalid history.version'],
+    ['history.exportedAt is missing', { format: 'quiz-history', version: 1, entries: [] }, 'sync pull failed: invalid history.exportedAt'],
+  ])('pull rejects a payload whose %s (same envelope check the push Lambda enforces)', async (_label, history, expectedError) => {
+    fetchAuthSessionMock.mockResolvedValue({ tokens: { accessToken: 'token-1' } })
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ progress: null, history }), { status: 200 }))
+
+    await expect(adapter.pull()).rejects.toThrow(expectedError)
+  })
 })

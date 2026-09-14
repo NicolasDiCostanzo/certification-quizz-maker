@@ -1,7 +1,7 @@
 import { useRouter } from 'vue-router'
 import * as auth from '../services/auth'
 import type { RemoteSyncPayload } from '../services/remoteSync'
-import { getSyncAdapter } from '../services/remoteSync'
+import { getSyncAdapter, InvalidPullPayload } from '../services/remoteSync'
 import { useQuizHistoryStore } from '../stores/quizHistory'
 import { useUserAccountStore } from '../stores/userAccount'
 import { useUserProgressStore } from '../stores/userProgress'
@@ -38,29 +38,41 @@ export function useAccount() {
   const historyStore = useQuizHistoryStore()
   const sync = getSyncAdapter()
 
-  function applyRemoteData(payload: RemoteSyncPayload | null) {
+  // False when a pulled document doesn't match the format/version this build expects:
+  // applying it anyway would silently blank the store (applyRemoteData) or import
+  // unrecognized data (migrateGuestData), and pushLocalData would then overwrite the
+  // account's real remote data with that corrupted state (push replaces it wholesale).
+  function isSupportedPayload(payload: RemoteSyncPayload | null): boolean {
     const progress = payload?.progress
-    if (progress && progress.format === PROGRESS_FORMAT && progress.version === PROGRESS_VERSION) {
-      progressStore.replaceAll(progress.byExamCode)
-    } else {
-      progressStore.replaceAll({})
-    }
+    if (progress && (progress.format !== PROGRESS_FORMAT || progress.version !== PROGRESS_VERSION)) return false
     const history = payload?.history
-    if (history && history.format === HISTORY_FORMAT && history.version === HISTORY_VERSION) {
-      historyStore.replaceAll(history.entries)
-    } else {
-      historyStore.replaceAll([])
-    }
+    if (history && (history.format !== HISTORY_FORMAT || history.version !== HISTORY_VERSION)) return false
+    return true
+  }
+
+  function applyRemoteData(payload: RemoteSyncPayload | null): boolean {
+    if (!isSupportedPayload(payload)) return false
+    progressStore.replaceAll(payload?.progress ? payload.progress.byExamCode : {})
+    historyStore.replaceAll(payload?.history ? payload.history.entries : [])
+    return true
   }
 
   async function loadAccountData(signal: AbortSignal): Promise<boolean> {
     try {
       const payload = await sync.pull(signal)
       if (signal.aborted) return false
-      applyRemoteData(payload)
+      if (!applyRemoteData(payload)) {
+        syncError.value = texts.syncFailed
+        return false
+      }
       return true
-    } catch {
+    } catch (err) {
       if (signal.aborted) return false
+      if (err instanceof InvalidPullPayload) {
+        // Remote data failed validation — keep local stores intact, just report the error.
+        syncError.value = texts.syncFailed
+        return false
+      }
       applyRemoteData(null)
       syncError.value = texts.syncFailed
       return false
@@ -118,6 +130,10 @@ export function useAccount() {
       return false
     }
     if (signal.aborted) return false
+    if (!isSupportedPayload(remote)) {
+      syncError.value = texts.syncFailed
+      return false
+    }
     if (remote?.progress) progressStore.importProgress(remote.progress)
     if (remote?.history) historyStore.importHistory(remote.history)
     const controller = new AbortController()
@@ -162,15 +178,14 @@ export function useAccount() {
       options.migrateGuest && !wasSignedIn
         ? await migrateGuestData(attempt, controller.signal)
         : await loadAccountData(controller.signal)
-    if (authAttempt === attempt) {
-      // Leaving syncSession null on failure is deliberate, not a dead end: push
-      // replaces the remote document wholesale, so enabling it here would risk
-      // uploading the just-blanked local state over the account's real data.
-      // The user retries by signing in again; accountDataLoadFailed keeps this
-      // attempt from being mistaken for "synced" if they sign out instead.
-      syncSession = ok ? Symbol() : null
-      accountDataLoadFailed = !ok
-    }
+    if (authAttempt !== attempt) return
+    // Leaving syncSession null on failure is deliberate, not a dead end: push
+    // replaces the remote document wholesale, so enabling it here would risk
+    // uploading the just-blanked local state over the account's real data.
+    // The user retries by signing in again; accountDataLoadFailed keeps this
+    // attempt from being mistaken for "synced" if they sign out instead.
+    syncSession = ok ? Symbol() : null
+    accountDataLoadFailed = !ok
     await router.push({ name: 'cert-selector' })
   }
 
@@ -194,6 +209,7 @@ export function useAccount() {
       clearTimeout(debounceTimer)
       flushDebouncedPush?.()
     }
+    authAttempt++
     activeAttemptAbort?.abort()
     const outcome = await Promise.race([
       pendingPush.then(

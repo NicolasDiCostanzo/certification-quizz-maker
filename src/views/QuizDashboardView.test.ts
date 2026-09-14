@@ -93,4 +93,42 @@ describe('QuizDashboardView', () => {
     expect(historyStore.entries).toHaveLength(0)
     expect(pushLocalData).toHaveBeenCalledOnce()
   })
+
+  it('navigates to the history review route when QuizHistoryList emits review', async () => {
+    useQuizHistoryStore().entries.push({
+      id: 'h1',
+      certCode: 'TEST',
+      mode: 'preparation',
+      startedAt: 0,
+      finishedAt: 1,
+      questionIds: ['q1'],
+      answers: {},
+      flags: [],
+      result: { percentCorrect: 100, passed: true, timesCorrect: 1, totalAnswered: 1 },
+    })
+
+    await router.push('/certs/TEST')
+    const wrapper = mount(QuizDashboardView, { global: { plugins: [pinia, router] }, props: { certCode: 'TEST' } })
+    const pushSpy = vi.spyOn(router, 'push').mockResolvedValue(undefined)
+
+    await wrapper.findComponent({ name: 'QuizHistoryList' }).vm.$emit('review', 'h1')
+
+    expect(pushSpy).toHaveBeenCalledWith({ name: 'quiz-history-review', params: { certCode: 'TEST', entryId: 'h1' } })
+    pushSpy.mockRestore()
+  })
+
+  it('navigates to the flagged review route when ReviewBreakdown emits reviewFlagged', async () => {
+    useUserProgressStore().byExamCode['TEST'] = {
+      q1: { questionId: 'q1', attempts: 1, timesCorrect: 0, timesWrong: 1, flagged: true, lastSeenAt: 1 },
+    }
+
+    await router.push('/certs/TEST')
+    const wrapper = mount(QuizDashboardView, { global: { plugins: [pinia, router] }, props: { certCode: 'TEST' } })
+    const pushSpy = vi.spyOn(router, 'push').mockResolvedValue(undefined)
+
+    await wrapper.findComponent({ name: 'ReviewBreakdown' }).vm.$emit('reviewFlagged')
+
+    expect(pushSpy).toHaveBeenCalledWith({ name: 'flagged-review', params: { certCode: 'TEST' } })
+    pushSpy.mockRestore()
+  })
 })

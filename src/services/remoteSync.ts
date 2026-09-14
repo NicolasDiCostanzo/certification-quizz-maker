@@ -1,9 +1,17 @@
 import { awsConfig, isSyncConfigured } from '../config'
 import type { HistoryExportFile, ProgressExportFile } from '../types'
+import { validateHistoryExportFile, validateProgressExportFile } from '../utils/syncPayloadValidator'
 
 export interface RemoteSyncPayload {
   progress: ProgressExportFile | null
   history: HistoryExportFile | null
+}
+
+export class InvalidPullPayload extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'InvalidPullPayload'
+  }
 }
 
 export interface RemoteSyncAdapter {
@@ -27,36 +35,22 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 function validatePullPayload(value: unknown): RemoteSyncPayload | null {
   if (value === null) return null
   if (typeof value !== 'object' || Array.isArray(value)) {
-    throw new Error('sync pull failed: invalid payload shape')
+    throw new InvalidPullPayload('sync pull failed: invalid payload shape')
   }
   const v = value as Record<string, unknown>
   if (!('progress' in v)) {
-    throw new Error('sync pull failed: missing progress')
+    throw new InvalidPullPayload('sync pull failed: missing progress')
   }
   if (v.progress !== null) {
-    if (typeof v.progress !== 'object' || Array.isArray(v.progress)) {
-      throw new Error('sync pull failed: invalid progress document')
-    }
-    const progress = v.progress as Record<string, unknown>
-    if (
-      typeof progress.byExamCode !== 'object' ||
-      progress.byExamCode === null ||
-      Array.isArray(progress.byExamCode)
-    ) {
-      throw new Error('sync pull failed: invalid progress.byExamCode')
-    }
+    const errors = validateProgressExportFile(v.progress)
+    if (errors.length > 0) throw new InvalidPullPayload(`sync pull failed: ${errors[0]}`)
   }
   if (!('history' in v)) {
-    throw new Error('sync pull failed: missing history')
+    throw new InvalidPullPayload('sync pull failed: missing history')
   }
   if (v.history !== null) {
-    if (typeof v.history !== 'object' || Array.isArray(v.history)) {
-      throw new Error('sync pull failed: invalid history document')
-    }
-    const history = v.history as Record<string, unknown>
-    if (!Array.isArray(history.entries)) {
-      throw new Error('sync pull failed: invalid history.entries')
-    }
+    const errors = validateHistoryExportFile(v.history)
+    if (errors.length > 0) throw new InvalidPullPayload(`sync pull failed: ${errors[0]}`)
   }
   return v as unknown as RemoteSyncPayload
 }

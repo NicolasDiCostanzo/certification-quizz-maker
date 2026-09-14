@@ -3,22 +3,24 @@ import { isQuestionAnswerable, validateCertBundle } from '../utils/schemaValidat
 
 const modules = import.meta.glob<{ default: unknown }>('/src/assets/*questions.json', { eager: true })
 
-function loadBuiltInCerts(): { certs: CertBundle[]; issuesByPath: Record<string, string[]> } {
+export function loadBuiltInCerts(
+  modules: Record<string, { default: unknown }>,
+): { certs: CertBundle[]; issuesByPath: Record<string, string[]> } {
   const certs: CertBundle[] = []
   const issuesByPath: Record<string, string[]> = {}
-  const seenExamCodes = new Set<string>()
+  const pathByExamCode = new Map<string, string>()
 
   for (const [path, mod] of Object.entries(modules)) {
     const result = validateCertBundle(mod.default)
     if (result.valid && result.bundle) {
       const examCode = result.bundle.exam.code
-      if (seenExamCodes.has(examCode)) {
-        issuesByPath[path] = [
-          `Duplicate exam code "${examCode}" — another bundle already provides this certification, so this bundle was excluded to keep getCert unambiguous.`,
-        ]
-        continue
+      const existingPath = pathByExamCode.get(examCode)
+      if (existingPath) {
+        throw new Error(
+          `Duplicate exam code "${examCode}": both "${existingPath}" and "${path}" provide this certification. Remove or rename one of the bundles before shipping.`,
+        )
       }
-      seenExamCodes.add(examCode)
+      pathByExamCode.set(examCode, path)
       certs.push(result.bundle)
     } else {
       issuesByPath[path] = result.errors
@@ -28,7 +30,7 @@ function loadBuiltInCerts(): { certs: CertBundle[]; issuesByPath: Record<string,
   return { certs, issuesByPath }
 }
 
-const { certs: availableCerts, issuesByPath: certLoadIssues } = loadBuiltInCerts()
+const { certs: availableCerts, issuesByPath: certLoadIssues } = loadBuiltInCerts(modules)
 
 if (Object.keys(certLoadIssues).length > 0) {
   for (const [path, errors] of Object.entries(certLoadIssues)) {

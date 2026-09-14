@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { texts } from '../texts/en'
 import type { ThemeBreakdown, TopicBreakdown } from '../utils/scoreBreakdown'
 import PrimaryButton from './PrimaryButton.vue'
@@ -11,12 +10,15 @@ const props = defineProps<{
   themeBreakdown: ThemeBreakdown[]
   themeGroups: string[]
   passingPercent: number
-  certCode?: string
   showReviewButton?: boolean
   hasFlaggedQuestions?: boolean
 }>()
 
-const router = useRouter()
+const emit = defineEmits<{
+  reviewTopic: [topic: string]
+  reviewTheme: [group: string, value: string]
+  reviewFlagged: []
+}>()
 
 const openThemeGroups = ref<Record<string, boolean>>({})
 
@@ -42,23 +44,7 @@ const visibleThemeGroups = computed(() =>
   props.themeGroups.filter(group => (themeBreakdownByGroup.value[group]?.length ?? 0) > 0)
 )
 
-function navigateToTopic(topic: string) {
-  if (props.certCode) {
-    router.push({ name: 'topic-review', params: { certCode: props.certCode, topic } })
-  }
-}
 
-function navigateToTheme(group: string, value: string) {
-  if (props.certCode) {
-    router.push({ name: 'theme-review', params: { certCode: props.certCode, themeGroup: group, themeValue: value } })
-  }
-}
-
-function navigateToFlagged() {
-  if (props.certCode) {
-    router.push({ name: 'flagged-review', params: { certCode: props.certCode } })
-  }
-}
 </script>
 
 <template>
@@ -76,7 +62,7 @@ function navigateToFlagged() {
       <PrimaryButton
         v-if="showReviewButton"
         size="sm"
-        @click.stop="navigateToTopic(item.label)"
+        @click.stop="emit('reviewTopic', item.label)"
       >
         {{ texts.review }}
       </PrimaryButton>
@@ -104,7 +90,7 @@ function navigateToFlagged() {
             <PrimaryButton
               v-if="showReviewButton"
               size="sm"
-              @click.stop="navigateToTheme(item.group, item.value)"
+              @click.stop="emit('reviewTheme', item.group, item.value)"
             >
               {{ texts.review }}
             </PrimaryButton>
@@ -119,7 +105,7 @@ function navigateToFlagged() {
       size="sm"
       class="flagged-review-btn"
       :disabled="!hasFlaggedQuestions"
-      @click="navigateToFlagged"
+      @click="emit('reviewFlagged')"
     >
       {{ texts.reviewFlagged }}
     </PrimaryButton>

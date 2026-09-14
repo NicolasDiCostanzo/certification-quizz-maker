@@ -1,5 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, TransactWriteCommand } from '@aws-sdk/lib-dynamodb'
+import { validateHistoryExportFile, validateProgressExportFile } from '../../utils/syncPayloadValidator'
 
 const client = new DynamoDBClient({})
 const docClient = DynamoDBDocumentClient.from(client)
@@ -24,30 +25,6 @@ const MAX_ITEM_SIZE_BYTES = 190 * 1024
 
 function itemExceedsMaxSize(item: Record<string, unknown>): boolean {
   return Buffer.byteLength(JSON.stringify(item), 'utf8') > MAX_ITEM_SIZE_BYTES
-}
-
-function isValidProgress(value: unknown): boolean {
-  if (typeof value !== 'object' || value === null) return false
-  const v = value as Record<string, unknown>
-  return (
-    v.format === 'quiz-progress' &&
-    Number.isSafeInteger(v.version) &&
-    typeof v.exportedAt === 'string' &&
-    typeof v.byExamCode === 'object' &&
-    v.byExamCode !== null &&
-    !Array.isArray(v.byExamCode)
-  )
-}
-
-function isValidHistory(value: unknown): boolean {
-  if (typeof value !== 'object' || value === null) return false
-  const v = value as Record<string, unknown>
-  return (
-    v.format === 'quiz-history' &&
-    Number.isSafeInteger(v.version) &&
-    typeof v.exportedAt === 'string' &&
-    Array.isArray(v.entries)
-  )
 }
 
 function recordCommand(
@@ -94,14 +71,14 @@ export const handler = async (event: {
     }
   }
 
-  if ('progress' in payload && payload.progress !== null && !isValidProgress(payload.progress)) {
+  if ('progress' in payload && payload.progress !== null && validateProgressExportFile(payload.progress).length > 0) {
     return {
       statusCode: 400,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: 'Invalid progress document' }),
     }
   }
-  if ('history' in payload && payload.history !== null && !isValidHistory(payload.history)) {
+  if ('history' in payload && payload.history !== null && validateHistoryExportFile(payload.history).length > 0) {
     return {
       statusCode: 400,
       headers: { 'Content-Type': 'application/json' },
@@ -131,7 +108,16 @@ export const handler = async (event: {
   }
 
   if (commands.length > 0) {
-    await docClient.send(new TransactWriteCommand({ TransactItems: commands }))
+    try {
+      await docClient.send(new TransactWriteCommand({ TransactItems: commands }))
+    } catch (err) {
+      console.error('sync push failed', { userId, error: err instanceof Error ? err.message : err })
+      return {
+        statusCode: 500,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: 'Internal server error' }),
+      }
+    }
   }
 
   return {
