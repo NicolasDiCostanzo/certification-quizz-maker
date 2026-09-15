@@ -1,46 +1,34 @@
 import { expect, test } from '@playwright/test'
-import {
-  AdminConfirmSignUpCommand,
-  AdminDeleteUserCommand,
-  CognitoIdentityProviderClient,
-} from '@aws-sdk/client-cognito-identity-provider'
 import { texts } from '../src/texts/en'
+import { seedConfirmedUser, signUpAndConfirm } from './helpers/authFlow'
+import { newTestUserCredentials } from './helpers/testUser'
 
-const enabled =
-  process.env.E2E_MODE === 'auth' &&
-  !!process.env.VITE_AWS_REGION &&
-  !!process.env.VITE_COGNITO_USER_POOL_ID &&
-  !!process.env.VITE_COGNITO_CLIENT_ID
+test('sign-up reaches the confirmation step, and confirming signs the user in automatically', async ({ page }) => {
+  const { email, password } = newTestUserCredentials()
 
-test.skip(!enabled, 'authenticated e2e requires E2E_MODE=auth plus VITE_AWS_REGION, VITE_COGNITO_USER_POOL_ID and VITE_COGNITO_CLIENT_ID')
+  await signUpAndConfirm(page, { email, password })
 
-const client = new CognitoIdentityProviderClient({ region: process.env.VITE_AWS_REGION })
-const userPoolId = process.env.VITE_COGNITO_USER_POOL_ID!
-const password = 'Passw0rd-E2e'
-const email = `e2e-${Date.now()}@example.com`
-
-test.afterAll(async () => {
-  try {
-    await client.send(new AdminDeleteUserCommand({ UserPoolId: userPoolId, Username: email }))
-  } catch (err) {
-    if (err?.name !== 'UserNotFoundException') throw err
-  }
+  await expect(page.locator('.account-chip__email')).toHaveText(email)
 })
 
-test('sign-up reaches the confirmation step, then the confirmed user signs in, survives a reload and signs out', async ({ page }) => {
-  await page.goto('/')
-  await page.getByRole('button', { name: texts.welcomeNewAccountCta }).click()
-
-  await page.locator('input[type="email"]').fill(email)
-  await page.locator('input[type="password"]').fill(password)
-  await page.getByRole('button', { name: texts.authSignUpCta }).click()
-
-  await expect(page.getByRole('heading', { name: texts.authConfirmTitle })).toBeVisible()
-
-  await client.send(new AdminConfirmSignUpCommand({ UserPoolId: userPoolId, Username: email }))
+test('sign-in rejects a wrong password and an unknown email, then succeeds with the right credentials, survives a reload and signs out', async ({ page }) => {
+  const { email, password } = newTestUserCredentials()
+  await seedConfirmedUser(page, { email, password })
 
   await page.goto('/')
   await page.getByRole('button', { name: texts.welcomeExistingAccountCta }).click()
+  await expect(page.getByRole('heading', { name: texts.authSignInTitle })).toBeVisible()
+
+  await page.locator('input[type="email"]').fill(email)
+  await page.locator('input[type="password"]').fill(`${password}-wrong`)
+  await page.getByRole('button', { name: texts.authSignInCta }).click()
+  await expect(page.getByRole('alert')).toHaveText(texts.authSignInError)
+
+  await page.locator('input[type="email"]').fill(`unknown-${email}`)
+  await page.locator('input[type="password"]').fill(password)
+  await page.getByRole('button', { name: texts.authSignInCta }).click()
+  await expect(page.getByRole('alert')).toHaveText(texts.authSignInError)
+
   await page.locator('input[type="email"]').fill(email)
   await page.locator('input[type="password"]').fill(password)
   await page.getByRole('button', { name: texts.authSignInCta }).click()
@@ -52,7 +40,5 @@ test('sign-up reaches the confirmation step, then the confirmed user signs in, s
   await expect(page.locator('.account-chip__email')).toHaveText(email)
 
   await page.getByRole('button', { name: texts.signOut }).click()
-  const url = new URL(page.url())
-  await expect(url.pathname).toBe('/')
-  await expect(url.hash).toBe('#/')
+  await expect(page).toHaveURL(/\/#\/$/)
 })
