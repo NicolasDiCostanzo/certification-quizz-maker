@@ -12,7 +12,17 @@ import {
   topicFilter,
 } from './fixtures/deploymentQuiz'
 import { signUpConfirmAndSignIn } from './helpers/authFlow'
+import { freezeTimeAt } from './helpers/clock'
 import { authEnabled, authSkipReason, deleteTestUser, newTestUserCredentials } from './helpers/cognitoTestUser'
+import {
+  expectFlaggedReviewEnabled,
+  expectSingleHistoryEntry,
+  goBackToDashboard,
+  goBackToHome,
+  openCertDashboardCard,
+  openFlaggedReviewOnly,
+  signOut,
+} from './helpers/dashboard'
 import {
   configureFilteredQuiz,
   expectCorrectFeedback,
@@ -44,6 +54,17 @@ test.skip(!authEnabled, authSkipReason)
 
 const { email, password } = newTestUserCredentials()
 
+const quizStartedAt = new Date('2025-06-15T10:00:00.000Z')
+const quizFinishedAt = new Date(quizStartedAt.getTime() + 13 * 60_000)
+const expectedHistoryDate = quizFinishedAt.toLocaleDateString('en-US', {
+  timeZone: 'UTC',
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+})
+
 test.describe.serial('quiz journey on the DVA-C02 certification', () => {
   test.beforeAll(async ({ sharedPage: page }) => {
     await pinDeterministicShuffle(page)
@@ -61,7 +82,7 @@ test.describe.serial('quiz journey on the DVA-C02 certification', () => {
   })
 
   test('shows a blank dashboard before any quiz is taken', async ({ sharedPage: page }) => {
-    await page.getByRole('heading', { name: certExamName }).click()
+    await openCertDashboardCard(page, certExamName)
     await expect(page).toHaveURL(new RegExp(`#/certs/${certCode}$`))
 
     await expectDashboardStat(page, texts.quizzesTaken, '0')
@@ -75,6 +96,7 @@ test.describe.serial('quiz journey on the DVA-C02 certification', () => {
     await configureFilteredQuiz(page, { topic: topicFilter, themeGroup, themeValues })
     await expectMatchingCount(page, scriptedQuestions.length)
 
+    await freezeTimeAt(page, quizStartedAt)
     await startConfiguredQuiz(page)
     await expect(page.locator('.progress-text')).toHaveText(texts.questionOf(1, scriptedQuestions.length))
   })
@@ -103,6 +125,7 @@ test.describe.serial('quiz journey on the DVA-C02 certification', () => {
     await selectAnswer(page, q4.selectAnswers)
     await submitAnswer(page)
     await expectIncorrectFeedback(page, q4.correctAnswers)
+    await freezeTimeAt(page, quizFinishedAt)
     await finishQuiz(page)
 
     await expect(page).toHaveURL(new RegExp(`#/certs/${certCode}/quiz/review$`))
@@ -155,5 +178,54 @@ test.describe.serial('quiz journey on the DVA-C02 certification', () => {
 
     await expectSummaryCard(page, 1, { correct: true, flagged: false })
     await expectSummaryCard(page, 4, { correct: false, flagged: true })
+  })
+
+  test('shows the all-time score and quiz history entry on the dashboard', async ({ sharedPage: page }) => {
+    await goBackToHome(page)
+    await openCertDashboardCard(page, certExamName)
+    await expect(page).toHaveURL(new RegExp(`#/certs/${certCode}$`))
+
+    await expectDashboardStat(page, texts.quizzesTaken, '1')
+    await expectDashboardStat(page, texts.overallAccuracy, `${expectedResult.percent}%`)
+    await expectDashboardStat(page, texts.correctAnswers, `${expectedResult.correctCount} / ${expectedResult.totalQuestions}`)
+
+    for (const row of topicBreakdown) {
+      await expectTopicBreakdownRow(page, row)
+    }
+    for (const group of themeGroupsInOrder) {
+      await expandThemeGroup(page, group)
+      for (const row of themeBreakdown[group]) {
+        await expectThemeBreakdownRow(page, group, row)
+      }
+    }
+
+    await expectFlaggedReviewEnabled(page, true)
+    await expectSingleHistoryEntry(page, {
+      mode: texts.modePreparation,
+      dateText: expectedHistoryDate,
+      duration: '13 min',
+      percent: expectedResult.percent,
+    })
+  })
+
+  test('reviewing flagged questions only shows question 4, then removing its flag empties the list', async ({ sharedPage: page }) => {
+    await openFlaggedReviewOnly(page)
+    await expect(page.locator('.summary-card')).toHaveCount(1)
+    await expectQuestionDetail(page, topicFilter, scriptedQuestions[3])
+
+    await unflagQuestion(page)
+    await expect(page.getByText(texts.noQuestionsFoundMessage)).toBeVisible()
+
+    await goBackToDashboard(page)
+    await expect(page).toHaveURL(new RegExp(`#/certs/${certCode}$`))
+    await expectFlaggedReviewEnabled(page, false)
+  })
+
+  test('signing out returns to the welcome page with all 3 account options', async ({ sharedPage: page }) => {
+    await signOut(page)
+
+    await expect(page.getByRole('button', { name: texts.welcomeExistingAccountCta })).toBeVisible()
+    await expect(page.getByRole('button', { name: texts.welcomeNewAccountCta })).toBeVisible()
+    await expect(page.getByRole('button', { name: texts.welcomeNoAccountCta })).toBeVisible()
   })
 })

@@ -58,7 +58,7 @@ export async function expectThemeBreakdownRow(page: Page, group: string, row: Br
   await expect(rowLocator.locator('[role="progressbar"]')).toHaveAttribute('aria-valuenow', String(percentOf(row)))
 }
 
-export function summaryCard(page: Page, index: number): Locator {
+function summaryCard(page: Page, index: number): Locator {
   return page.locator('.summary-card').nth(index - 1)
 }
 
