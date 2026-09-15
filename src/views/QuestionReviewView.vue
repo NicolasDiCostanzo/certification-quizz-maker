@@ -5,6 +5,7 @@ import ReviewDetailPanel from '../components/ReviewDetailPanel.vue'
 import ReviewQuestionGrid from '../components/ReviewQuestionGrid.vue'
 import ReviewSummary from '../components/ReviewSummary.vue'
 import PrimaryButton from '../components/PrimaryButton.vue'
+import { useAccount } from '../composables/useAccount'
 import { useUserProgressStore } from '../stores/userProgress'
 import { texts } from '../texts/en'
 import type { CertBundle, Question, QuestionAnswer } from '../types'
@@ -26,6 +27,7 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
+const { pushLocalDataDebounced } = useAccount()
 const progressStore = useUserProgressStore()
 
 const certCode = computed(() => props.cert?.exam.code ?? '')
@@ -66,6 +68,7 @@ function toggleSelected(questionId: string) {
 
 function toggleFlag(questionId: string) {
   progressStore.toggleFlag(certCode.value, questionId)
+  void pushLocalDataDebounced()
 }
 
 function goBack() {

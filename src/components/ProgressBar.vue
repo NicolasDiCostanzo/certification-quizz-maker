@@ -6,20 +6,32 @@ const props = defineProps({
   passing: { type: Number, required: true },
 })
 
-const width = computed(() => `${props.value}%`)
-const isPassed = computed(() => props.value >= props.passing)
+const normalizedValue = computed(() => {
+  const v = props.value
+  if(!Number.isFinite(v)) return 0;
+  return Math.min(100, Math.max(0, v))
+})
+
+const width = computed(() => `${normalizedValue.value}%`)
+const isPassed = computed(() => normalizedValue.value >= props.passing)
 </script>
 
 <template>
   <div class="progress-bar">
-    <div class="progress-bar__track">
+    <div
+      class="progress-bar__track"
+      role="progressbar"
+      :aria-valuenow="normalizedValue"
+      aria-valuemin="0"
+      aria-valuemax="100"
+    >
       <div
         class="progress-bar__fill"
         :class="{ 'progress-bar__fill--passed': isPassed }"
         :style="{ width }"
         :data-passed="isPassed"
       >
-      {{ props.value }}%
+      {{ normalizedValue }}%
       </div>
     </div>
   </div>

@@ -38,4 +38,30 @@ describe('ConfirmModal', () => {
     await wrapper.find('.btn--primary').trigger('click')
     expect(wrapper.emitted('confirm')).toBeTruthy()
   })
+
+  it('moves focus into the dialog on open, onto the first focusable element', () => {
+    const wrapper = mount(ConfirmModal, { props, attachTo: document.body })
+    expect(document.activeElement).toBe(wrapper.find('.btn--secondary').element)
+    wrapper.unmount()
+  })
+
+  it('traps Tab so focus cycles between the cancel and confirm buttons', () => {
+    const wrapper = mount(ConfirmModal, { props, attachTo: document.body })
+    const cancelButton = wrapper.find('.btn--secondary').element as HTMLElement
+    const confirmButton = wrapper.find('.btn--primary').element as HTMLElement
+
+    confirmButton.focus()
+    const forward = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true })
+    window.dispatchEvent(forward)
+    expect(forward.defaultPrevented).toBe(true)
+    expect(document.activeElement).toBe(cancelButton)
+
+    cancelButton.focus()
+    const backward = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, cancelable: true })
+    window.dispatchEvent(backward)
+    expect(backward.defaultPrevented).toBe(true)
+    expect(document.activeElement).toBe(confirmButton)
+
+    wrapper.unmount()
+  })
 })

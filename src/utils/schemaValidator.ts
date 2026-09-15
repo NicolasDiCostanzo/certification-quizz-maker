@@ -107,6 +107,8 @@ function validateExam(value: unknown, errors: string[], warnings: string[]): Exa
       errors.push('exam.weights must be an object mapping topic names to numbers.')
     } else if (!Object.values(value.weights).every((v) => typeof v === 'number')) {
       errors.push('exam.weights must have a numeric value for every topic.')
+    } else if (!Object.values(value.weights as Record<string, number>).every((v) => Number.isFinite(v) && v >= 0)) {
+      errors.push('exam.weights values must be non-negative, finite numbers.')
     } else {
       weights = value.weights as Record<string, number>
       const sum = Object.values(weights).reduce((total, v) => total + v, 0)

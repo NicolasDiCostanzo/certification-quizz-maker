@@ -12,6 +12,12 @@ interface ImageSegment {
 export type InlineSegment = TextSegment | ImageSegment
 
 const IMAGE_PATTERN = /!\[([^\]]*)\]\(([^)]+)\)/g
+const SAFE_IMAGE_URL_PATTERN = /^(https?:|data:image\/)/i
+const HAS_SCHEME_PATTERN = /^[a-z][a-z0-9+.-]*:/i
+
+function isSafeImageUrl(url: string): boolean {
+  return !HAS_SCHEME_PATTERN.test(url) || SAFE_IMAGE_URL_PATTERN.test(url)
+}
 
 export function parseInlineSegments(text: string): InlineSegment[] {
   const segments: InlineSegment[] = []
@@ -24,7 +30,7 @@ export function parseInlineSegments(text: string): InlineSegment[] {
     if (index > lastIndex) {
       segments.push({ type: 'text', value: text.slice(lastIndex, index) })
     }
-    segments.push({ type: 'image', value: url, alt })
+    segments.push(isSafeImageUrl(url) ? { type: 'image', value: url, alt } : { type: 'text', value: full })
     lastIndex = index + full.length
   }
 

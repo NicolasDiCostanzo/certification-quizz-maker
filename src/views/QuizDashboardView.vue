@@ -13,6 +13,7 @@ import PrimaryButton from '../components/PrimaryButton.vue'
 import QuizHistoryList from '../components/QuizHistoryList.vue'
 import ReviewBreakdown from '../components/ReviewBreakdown.vue'
 import SecondaryButton from '../components/SecondaryButton.vue'
+import { useAccount } from '../composables/useAccount'
 
 const props = defineProps<{
   certCode: string
@@ -20,6 +21,7 @@ const props = defineProps<{
 
 const router = useRouter()
 const { getCert } = useQuizLoader()
+const { pushLocalData } = useAccount()
 const historyStore = useQuizHistoryStore()
 const progressStore = useUserProgressStore()
 
@@ -56,6 +58,7 @@ function confirmDelete() {
   if (deleteTargetId.value) {
     historyStore.deleteById(deleteTargetId.value)
     deleteTargetId.value = null
+    void pushLocalData()
   }
 }
 
@@ -63,6 +66,7 @@ function confirmReset() {
   historyStore.resetByCertCode(props.certCode)
   progressStore.resetByCertCode(props.certCode)
   showResetModal.value = false
+  void pushLocalData()
 }
 
 function startQuiz() {
@@ -71,6 +75,22 @@ function startQuiz() {
 
 function goHome() {
   router.push({ name: 'cert-selector' })
+}
+
+function reviewEntry(entryId: string) {
+  router.push({ name: 'quiz-history-review', params: { certCode: props.certCode, entryId } })
+}
+
+function reviewTopic(topic: string) {
+  router.push({ name: 'topic-review', params: { certCode: props.certCode, topic } })
+}
+
+function reviewTheme(group: string, value: string) {
+  router.push({ name: 'theme-review', params: { certCode: props.certCode, themeGroup: group, themeValue: value } })
+}
+
+function reviewFlagged() {
+  router.push({ name: 'flagged-review', params: { certCode: props.certCode } })
 }
 </script>
 
@@ -104,13 +124,15 @@ function goHome() {
 
     <ReviewBreakdown
       v-if="entries.length > 0 || hasFlaggedQuestions"
-      :cert-code="certCode"
       :topic-breakdown="topicBreakdown"
       :theme-breakdown="themeBreakdown"
       :theme-groups="themeGroups"
       :passing-percent="passingPercent"
       :show-review-button="true"
       :has-flagged-questions="hasFlaggedQuestions"
+      @review-topic="reviewTopic"
+      @review-theme="reviewTheme"
+      @review-flagged="reviewFlagged"
     />
 
     <section class="history-section">
@@ -125,7 +147,7 @@ function goHome() {
           {{ texts.resetAll }}
         </SecondaryButton>
       </div>
-      <QuizHistoryList :cert-code="certCode" :entries="entries" @request-delete="requestDelete" />
+      <QuizHistoryList :entries="entries" @request-delete="requestDelete" @review="reviewEntry" />
     </section>
 
     <footer class="dashboard__footer">

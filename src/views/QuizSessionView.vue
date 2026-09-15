@@ -6,6 +6,7 @@ import TimerBar from '../components/TimerBar.vue'
 import Badge from '../components/BaseBadge.vue'
 import PrimaryButton from '../components/PrimaryButton.vue'
 import SecondaryButton from '../components/SecondaryButton.vue'
+import { useAccount } from '../composables/useAccount'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { useQuizHistoryStore } from '../stores/quizHistory'
 import { useQuizSessionStore } from '../stores/quizSession'
@@ -15,6 +16,7 @@ import { computeScore } from '../utils/scoring'
 import type { QuizHistoryEntry } from '../types'
 
 const router = useRouter()
+const { pushLocalData, pushLocalDataDebounced } = useAccount()
 const store = useQuizSessionStore()
 const progressStore = useUserProgressStore()
 const historyStore = useQuizHistoryStore()
@@ -51,6 +53,7 @@ function toggleFlag() {
   if (!question.value) return
   store.toggleFlag(question.value.id)
   progressStore.toggleFlag(certCode.value, question.value.id)
+  void pushLocalDataDebounced()
 }
 
 function goNext() {
@@ -86,6 +89,7 @@ function finishQuiz() {
     result,
   }
   historyStore.record(entry)
+  void pushLocalData()
   router.push({ name: 'quiz-review', params: { certCode: certCode.value } })
 }
 

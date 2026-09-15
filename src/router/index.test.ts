@@ -1,10 +1,16 @@
 import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { useQuizSessionStore } from '../stores/quizSession'
 import { useUserAccountStore } from '../stores/userAccount'
-import { router } from './index'
 import type { Question } from '../types'
+import { router } from './index'
+
+let authConfigured = true
+vi.mock('../config', () => ({
+  awsConfig: { region: undefined, userPoolId: undefined, userPoolClientId: undefined, syncApiUrl: undefined },
+  isAuthAvailable: () => authConfigured,
+}))
 
 const sessionQuestions: Question[] = [
   { id: 'q1', question: 'Q1?', options: ['A', 'B'], answers: 'A', topic: 'Security' },
@@ -19,7 +25,7 @@ describe('router', () => {
 
   it('resolves / to the cert-selector home screen', async () => {
     await router.push('/')
-    expect(router.currentRoute.value.name).toBe('cert-selector')
+    expect(router.currentRoute.value.name).toBe('welcome')
   })
 
   it('redirects / to the welcome screen while no account mode has been chosen', async () => {
@@ -30,7 +36,19 @@ describe('router', () => {
   })
 
   it('reaches the welcome screen directly', async () => {
-    await router.push('/welcome')
+    await router.push('/')
+    expect(router.currentRoute.value.name).toBe('welcome')
+  })
+
+  it('lets /auth through when authentication is configured', async () => {
+    authConfigured = true
+    await router.push('/auth')
+    expect(router.currentRoute.value.name).toBe('auth')
+  })
+
+  it('redirects /auth to the welcome screen when authentication is not configured', async () => {
+    authConfigured = false
+    await router.push('/auth')
     expect(router.currentRoute.value.name).toBe('welcome')
   })
 
@@ -50,7 +68,7 @@ describe('router', () => {
 
   it('does not interfere with routes that have no cert code', async () => {
     await router.push('/')
-    expect(router.currentRoute.value.name).toBe('cert-selector')
+    expect(router.currentRoute.value.name).toBe('welcome')
   })
 
   it('redirects quiz-session to configure when no session is active', async () => {

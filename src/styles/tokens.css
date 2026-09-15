@@ -12,6 +12,7 @@
     rgba(89, 62, 46, 0.15) 0 10px 15px -3px, rgba(89, 62, 46, 0.08) 0 4px 6px -2px;
   --green: #2e5b26;
   --red: #b02e26;
+  --text-inverse: #fff;
   --overlay: rgba(0, 0, 0, 0.5);
 
   --radius-none: 0px;

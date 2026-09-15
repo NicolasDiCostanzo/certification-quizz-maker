@@ -17,6 +17,15 @@ dist-ssr
 .env.*
 !.env.example
 
+# AWS SAM
+.aws-sam/
+samconfig.toml
+
+# Playwright
+test-results/
+playwright-report/
+.playwright/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

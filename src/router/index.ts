@@ -1,21 +1,24 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { useQuizLoader } from '../composables/useQuizLoader'
+import { isAuthAvailable } from '../config'
 import { useQuizSessionStore } from '../stores/quizSession'
 import { useUserAccountStore } from '../stores/userAccount'
+import AuthView from '../views/AuthView.vue'
 import CertSelectorView from '../views/CertSelectorView.vue'
+import QuestionBankReviewView from '../views/QuestionBankReviewView.vue'
 import QuizConfigureView from '../views/QuizConfigureView.vue'
 import QuizDashboardView from '../views/QuizDashboardView.vue'
 import QuizHistoryReviewView from '../views/QuizHistoryReviewView.vue'
 import QuizReviewView from '../views/QuizReviewView.vue'
 import QuizSessionView from '../views/QuizSessionView.vue'
-import QuestionBankReviewView from '../views/QuestionBankReviewView.vue'
 import WelcomeView from '../views/WelcomeView.vue'
 
 export const router = createRouter({
   history: createWebHashHistory(),
   routes: [
-    { path: '/', name: 'cert-selector', component: CertSelectorView },
-    { path: '/welcome', name: 'welcome', component: WelcomeView },
+    { path: '/cert', name: 'cert-selector', component: CertSelectorView },
+    { path: '/', name: 'welcome', component: WelcomeView },
+    { path: '/auth', name: 'auth', component: AuthView },
     { path: '/certs/:certCode', name: 'quiz-dashboard', component: QuizDashboardView, props: true },
     { path: '/certs/:certCode/configure', name: 'quiz-configure', component: QuizConfigureView },
     { path: '/certs/:certCode/quiz', name: 'quiz-session', component: QuizSessionView },
@@ -33,6 +36,12 @@ router.beforeEach((to) => {
   const certCode = to.params.certCode
   if (typeof certCode === 'string' && !getCert(certCode)) {
     return { name: 'cert-selector' }
+  }
+})
+
+router.beforeEach((to) => {
+  if (to.name === 'auth' && !isAuthAvailable()) {
+    return { name: 'welcome' }
   }
 })
 

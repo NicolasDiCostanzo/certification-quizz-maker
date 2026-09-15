@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, useId } from 'vue'
+import { onMounted, onUnmounted, ref, useId } from 'vue'
 import Card from './BaseCard.vue'
 import PrimaryButton from './PrimaryButton.vue'
 import SecondaryButton from './SecondaryButton.vue'
@@ -17,17 +17,50 @@ const emit = defineEmits<{
 }>()
 
 const titleId = useId()
+const overlayRef = ref<HTMLElement | null>(null)
+const previousActiveElement = ref<HTMLElement | null>(null)
 
-function handleKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') emit('cancel')
+function focusableElements(): HTMLElement[] {
+  return overlayRef.value
+    ? Array.from(overlayRef.value.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]'))
+    : []
 }
 
-onMounted(() => window.addEventListener('keydown', handleKeydown))
-onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    emit('cancel')
+    return
+  }
+  if (event.key !== 'Tab') return
+  const elements = focusableElements()
+  if (elements.length === 0) return
+  const first = elements[0]
+  const last = elements[elements.length - 1]
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault()
+    last.focus()
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault()
+    first.focus()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+  previousActiveElement.value = document.activeElement as HTMLElement | null
+  focusableElements()[0]?.focus()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
+  if (previousActiveElement.value?.isConnected) {
+    previousActiveElement.value.focus()
+  }
+})
 </script>
 
 <template>
-  <div class="modal-overlay" @click.self="emit('cancel')">
+  <div ref="overlayRef" class="modal-overlay" @click.self="emit('cancel')">
     <Card
       padding="xl"
       radius="2xl"

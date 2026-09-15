@@ -17,4 +17,13 @@ describe('ProgressBar', () => {
     const wrapper = mount(ProgressBar, { props: { value: 50, passing: 70 } })
     expect(wrapper.find('.progress-bar__fill').attributes('data-passed')).toBe('false')
   })
+
+  it('exposes progressbar semantics for assistive tech', () => {
+    const wrapper = mount(ProgressBar, { props: { value: 42, passing: 70 } })
+    const track = wrapper.find('[role="progressbar"]')
+    expect(track.exists()).toBe(true)
+    expect(track.attributes('aria-valuenow')).toBe('42')
+    expect(track.attributes('aria-valuemin')).toBe('0')
+    expect(track.attributes('aria-valuemax')).toBe('100')
+  })
 })
