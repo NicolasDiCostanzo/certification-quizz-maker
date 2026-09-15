@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { Question } from '../types';
 import { texts } from '../texts/en';
+import type { Question } from '../types';
 import { parseInlineSegments } from '../utils/markdownImage';
-import QuestionOptionsList from './QuestionOptionsList.vue'
+import QuestionOptionsList from './QuestionOptionsList.vue';
 
 const props = defineProps<{
   question: Question

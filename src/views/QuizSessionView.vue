@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import QuestionCard from '../components/QuestionCard.vue'
-import TimerBar from '../components/TimerBar.vue'
 import Badge from '../components/BaseBadge.vue'
 import PrimaryButton from '../components/PrimaryButton.vue'
+import QuestionCard from '../components/QuestionCard.vue'
 import SecondaryButton from '../components/SecondaryButton.vue'
+import TimerBar from '../components/TimerBar.vue'
 import { useAccount } from '../composables/useAccount'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { useQuizHistoryStore } from '../stores/quizHistory'
 import { useQuizSessionStore } from '../stores/quizSession'
 import { useUserProgressStore } from '../stores/userProgress'
 import { texts } from '../texts/en'
-import { computeScore } from '../utils/scoring'
 import type { QuizHistoryEntry } from '../types'
+import { computeScore } from '../utils/scoring'
 
 const router = useRouter()
 const { pushLocalData, pushLocalDataDebounced } = useAccount()
@@ -141,11 +141,10 @@ function handleTimeUp() {
 <style scoped>
 .session {
   max-width: 720px;
-  margin: 0 auto;
+  margin: auto;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  margin: 1rem;
 }
 
 .session-header {
@@ -176,6 +175,7 @@ function handleTimeUp() {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding-bottom: 16px;
 }
 
 .flag-btn--active {
@@ -187,10 +187,13 @@ function handleTimeUp() {
   margin-left: auto;
 }
 
-@media (max-width: 1024px) {
-  .session-nav {
-    flex-direction: column;
+@media (max-width: 720px) {
+  .session {
+    margin: 0 1rem;
   }
+}
+
+@media (max-width: 500px) {
   .next-btn {
     margin-left: 0;
   }
