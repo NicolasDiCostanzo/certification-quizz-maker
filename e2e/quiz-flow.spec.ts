@@ -1,6 +1,18 @@
 import { texts } from '../src/texts/en'
-import { authEnabled, authSkipReason, deleteTestUser, newTestUserCredentials } from './helpers/cognitoTestUser'
+import {
+  certCode,
+  certExamName,
+  expectedResult,
+  scriptedQuestions,
+  themeBreakdown,
+  themeGroup,
+  themeGroupsInOrder,
+  themeValues,
+  topicBreakdown,
+  topicFilter,
+} from './fixtures/deploymentQuiz'
 import { signUpConfirmAndSignIn } from './helpers/authFlow'
+import { authEnabled, authSkipReason, deleteTestUser, newTestUserCredentials } from './helpers/cognitoTestUser'
 import {
   configureFilteredQuiz,
   expectCorrectFeedback,
@@ -16,7 +28,16 @@ import {
   submitAnswer,
   unflagQuestion,
 } from './helpers/quiz'
-import { certCode, certExamName, scriptedQuestions, themeGroup, themeValues, topicFilter } from './fixtures/deploymentQuiz'
+import {
+  expandThemeGroup,
+  expectPassFailBanner,
+  expectQuestionDetail,
+  expectScoreCard,
+  expectSummaryCard,
+  expectThemeBreakdownRow,
+  expectTopicBreakdownRow,
+  openQuestionDetail,
+} from './helpers/review'
 import { expect, test } from './helpers/sharedPageFixture'
 
 test.skip(!authEnabled, authSkipReason)
@@ -85,5 +106,54 @@ test.describe.serial('quiz journey on the DVA-C02 certification', () => {
     await finishQuiz(page)
 
     await expect(page).toHaveURL(new RegExp(`#/certs/${certCode}/quiz/review$`))
+  })
+
+  test('shows the pass/fail banner and score card', async ({ sharedPage: page }) => {
+    await expectPassFailBanner(page, expectedResult.passed)
+    await expectScoreCard(page, {
+      percent: expectedResult.percent,
+      correctCount: expectedResult.correctCount,
+      totalAnswered: expectedResult.totalQuestions,
+      projectedScore: expectedResult.projectedScore,
+      scale: expectedResult.scale,
+    })
+  })
+
+  test('shows the score by topic and score by theme breakdown', async ({ sharedPage: page }) => {
+    for (const row of topicBreakdown) {
+      await expectTopicBreakdownRow(page, row)
+    }
+
+    await expect(page.locator('.breakdown__group-label')).toHaveText(themeGroupsInOrder)
+
+    for (const group of themeGroupsInOrder) {
+      await expandThemeGroup(page, group)
+      for (const row of themeBreakdown[group]) {
+        await expectThemeBreakdownRow(page, group, row)
+      }
+    }
+  })
+
+  test('shows the 4 summary cards with the scripted correctness and flag state', async ({ sharedPage: page }) => {
+    for (const [i, question] of scriptedQuestions.entries()) {
+      await expectSummaryCard(page, i + 1, { correct: question.correct, flagged: question.flaggedAfterQuiz })
+    }
+  })
+
+  test('shows full question detail per card, then unflags the first and flags the last', async ({ sharedPage: page }) => {
+    await expectQuestionDetail(page, topicFilter, scriptedQuestions[0])
+    for (const [i, question] of scriptedQuestions.entries()) {
+      if (i === 0) continue
+      await openQuestionDetail(page, i + 1)
+      await expectQuestionDetail(page, topicFilter, question)
+    }
+
+    await openQuestionDetail(page, 1)
+    await unflagQuestion(page)
+    await openQuestionDetail(page, 4)
+    await flagQuestion(page)
+
+    await expectSummaryCard(page, 1, { correct: true, flagged: false })
+    await expectSummaryCard(page, 4, { correct: false, flagged: true })
   })
 })
