@@ -12,8 +12,8 @@
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "npm run build && playwright test",
-    "test:e2e:ui": "npm run build && playwright test --ui",
+    "test:e2e": "VITE_E2E_FAKE_AUTH=true VITE_COGNITO_USER_POOL_ID=e2e-fake-pool VITE_COGNITO_CLIENT_ID=e2e-fake-client VITE_SYNC_API_URL= npm run build && playwright test",
+    "test:e2e:ui": "VITE_E2E_FAKE_AUTH=true VITE_COGNITO_USER_POOL_ID=e2e-fake-pool VITE_COGNITO_CLIENT_ID=e2e-fake-client VITE_SYNC_API_URL= npm run build && playwright test --ui",
     "prepare": "husky",
     "knip": "knip --exclude cycles --no-progress"
   },
