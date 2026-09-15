@@ -11,9 +11,9 @@ import {
   topicBreakdown,
   topicFilter,
 } from './fixtures/deploymentQuiz'
-import { signUpConfirmAndSignIn } from './helpers/authFlow'
+import { seedConfirmedUser, signIn } from './helpers/authFlow'
 import { freezeTimeAt } from './helpers/clock'
-import { authEnabled, authSkipReason, deleteTestUser, newTestUserCredentials } from './helpers/cognitoTestUser'
+import { newTestUserCredentials } from './helpers/testUser'
 import {
   expectFlaggedReviewEnabled,
   expectSingleHistoryEntry,
@@ -50,8 +50,6 @@ import {
 } from './helpers/review'
 import { expect, test } from './helpers/sharedPageFixture'
 
-test.skip(!authEnabled, authSkipReason)
-
 const { email, password } = newTestUserCredentials()
 
 const quizStartedAt = new Date('2025-06-15T10:00:00.000Z')
@@ -68,11 +66,8 @@ const expectedHistoryDate = quizFinishedAt.toLocaleDateString('en-US', {
 test.describe.serial('quiz journey on the DVA-C02 certification', () => {
   test.beforeAll(async ({ sharedPage: page }) => {
     await pinDeterministicShuffle(page)
-    await signUpConfirmAndSignIn(page, { email, password })
-  })
-
-  test.afterAll(async () => {
-    await deleteTestUser(email)
+    await seedConfirmedUser(page, { email, password })
+    await signIn(page, { email, password })
   })
 
   test('lists every declared certification as a card', async ({ sharedPage: page }) => {

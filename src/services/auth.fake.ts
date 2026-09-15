@@ -1,6 +1,6 @@
 import type { AuthUser } from '../types'
 
-const STORAGE_KEY = 'e2e-fake-auth-users'
+export const FAKE_AUTH_STORAGE_KEY = 'e2e-fake-auth-users'
 
 interface FakeUserRecord {
   password: string
@@ -10,14 +10,14 @@ interface FakeUserRecord {
 
 function loadUsers(): Record<string, FakeUserRecord> {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}')
+    return JSON.parse(localStorage.getItem(FAKE_AUTH_STORAGE_KEY) ?? '{}')
   } catch {
     return {}
   }
 }
 
 function saveUsers(users: Record<string, FakeUserRecord>): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(users))
+  localStorage.setItem(FAKE_AUTH_STORAGE_KEY, JSON.stringify(users))
 }
 
 export async function signUp(email: string, password: string): Promise<boolean> {
