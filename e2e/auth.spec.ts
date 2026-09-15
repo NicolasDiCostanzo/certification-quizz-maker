@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { texts } from '../src/texts/en'
-import { authEnabled, authSkipReason, confirmTestUser, deleteTestUser, newTestUserCredentials } from './helpers/cognitoTestUser'
+import { authEnabled, authSkipReason, deleteTestUser, newTestUserCredentials } from './helpers/cognitoTestUser'
+import { signUpAndConfirm } from './helpers/authFlow'
 
 test.skip(!authEnabled, authSkipReason)
 
@@ -13,16 +14,7 @@ test.afterAll(async () => {
 })
 
 test('sign-up reaches the confirmation step, then the confirmed user signs in, survives a reload and signs out', async ({ page }) => {
-  await page.goto('/')
-  await page.getByRole('button', { name: texts.welcomeNewAccountCta }).click()
-
-  await page.locator('input[type="email"]').fill(email)
-  await page.locator('input[type="password"]').fill(password)
-  await page.getByRole('button', { name: texts.authSignUpCta }).click()
-
-  await expect(page.getByRole('heading', { name: texts.authConfirmTitle })).toBeVisible()
-
-  await confirmTestUser(email)
+  await signUpAndConfirm(page, { email, password })
 
   await page.goto('/')
   await page.getByRole('button', { name: texts.welcomeExistingAccountCta }).click()
