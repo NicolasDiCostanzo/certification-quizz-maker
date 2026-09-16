@@ -204,6 +204,26 @@ export function useAccount() {
     await completeAuthentication(user, options)
   }
 
+  async function requestPasswordReset(email: string): Promise<void> {
+    return auth.requestPasswordReset(email)
+  }
+
+  async function confirmPasswordReset(email: string, code: string, newPassword: string, options: { migrateGuest?: boolean } = {}) {
+    await auth.confirmPasswordReset(email, code, newPassword)
+    try {
+      await signIn(email, newPassword, options)
+    } catch (err) {
+      await auth.signOut().catch(() => undefined)
+      const signInError = new Error('password reset succeeded but automatic sign-in failed', { cause: err })
+      signInError.name = 'ResetAutoSignInError'
+      throw signInError
+    }
+  }
+
+  async function resendConfirmationCode(email: string): Promise<void> {
+    return auth.resendSignUpCode(email)
+  }
+
   async function signOut() {
     if (debounceTimer !== null) {
       clearTimeout(debounceTimer)
@@ -260,6 +280,9 @@ export function useAccount() {
   return {
     signUp,
     confirmSignUp,
+    resendConfirmationCode,
+    requestPasswordReset,
+    confirmPasswordReset,
     signIn,
     signOut,
     continueLocal,

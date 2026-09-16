@@ -1,4 +1,5 @@
-import type { AuthUser } from '../types'
+import { resendSignUpCode as amplifyResendSignUpCode, signIn as amplifySignIn, confirmResetPassword, fetchUserAttributes, getCurrentUser, resetPassword } from 'aws-amplify/auth';
+import type { AuthUser } from '../types';
 
 export async function signUp(email: string, password: string): Promise<boolean> {
   const { signUp: amplifySignUp } = await import('aws-amplify/auth')
@@ -15,8 +16,19 @@ export async function confirmSignUp(email: string, code: string): Promise<void> 
   await amplifyConfirmSignUp({ username: email, confirmationCode: code })
 }
 
+export async function resendSignUpCode(email: string): Promise<void> {
+  await amplifyResendSignUpCode({ username: email })
+}
+
+export async function requestPasswordReset(email: string): Promise<void> {
+  await resetPassword({ username: email })
+}
+
+export async function confirmPasswordReset(email: string, code: string, newPassword: string): Promise<void> {
+  await confirmResetPassword({ username: email, confirmationCode: code, newPassword })
+}
+
 export async function signIn(email: string, password: string): Promise<AuthUser> {
-  const { fetchUserAttributes, getCurrentUser, signIn: amplifySignIn } = await import('aws-amplify/auth')
   const { isSignedIn } = await amplifySignIn({ username: email, password })
   if (!isSignedIn) throw new Error('sign-in did not complete')
   const { userId } = await getCurrentUser()

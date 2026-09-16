@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { configureAuth, confirmSignUp, signIn, signOut, signUp } from './auth.fake'
+import { configureAuth, confirmPasswordReset, confirmSignUp, requestPasswordReset, resendSignUpCode, signIn, signOut, signUp } from './auth.fake'
 
 beforeEach(() => {
   localStorage.clear()
@@ -39,11 +39,58 @@ describe('auth.fake', () => {
     await expect(confirmSignUp('dev@example.com', '')).rejects.toThrow()
   })
 
+  it('a password reset swaps the password while keeping the confirmed account usable', async () => {
+    await signUp('dev@example.com', 'Passw0rd!')
+    await confirmSignUp('dev@example.com', '123456')
+
+    await requestPasswordReset('dev@example.com')
+    await confirmPasswordReset('dev@example.com', '654321', 'NewPassw0rd!')
+
+    await expect(signIn('dev@example.com', 'Passw0rd!')).rejects.toThrow()
+    await expect(signIn('dev@example.com', 'NewPassw0rd!')).resolves.toEqual({
+      userId: expect.any(String),
+      email: 'dev@example.com',
+    })
+  })
+
+  it.each([
+    { case: 'an empty code', email: 'dev@example.com', code: '', password: 'NewPassw0rd!' },
+    { case: 'an email that never signed up', email: 'nobody@example.com', code: '654321', password: 'NewPassw0rd!' },
+  ])('rejects a reset with $case and leaves the old password in place', async ({ email, code, password }) => {
+    await signUp('dev@example.com', 'Passw0rd!')
+    await confirmSignUp('dev@example.com', '123456')
+
+    await expect(confirmPasswordReset(email, code, password)).rejects.toThrow()
+    await expect(signIn('dev@example.com', 'Passw0rd!')).resolves.toEqual({
+      userId: expect.any(String),
+      email: 'dev@example.com',
+    })
+  })
+
+  it.each([
+    { case: 'a reset request', call: () => requestPasswordReset('') },
+    { case: 'a confirmation-code resend', call: () => resendSignUpCode('') },
+  ])('rejects $case without an email address', async ({ call }) => {
+    await expect(call()).rejects.toThrow()
+  })
+
   it('sign-out resolves without throwing', async () => {
     await expect(signOut()).resolves.toBeUndefined()
   })
 
   it('configureAuth resolves true without needing real pool credentials', async () => {
     await expect(configureAuth()).resolves.toBe(true)
+  })
+
+  it('exports every function the real auth service exposes, so the E2E swap cannot miss an API', async () => {
+    const functionsOf = (module: object) =>
+      Object.entries(module)
+        .filter(([, value]) => typeof value === 'function')
+        .map(([name]) => name)
+        .sort()
+
+    const [fake, real] = await Promise.all([import('./auth.fake'), import('./auth')])
+
+    expect(functionsOf(fake)).toEqual(functionsOf(real))
   })
 })

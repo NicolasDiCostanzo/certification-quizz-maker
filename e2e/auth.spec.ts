@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { texts } from '../src/texts/en'
-import { seedConfirmedUser, signUpAndConfirm } from './helpers/authFlow'
+import { resendConfirmationCode, resetPassword, seedConfirmedUser, signUpAndConfirm } from './helpers/authFlow'
 import { newTestUserCredentials } from './helpers/testUser'
 
 test('sign-up reaches the confirmation step, and confirming signs the user in automatically', async ({ page }) => {
@@ -41,4 +41,15 @@ test('sign-in rejects a wrong password and an unknown email, then succeeds with 
 
   await page.getByRole('button', { name: texts.signOut }).click()
   await expect(page).toHaveURL(/\/#\/$/)
+})
+
+test('resending the confirmation code then confirming signs the user in', async ({ page }) => {
+  await resendConfirmationCode(page, newTestUserCredentials())
+})
+
+test('resetting the password signs the user in, and the new password works after sign-out', async ({ page }) => {
+  const user = newTestUserCredentials()
+  await seedConfirmedUser(page, user)
+
+  await resetPassword(page, user, `${user.password}-new`)
 })

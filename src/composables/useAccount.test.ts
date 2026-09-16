@@ -17,6 +17,9 @@ vi.mock('vue-router', () => ({
 vi.mock('../services/auth', () => ({
   signUp: vi.fn(),
   confirmSignUp: vi.fn(),
+  resendSignUpCode: vi.fn(),
+  requestPasswordReset: vi.fn(),
+  confirmPasswordReset: vi.fn(),
   signIn: vi.fn(),
   signOut: vi.fn(),
 }))
@@ -248,6 +251,50 @@ describe('useAccount sign-up', () => {
     expect(auth.signIn).toHaveBeenCalledWith('dev@example.com', 'Passw0rd!')
     expect(useUserAccountStore().user).toEqual(USER)
     expect(useUserAccountStore().accountMode).toBe('account')
+  })
+})
+
+describe('useAccount password reset', () => {
+  it('requesting a reset delegates to the auth service untouched', async () => {
+    vi.mocked(auth.requestPasswordReset).mockResolvedValue(undefined)
+
+    await useAccount().requestPasswordReset('dev@example.com')
+
+    expect(auth.requestPasswordReset).toHaveBeenCalledWith('dev@example.com')
+    expect(pushRoute).not.toHaveBeenCalled()
+  })
+
+  it('confirming a reset signs the user in with the new password and completes authentication', async () => {
+    vi.mocked(auth.confirmPasswordReset).mockResolvedValue(undefined)
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    adapter.pull.mockResolvedValue(null)
+    adapter.push.mockResolvedValue(undefined)
+
+    await useAccount().confirmPasswordReset('dev@example.com', '123456', 'NewPassw0rd!')
+
+    expect(auth.confirmPasswordReset).toHaveBeenCalledWith('dev@example.com', '123456', 'NewPassw0rd!')
+    expect(auth.signIn).toHaveBeenCalledWith('dev@example.com', 'NewPassw0rd!')
+    expect(useUserAccountStore().user).toEqual(USER)
+    expect(useUserAccountStore().accountMode).toBe('account')
+  })
+
+  it('a failed reset confirmation leaves the account untouched and never signs in', async () => {
+    vi.mocked(auth.confirmPasswordReset).mockRejectedValue(new Error('ExpiredCodeException'))
+
+    await expect(useAccount().confirmPasswordReset('dev@example.com', 'wrong', 'NewPassw0rd!')).rejects.toThrow()
+
+    expect(auth.signIn).not.toHaveBeenCalled()
+    expect(useUserAccountStore().accountMode).toBeNull()
+    expect(pushRoute).not.toHaveBeenCalled()
+  })
+
+  it('resending the confirmation code delegates to the auth service untouched', async () => {
+    vi.mocked(auth.resendSignUpCode).mockResolvedValue(undefined)
+
+    await useAccount().resendConfirmationCode('dev@example.com')
+
+    expect(auth.resendSignUpCode).toHaveBeenCalledWith('dev@example.com')
+    expect(pushRoute).not.toHaveBeenCalled()
   })
 })
 

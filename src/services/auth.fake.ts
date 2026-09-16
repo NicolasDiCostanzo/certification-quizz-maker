@@ -36,6 +36,27 @@ export async function confirmSignUp(email: string, code: string): Promise<void> 
   saveUsers(users)
 }
 
+function requireEmail(email: string): void {
+  if (!email) throw new Error('email is required')
+}
+
+export async function resendSignUpCode(email: string): Promise<void> {
+  requireEmail(email)
+}
+
+export async function requestPasswordReset(email: string): Promise<void> {
+  requireEmail(email)
+}
+
+export async function confirmPasswordReset(email: string, code: string, newPassword: string): Promise<void> {
+  if (!code) throw new Error('reset code is required')
+  const users = loadUsers()
+  const user = users[email]
+  if (!user) throw new Error('user not found')
+  user.password = newPassword
+  saveUsers(users)
+}
+
 export async function signIn(email: string, password: string): Promise<AuthUser> {
   const users = loadUsers()
   const user = users[email]

@@ -6,12 +6,18 @@ import AuthView from './AuthView.vue'
 
 const signUp = vi.fn()
 const confirmSignUp = vi.fn()
+const resendConfirmationCode = vi.fn()
+const requestPasswordReset = vi.fn()
+const confirmPasswordReset = vi.fn()
 const signIn = vi.fn()
 
 vi.mock('../composables/useAccount', () => ({
   useAccount: () => ({
     signUp,
     confirmSignUp,
+    resendConfirmationCode,
+    requestPasswordReset,
+    confirmPasswordReset,
     signIn,
     signOut: vi.fn(),
     continueLocal: vi.fn(),
@@ -130,5 +136,116 @@ describe('AuthView', () => {
     await wrapper.find('.auth__switch').trigger('click')
 
     expect(wrapper.text()).toContain(texts.authSignUpTitle)
+  })
+
+  it('the forgot-password link requests a reset for the entered email and advances to the code step', async () => {
+    requestPasswordReset.mockResolvedValue(undefined)
+    const wrapper = mount(AuthView)
+
+    await wrapper.find('input[type="email"]').setValue('dev@example.com')
+    await wrapper.findAll('.auth-link').at(0)?.trigger('click')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(requestPasswordReset).toHaveBeenCalledWith('dev@example.com')
+    expect(wrapper.text()).toContain(texts.authResetConfirmTitle)
+  })
+
+  it('a failed reset request keeps the email step and surfaces the error', async () => {
+    requestPasswordReset.mockRejectedValue(new Error('UserNotFoundException'))
+    const wrapper = mount(AuthView)
+
+    await wrapper.find('input[type="email"]').setValue('dev@example.com')
+    await wrapper.findAll('.auth-link').at(0)?.trigger('click')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain(texts.authResetTitle)
+    expect(wrapper.find('[role="alert"]').text()).toBe(texts.authResetRequestError)
+  })
+
+  it('confirming the reset sets the new password and signs in with the stored credentials', async () => {
+    requestPasswordReset.mockResolvedValue(undefined)
+    confirmPasswordReset.mockResolvedValue(undefined)
+    const wrapper = mount(AuthView)
+
+    await wrapper.find('input[type="email"]').setValue('dev@example.com')
+    await wrapper.findAll('.auth-link').at(0)?.trigger('click')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    await wrapper.find('input[autocomplete="one-time-code"]').setValue('654321')
+    await wrapper.find('input[autocomplete="new-password"]').setValue('NewPassw0rd!')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(confirmPasswordReset).toHaveBeenCalledWith('dev@example.com', '654321', 'NewPassw0rd!', { migrateGuest: false })
+  })
+
+  it('a weak new password surfaces the password requirement message on reset confirmation', async () => {
+    requestPasswordReset.mockResolvedValue(undefined)
+    const codeRejection = Object.assign(new Error('Password did not conform with policy'), {
+      name: 'InvalidPasswordException',
+    })
+    confirmPasswordReset.mockRejectedValue(codeRejection)
+    const wrapper = mount(AuthView)
+
+    await wrapper.find('input[type="email"]').setValue('dev@example.com')
+    await wrapper.findAll('.auth-link').at(0)?.trigger('click')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    await wrapper.find('input[autocomplete="one-time-code"]').setValue('654321')
+    await wrapper.find('input[autocomplete="new-password"]').setValue('weak')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(wrapper.find('[role="alert"]').text()).toBe(texts.authWeakPasswordError)
+  })
+
+  it('a failed reset confirmation stays on the code step with the reset error', async () => {
+    requestPasswordReset.mockResolvedValue(undefined)
+    confirmPasswordReset.mockRejectedValue(new Error('ExpiredCodeException'))
+    const wrapper = mount(AuthView)
+
+    await wrapper.find('input[type="email"]').setValue('dev@example.com')
+    await wrapper.findAll('.auth-link').at(0)?.trigger('click')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    await wrapper.find('input[autocomplete="one-time-code"]').setValue('654321')
+    await wrapper.find('input[autocomplete="new-password"]').setValue('NewPassw0rd!')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain(texts.authResetConfirmTitle)
+    expect(wrapper.find('[role="alert"]').text()).toBe(texts.authResetConfirmError)
+  })
+
+  it('the confirmation step offers a resend that reports its outcome without leaving the step', async () => {
+    query = { mode: 'signup' }
+    signUp.mockResolvedValue(true)
+    resendConfirmationCode.mockResolvedValue(undefined)
+    const wrapper = await fillAndSubmit('dev@example.com', 'Passw0rd!')
+
+    await wrapper.findAll('.auth-link').at(0)?.trigger('click')
+    await flushPromises()
+
+    expect(resendConfirmationCode).toHaveBeenCalledWith('dev@example.com')
+    expect(wrapper.text()).toContain(texts.authCodeResent)
+    expect(wrapper.text()).toContain(texts.authConfirmTitle)
+  })
+
+  it('a failed resend reports the resend error without leaving the confirmation step', async () => {
+    query = { mode: 'signup' }
+    signUp.mockResolvedValue(true)
+    resendConfirmationCode.mockRejectedValue(new Error('LimitExceededException'))
+    const wrapper = await fillAndSubmit('dev@example.com', 'Passw0rd!')
+
+    await wrapper.findAll('.auth-link').at(0)?.trigger('click')
+    await flushPromises()
+
+    expect(wrapper.find('[role="alert"]').text()).toBe(texts.authResendError)
+    expect(wrapper.text()).toContain(texts.authConfirmTitle)
   })
 })
