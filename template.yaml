@@ -3,10 +3,12 @@ Transform: AWS::Serverless-2016-10-31
 Description: certification-quizz-maker backend - Phase 1 identity (Cognito User Pool)
 
 Parameters:
+  SiteCustomDomain:
+    Type: String
+    Description: Custom domain served by the CloudFront site (must be covered by SiteCertificateArn)
   SiteCertificateArn:
     Type: String
-    Default: arn:aws:acm:us-east-1:283912199413:certificate/1b3e4fec-8fde-4c2f-bc88-289dad17c45d
-    Description: ACM certificate in us-east-1 covering the custom domain for the CloudFront site
+    Description: ARN of an ACM certificate in us-east-1 covering SiteCustomDomain
 
 Resources:
   UserPool:
@@ -82,8 +84,8 @@ Resources:
         DefaultAuthorizer: CognitoAuthorizer
       CorsConfiguration:
         AllowOrigins:
-          - https://quiz-cert.com
-          - https://www.quiz-cert.com
+          - !Sub https://${SiteCustomDomain}
+          - !Sub https://www.${SiteCustomDomain}
         AllowMethods:
           - GET
           - PUT
@@ -184,8 +186,8 @@ Resources:
         Enabled: true
         DefaultRootObject: index.html
         Aliases:
-          - quiz-cert.com
-          - www.quiz-cert.com
+          - !Ref SiteCustomDomain
+          - !Sub www.${SiteCustomDomain}
         ViewerCertificate:
           AcmCertificateArn: !Ref SiteCertificateArn
           SslSupportMethod: sni-only
@@ -250,8 +252,8 @@ Outputs:
       already configured with the Cognito authorizer from this stack.
     Value: !Sub https://${SyncApi}.execute-api.${AWS::Region}.amazonaws.com/sync
   SiteUrl:
-    Description: Public URL of the deployed web app
-    Value: !Sub https://${SiteDistribution.DomainName}
+    Description: Public URL of the deployed web app (matches the AllowOrigins CORS configuration)
+    Value: !Sub https://${SiteCustomDomain}
   SiteBucketName:
     Description: S3 bucket to upload dist/ contents to
     Value: !Ref SiteBucket
