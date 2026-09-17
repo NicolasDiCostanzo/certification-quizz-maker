@@ -2,6 +2,12 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: certification-quizz-maker backend - Phase 1 identity (Cognito User Pool)
 
+Parameters:
+  SiteCertificateArn:
+    Type: String
+    Default: arn:aws:acm:us-east-1:283912199413:certificate/1b3e4fec-8fde-4c2f-bc88-289dad17c45d
+    Description: ACM certificate in us-east-1 covering the custom domain for the CloudFront site
+
 Resources:
   UserPool:
     Type: AWS::Cognito::UserPool
@@ -76,7 +82,8 @@ Resources:
         DefaultAuthorizer: CognitoAuthorizer
       CorsConfiguration:
         AllowOrigins:
-          - '*'
+          - https://quiz-cert.com
+          - https://www.quiz-cert.com
         AllowMethods:
           - GET
           - PUT
@@ -176,6 +183,13 @@ Resources:
       DistributionConfig:
         Enabled: true
         DefaultRootObject: index.html
+        Aliases:
+          - quiz-cert.com
+          - www.quiz-cert.com
+        ViewerCertificate:
+          AcmCertificateArn: !Ref SiteCertificateArn
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
         Origins:
           - Id: SiteOrigin
             DomainName: !GetAtt SiteBucket.RegionalDomainName
