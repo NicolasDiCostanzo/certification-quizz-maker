@@ -195,7 +195,15 @@ export function useAccount() {
 
   async function confirmSignUp(email: string, code: string, password: string, options: { migrateGuest?: boolean } = {}) {
     await auth.confirmSignUp(email, code)
-    const user = await auth.signIn(email, password)
+    let user: AuthUser
+    try {
+      user = await auth.signIn(email, password)
+    } catch (err) {
+      await auth.signOut().catch(() => undefined)
+      const signInError = new Error('confirmation succeeded but automatic sign-in failed', { cause: err })
+      signInError.name = 'ConfirmAutoSignInError'
+      throw signInError
+    }
     await completeAuthentication(user, options)
   }
 
@@ -210,14 +218,16 @@ export function useAccount() {
 
   async function confirmPasswordReset(email: string, code: string, newPassword: string, options: { migrateGuest?: boolean } = {}) {
     await auth.confirmPasswordReset(email, code, newPassword)
+    let user: AuthUser
     try {
-      await signIn(email, newPassword, options)
+      user = await auth.signIn(email, newPassword)
     } catch (err) {
       await auth.signOut().catch(() => undefined)
       const signInError = new Error('password reset succeeded but automatic sign-in failed', { cause: err })
       signInError.name = 'ResetAutoSignInError'
       throw signInError
     }
+    await completeAuthentication(user, options)
   }
 
   async function resendConfirmationCode(email: string): Promise<void> {

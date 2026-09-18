@@ -22,6 +22,11 @@ function saveUsers(users: Record<string, FakeUserRecord>): void {
 
 export async function signUp(email: string, password: string): Promise<boolean> {
   const users = loadUsers()
+  if (users[email]) {
+    const error = new Error('User already exists')
+    error.name = 'UsernameExistsException'
+    throw error
+  }
   users[email] = { password, confirmed: false, userId: crypto.randomUUID() }
   saveUsers(users)
   return true
@@ -60,8 +65,15 @@ export async function confirmPasswordReset(email: string, code: string, newPassw
 export async function signIn(email: string, password: string): Promise<AuthUser> {
   const users = loadUsers()
   const user = users[email]
-  if (!user || !user.confirmed || user.password !== password) {
-    throw new Error('sign-in failed')
+  if (!user || user.password !== password) {
+    const error = new Error('sign-in failed')
+    error.name = 'NotAuthorizedException'
+    throw error
+  }
+  if (!user.confirmed) {
+    const error = new Error('user is not confirmed')
+    error.name = 'UserNotConfirmedException'
+    throw error
   }
   return { userId: user.userId, email }
 }

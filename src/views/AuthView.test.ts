@@ -248,4 +248,85 @@ describe('AuthView', () => {
     expect(wrapper.find('[role="alert"]').text()).toBe(texts.authResendError)
     expect(wrapper.text()).toContain(texts.authConfirmTitle)
   })
+
+  it('a sign-in for an unconfirmed account moves to the code step and verifies with the password already typed', async () => {
+    signIn.mockRejectedValue(Object.assign(new Error('sign-in did not complete'), { name: 'UserNotConfirmedException' }))
+    const wrapper = await fillAndSubmit('dev@example.com', 'Passw0rd!')
+
+    expect(wrapper.text()).toContain(texts.authConfirmTitle)
+    expect(wrapper.text()).toContain(texts.authUnconfirmedNotice)
+
+    await wrapper.find('input[autocomplete="one-time-code"]').setValue('123456')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(confirmSignUp).toHaveBeenCalledWith('dev@example.com', '123456', 'Passw0rd!', { migrateGuest: false })
+  })
+
+  it('a duplicate sign-up resends the code and moves to the code step', async () => {
+    query = { mode: 'signup' }
+    signUp.mockRejectedValue(Object.assign(new Error('User already exists'), { name: 'UsernameExistsException' }))
+    signIn.mockRejectedValue(Object.assign(new Error('sign-in did not complete'), { name: 'UserNotConfirmedException' }))
+    resendConfirmationCode.mockResolvedValue(undefined)
+
+    const wrapper = await fillAndSubmit('dev@example.com', 'Passw0rd!')
+
+    expect(resendConfirmationCode).toHaveBeenCalledWith('dev@example.com')
+    expect(wrapper.text()).toContain(texts.authConfirmTitle)
+    expect(wrapper.text()).toContain(texts.authCodeResent)
+  })
+
+  it('a duplicate sign-up for an account that is already confirmed lands on the code step like a new sign-up, without naming the conflict', async () => {
+    query = { mode: 'signup' }
+    signUp.mockRejectedValue(Object.assign(new Error('User already exists'), { name: 'UsernameExistsException' }))
+    signIn.mockRejectedValue(Object.assign(new Error('Incorrect username or password.'), { name: 'NotAuthorizedException' }))
+
+    const wrapper = await fillAndSubmit('dev@example.com', 'Passw0rd!')
+
+    expect(wrapper.text()).toContain(texts.authConfirmTitle)
+    expect(wrapper.find('input[autocomplete="one-time-code"]').exists()).toBe(true)
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false)
+    expect(resendConfirmationCode).not.toHaveBeenCalled()
+  })
+
+  it('the never-confirmed link resends the code and opens the code step without a password', async () => {
+    resendConfirmationCode.mockResolvedValue(undefined)
+    const wrapper = mount(AuthView)
+
+    await wrapper.find('input[type="email"]').setValue('dev@example.com')
+    await wrapper.findAll('.auth-link').at(1)?.trigger('click')
+    await flushPromises()
+
+    expect(resendConfirmationCode).toHaveBeenCalledWith('dev@example.com')
+    expect(wrapper.text()).toContain(texts.authConfirmTitle)
+    expect(wrapper.text()).toContain(texts.authCodeResent)
+  })
+
+  it('a failed resend from the sign-in form keeps the sign-in form and reports the error', async () => {
+    resendConfirmationCode.mockRejectedValue(new Error('LimitExceededException'))
+    const wrapper = mount(AuthView)
+
+    await wrapper.find('input[type="email"]').setValue('dev@example.com')
+    await wrapper.findAll('.auth-link').at(1)?.trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain(texts.authSignInTitle)
+    expect(wrapper.find('[role="alert"]').text()).toBe(texts.authResendError)
+  })
+
+  it('a confirmation that verifies the account but cannot sign in falls back to the sign-in form', async () => {
+    query = { mode: 'signup' }
+    signUp.mockResolvedValue(true)
+    confirmSignUp.mockRejectedValue(
+      Object.assign(new Error('sign-in did not complete'), { name: 'ConfirmAutoSignInError' }),
+    )
+    const wrapper = await fillAndSubmit('dev@example.com', 'Passw0rd!')
+
+    await wrapper.find('input[autocomplete="one-time-code"]').setValue('123456')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain(texts.authSignInTitle)
+    expect(wrapper.find('[role="status"]').text()).toBe(texts.authConfirmCompleted)
+  })
 })

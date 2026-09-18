@@ -32,6 +32,43 @@ const title = computed(() => {
   return isSignUp.value ? texts.authSignUpTitle : texts.authSignInTitle
 })
 
+async function resumeConfirmation() {
+  try {
+    await resendConfirmationCode(email.value)
+  } catch {
+    error.value = texts.authResendError
+    return
+  }
+  step.value = 'confirmation'
+  notice.value = texts.authCodeResent
+}
+
+async function recoverExistingAccount() {
+  try {
+    await signIn(email.value, password.value, { migrateGuest: uploadAfterAuth })
+  } catch (err) {
+    if (err instanceof Error && err.name === 'UserNotConfirmedException') {
+      await resumeConfirmation()
+    } else {
+      step.value = 'confirmation'
+    }
+  }
+}
+
+function handleCredentialsFailure(err: unknown) {
+  const name = err instanceof Error ? err.name : ''
+  if (isSignUp.value && name === 'InvalidPasswordException') {
+    error.value = texts.authWeakPasswordError
+    return
+  }
+  if (name === 'UserNotConfirmedException') {
+    step.value = 'confirmation'
+    notice.value = texts.authUnconfirmedNotice
+    return
+  }
+  error.value = isSignUp.value ? texts.authSignUpError : texts.authSignInError
+}
+
 async function submitCredentials() {
   busy.value = true
   error.value = null
@@ -45,10 +82,10 @@ async function submitCredentials() {
     }
     await signIn(email.value, password.value, { migrateGuest: uploadAfterAuth })
   } catch (err) {
-    if (isSignUp.value && err instanceof Error && err.name === 'InvalidPasswordException') {
-      error.value = texts.authWeakPasswordError
+    if (err instanceof Error && err.name === 'UsernameExistsException') {
+      await recoverExistingAccount()
     } else {
-      error.value = isSignUp.value ? texts.authSignUpError : texts.authSignInError
+      handleCredentialsFailure(err)
     }
   } finally {
     busy.value = false
@@ -61,8 +98,26 @@ async function submitConfirmation() {
   notice.value = null
   try {
     await confirmSignUp(email.value, code.value, password.value, { migrateGuest: uploadAfterAuth })
-  } catch {
-    error.value = texts.authConfirmError
+  } catch (err) {
+    if (err instanceof Error && err.name === 'ConfirmAutoSignInError') {
+      code.value = ''
+      mode.value = 'signin'
+      step.value = 'credentials'
+      notice.value = texts.authConfirmCompleted
+    } else {
+      error.value = texts.authConfirmError
+    }
+  } finally {
+    busy.value = false
+  }
+}
+
+async function startConfirmation() {
+  busy.value = true
+  error.value = null
+  notice.value = null
+  try {
+    await resumeConfirmation()
   } finally {
     busy.value = false
   }
@@ -163,6 +218,9 @@ function backToSignIn() {
         </PrimaryButton>
         <AuthLinkButton v-if="!isSignUp" :disabled="busy" @click="startReset">
           {{ texts.authSwitchToReset }}
+        </AuthLinkButton>
+        <AuthLinkButton v-if="!isSignUp" :disabled="busy" @click="startConfirmation">
+          {{ texts.authSwitchToConfirm }}
         </AuthLinkButton>
       </form>
 

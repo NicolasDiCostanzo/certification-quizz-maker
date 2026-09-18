@@ -53,3 +53,32 @@ test('resetting the password signs the user in, and the new password works after
 
   await resetPassword(page, user, `${user.password}-new`)
 })
+
+test('an account left unconfirmed is verified later from the sign-in form, then signs in', async ({ page }) => {
+  const { email, password } = newTestUserCredentials()
+
+  await page.goto('/')
+  await page.getByRole('button', { name: texts.welcomeNewAccountCta }).click()
+  await page.locator('input[type="email"]').fill(email)
+  await page.locator('input[type="password"]').fill(password)
+  await page.getByRole('button', { name: texts.authSignUpCta }).click()
+  await expect(page.getByRole('heading', { name: texts.authConfirmTitle })).toBeVisible()
+
+  await page.goto('/')
+  await page.getByRole('button', { name: texts.welcomeExistingAccountCta }).click()
+  await page.locator('input[type="email"]').fill(email)
+  await page.getByRole('button', { name: texts.authSwitchToConfirm }).click()
+
+  await expect(page.getByRole('heading', { name: texts.authConfirmTitle })).toBeVisible()
+  await expect(page.getByText(texts.authCodeResent)).toBeVisible()
+
+  await page.locator('input[autocomplete="one-time-code"]').fill('000000')
+  await page.getByRole('button', { name: texts.authConfirmCta }).click()
+  await expect(page.getByText(texts.authConfirmCompleted)).toBeVisible()
+
+  await page.locator('input[type="password"]').fill(password)
+  await page.getByRole('button', { name: texts.authSignInCta }).click()
+
+  await expect(page).toHaveURL(/#\/cert$/)
+  await expect(page.locator('.account-chip__email')).toHaveText(email)
+})

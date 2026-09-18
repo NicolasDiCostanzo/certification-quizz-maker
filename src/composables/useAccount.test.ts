@@ -252,6 +252,33 @@ describe('useAccount sign-up', () => {
     expect(useUserAccountStore().user).toEqual(USER)
     expect(useUserAccountStore().accountMode).toBe('account')
   })
+
+  it('a confirmation whose automatic sign-in fails reports it without signing the account in', async () => {
+    vi.mocked(auth.confirmSignUp).mockResolvedValue(undefined)
+    vi.mocked(auth.signIn).mockRejectedValue(new Error('sign-in did not complete'))
+
+    await expect(useAccount().confirmSignUp('dev@example.com', '123456', '')).rejects.toMatchObject({
+      name: 'ConfirmAutoSignInError',
+    })
+
+    expect(useUserAccountStore().accountMode).toBeNull()
+    expect(pushRoute).not.toHaveBeenCalled()
+  })
+
+  it('a failure after a successful automatic sign-in is not reported as a sign-in failure and keeps the account signed in', async () => {
+    vi.mocked(auth.confirmSignUp).mockResolvedValue(undefined)
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    adapter.pull.mockResolvedValue(null)
+    pushRoute.mockRejectedValue(new Error('navigation failed'))
+
+    await expect(useAccount().confirmSignUp('dev@example.com', '123456', 'Passw0rd!')).rejects.toThrow(
+      'navigation failed',
+    )
+
+    expect(auth.signOut).not.toHaveBeenCalled()
+    expect(useUserAccountStore().accountMode).toBe('account')
+    expect(useUserAccountStore().user).toEqual(USER)
+  })
 })
 
 describe('useAccount password reset', () => {
@@ -286,6 +313,21 @@ describe('useAccount password reset', () => {
     expect(auth.signIn).not.toHaveBeenCalled()
     expect(useUserAccountStore().accountMode).toBeNull()
     expect(pushRoute).not.toHaveBeenCalled()
+  })
+
+  it('a failure after a successful automatic sign-in is not reported as a sign-in failure and keeps the account signed in', async () => {
+    vi.mocked(auth.confirmPasswordReset).mockResolvedValue(undefined)
+    vi.mocked(auth.signIn).mockResolvedValue(USER)
+    adapter.pull.mockResolvedValue(null)
+    pushRoute.mockRejectedValue(new Error('navigation failed'))
+
+    await expect(
+      useAccount().confirmPasswordReset('dev@example.com', '123456', 'NewPassw0rd!'),
+    ).rejects.toThrow('navigation failed')
+
+    expect(auth.signOut).not.toHaveBeenCalled()
+    expect(useUserAccountStore().accountMode).toBe('account')
+    expect(useUserAccountStore().user).toEqual(USER)
   })
 
   it('resending the confirmation code delegates to the auth service untouched', async () => {
