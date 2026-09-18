@@ -29,8 +29,12 @@ export async function confirmPasswordReset(email: string, code: string, newPassw
 }
 
 export async function signIn(email: string, password: string): Promise<AuthUser> {
-  const { isSignedIn } = await amplifySignIn({ username: email, password })
-  if (!isSignedIn) throw new Error('sign-in did not complete')
+  const { isSignedIn, nextStep } = await amplifySignIn({ username: email, password })
+  if (!isSignedIn) {
+    const error = new Error('sign-in did not complete')
+    if (nextStep?.signInStep === 'CONFIRM_SIGN_UP') error.name = 'UserNotConfirmedException'
+    throw error
+  }
   const { userId } = await getCurrentUser()
   const attributes = await fetchUserAttributes()
   return { userId, email: attributes.email ?? null }

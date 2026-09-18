@@ -27,10 +27,28 @@ describe('auth.fake', () => {
     await expect(signIn('nobody@example.com', 'Passw0rd!')).rejects.toThrow()
   })
 
-  it('rejects sign-in before the account is confirmed', async () => {
+  it('reports an unconfirmed account as needing confirmation rather than as a bad sign-in', async () => {
     await signUp('dev@example.com', 'Passw0rd!')
 
-    await expect(signIn('dev@example.com', 'Passw0rd!')).rejects.toThrow()
+    const error = await signIn('dev@example.com', 'Passw0rd!').catch((err: Error) => err)
+
+    expect(error).toBeInstanceOf(Error)
+    expect((error as Error).name).toBe('UserNotConfirmedException')
+  })
+
+  it('rejects a second sign-up for an email that already exists, leaving the first account intact', async () => {
+    await signUp('dev@example.com', 'Passw0rd!')
+
+    const rejection = await signUp('dev@example.com', 'OtherPassw0rd!').catch((err: Error) => err)
+
+    expect(rejection).toBeInstanceOf(Error)
+    expect((rejection as Error).name).toBe('UsernameExistsException')
+
+    await confirmSignUp('dev@example.com', '123456')
+    await expect(signIn('dev@example.com', 'Passw0rd!')).resolves.toEqual({
+      userId: expect.any(String),
+      email: 'dev@example.com',
+    })
   })
 
   it('rejects confirmation with an empty code', async () => {
