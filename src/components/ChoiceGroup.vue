@@ -1,11 +1,11 @@
 <script setup lang="ts" generic="T extends string">
-import Card from './BaseCard.vue'
-import FilterOption from './FilterOption.vue'
+import Card from './BaseCard.vue';
+import FilterOption from './FilterOption.vue';
 
 defineProps<{
   name: string
   label: string
-  options: { value: T; label: string }[]
+  options: { value: T; label: string; description?: string }[]
   modelValue: T
 }>()
 
@@ -15,13 +15,13 @@ const emit = defineEmits<{ 'update:modelValue': [value: T] }>()
 <template>
   <Card tag="fieldset" padding="md" radius="xl" bg="none">
     <legend>{{ label }}</legend>
-    <FilterOption v-for="option in options" :key="option.value" :text="option.label">
-      <input
+      <FilterOption v-for="option in options" :key="option.value" :text="option.label" :description="option.description">
+        <input
         type="radio"
         :name="name"
         :checked="modelValue === option.value"
         @change="emit('update:modelValue', option.value)"
-      />
-    </FilterOption>
+        />
+      </FilterOption>
   </Card>
 </template>
