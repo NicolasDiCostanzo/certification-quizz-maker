@@ -1,12 +1,12 @@
 <script setup lang="ts">
   import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import Card from '../components/BaseCard.vue'
 import ChoiceGroup from '../components/ChoiceGroup.vue'
 import CountPicker from '../components/CountPicker.vue'
 import FilterOption from '../components/FilterOption.vue'
-import ThemeFilter from '../components/ThemeFilter.vue'
-import Card from '../components/BaseCard.vue'
 import PrimaryButton from '../components/PrimaryButton.vue'
+import ThemeFilter from '../components/ThemeFilter.vue'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { useQuizSessionStore } from '../stores/quizSession'
 import { useUserProgressStore } from '../stores/userProgress'
@@ -36,9 +36,9 @@ function emptyGroupFilters(themes: ThemeRegistry): Record<string, ThemeGroupFilt
   const count = ref<number | 'all'>(cert.value?.exam.totalQuestions ?? 'all')
   const includeMatchMode = ref<ThemeMatchMode>('or')
 
-  const modeOptions: { value: QuizMode; label: string }[] = [
-    { value: 'preparation', label: texts.modePreparation },
-    { value: 'exam', label: texts.modeExam },
+  const modeOptions: { value: QuizMode; label: string; description?: string }[] = [
+    { value: 'preparation', label: texts.modePreparation, description: texts.modePreparationDescription },
+    { value: 'exam', label: texts.modeExam, description: texts.modeExamDescription },
   ]
 
   const replayOptions: { value: ReplayMode; label: string }[] = [
