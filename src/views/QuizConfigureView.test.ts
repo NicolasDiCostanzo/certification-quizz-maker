@@ -13,6 +13,7 @@ vi.mock('../composables/useQuizLoader', async () => {
     useQuizLoader: () => ({
       availableCerts: [validCertBundle, secondCertBundle],
       certLoadIssues: {},
+      ensureCertLoaded: async () => true,
       getCert: (code: string) =>
         code === 'FIX-001' ? validCertBundle : code === 'SECOND' ? secondCertBundle : undefined,
       activePool: (code: string) =>

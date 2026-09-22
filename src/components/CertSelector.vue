@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { texts } from '../texts/en';
-import type { CertBundle } from '../types';
+import type { CertBundleMeta } from '../types';
 import CertCard from './CertCard.vue';
 import RequestNotice from './RequestNotice.vue';
 
-defineProps<{ certs: CertBundle[] }>()
+defineProps<{ certs: CertBundleMeta[] }>()
 </script>
 
 <template>

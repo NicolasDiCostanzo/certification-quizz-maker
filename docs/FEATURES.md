@@ -15,11 +15,11 @@ Single source of truth for every feature discussed for this project, with its cu
 |---|---|
 | Cert-agnostic app: all exam-specific data in JSON, generic mechanics in code | ✅ |
 | DVA-C02 (555 questions) as the default seed cert for all users | ✅ |
-| Built-in certs auto-discovered at build time (`import.meta.glob`); this is the **only** way a cert bundle enters the app — no runtime upload, no client-side storage of bundles | ✅ |
+| Built-in certs auto-discovered at build time (`import.meta.glob` + `cert-manifest.json`); the selector reads a small bundled manifest while each cert's question bank loads lazily as its own chunk on first navigation — this is the **only** way a cert bundle enters the app: no runtime upload, no client-side storage of bundles | ✅ |
 | Cert-selector home screen with per-cert cards (name, code, bank size, real-exam question count, time limit, weights breakdown, passing score, instructions text) | ✅ |
 | Cert switching isolates everything per cert (themes, topics, metadata, progress) | ✅ |
 | In-app notice on the cert-selector screen: a cert that isn't built in yet is requested by opening a GitHub issue, not uploaded at runtime | ✅ |
-| SKILL.md: AI authoring spec with stop-and-ask rule (never guess, never force-fit, never silently drop data) — a **maintainer/contributor tool**, not an end-user upload flow: whoever picks up a requested cert converts the raw exam dump with SKILL.md and an LLM of their choice, then opens a PR adding the resulting JSON as a new `src/assets/<CODE> questions.json`, picked up automatically by the build-time discovery above | ✅ |
+| SKILL.md: AI authoring spec with stop-and-ask rule (never guess, never force-fit, never silently drop data) — a **maintainer/contributor tool**, not an end-user upload flow: whoever picks up a requested cert converts the raw exam dump with SKILL.md and an LLM of their choice, then opens a PR adding the resulting JSON as a new `src/assets/<CODE> questions.json` plus its `cert-manifest.json` entry, picked up automatically by the build-time discovery above | ✅ |
 
 ## Quiz configuration
 
@@ -109,6 +109,7 @@ Recorded so they aren't re-proposed later without revisiting the reasoning:
 
 - Mandatory accounts or any auth wall for basic use.
 - Server-side storage of cert bundles in Phase 1.
+- Remote hosting of exam bundles (fetched from S3/CloudFront at runtime) — decided against for now: bundles are static, immutable, identical for all users, so shipping them with the app is simpler, offline-safe, and failure-mode-free. Revisit only when one of these triggers hits: question fixes between deploys become frequent, external contributors need to add exams without deploy rights, or the cert count makes per-cert lazy chunks feel heavy.
 - Runtime cert upload and client-side (IndexedDB) storage of uploaded bundles by end users — dropped as too much complexity for the value; a cert not yet built in is requested via a GitHub issue and shipped as a new built-in bundle instead.
 - Auto-fixing invalid cert JSON — errors are reported (surfaced to whoever is adding the bundle), never silently patched.
 - Force-fitting unsupported question types (drag-and-drop, matching, simulations) — SKILL.md and the validator reject them instead.

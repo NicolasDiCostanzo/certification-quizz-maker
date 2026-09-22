@@ -6,7 +6,7 @@ This document specifies the two data structures the app works with: the **cert b
 
 ## Cert bundle
 
-One JSON file per certification, named `<CODE> questions.json` (e.g. `DVA-C02 questions.json`). The app auto-discovers all files matching `/src/assets/* questions.json` at build time — this is the only way a bundle enters the app. There is no runtime upload or client-side storage of bundles; a certification that isn't built in yet is requested via a GitHub issue and shipped as a new file here (see `SKILL.md` for the maintainer-side conversion spec).
+One JSON file per certification, named `<CODE> questions.json` (e.g. `DVA-C02 questions.json`). The app auto-discovers all files matching `/src/assets/* questions.json` at build time, and each cert must also have an entry in `src/assets/cert-manifest.json` (file name, exam metadata, question count) — the manifest drives the cert selector while the bundle itself loads lazily on first navigation. This is the only way a bundle enters the app. There is no runtime upload or client-side storage of bundles; a certification that isn't built in yet is requested via a GitHub issue and shipped as a new file here (see `SKILL.md` for the maintainer-side conversion spec).
 
 ### Top-level shape
 

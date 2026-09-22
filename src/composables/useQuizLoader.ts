@@ -1,46 +1,68 @@
-import type { CertBundle, Question } from '../types'
+import certManifest from '../assets/cert-manifest.json'
+import type { CertBundle, CertBundleMeta, CertManifestEntry, Question } from '../types'
 import { isQuestionAnswerable, validateCertBundle } from '../utils/schemaValidator'
 
-const modules = import.meta.glob<{ default: unknown }>('/src/assets/*questions.json', { eager: true })
+type ModuleLoader = () => Promise<{ default: unknown }>
 
-export function loadBuiltInCerts(
-  modules: Record<string, { default: unknown }>,
-): { certs: CertBundle[]; issuesByPath: Record<string, string[]> } {
-  const certs: CertBundle[] = []
-  const issuesByPath: Record<string, string[]> = {}
-  const pathByExamCode = new Map<string, string>()
+const modules: Record<string, ModuleLoader> = import.meta.glob<{ default: unknown }>(
+  '/src/assets/*questions.json',
+)
 
-  for (const [path, mod] of Object.entries(modules)) {
-    const result = validateCertBundle(mod.default)
-    if (result.valid && result.bundle) {
-      const examCode = result.bundle.exam.code
-      const existingPath = pathByExamCode.get(examCode)
-      if (existingPath) {
-        throw new Error(
-          `Duplicate exam code "${examCode}": both "${existingPath}" and "${path}" provide this certification. Remove or rename one of the bundles before shipping.`,
-        )
-      }
-      pathByExamCode.set(examCode, path)
-      certs.push(result.bundle)
-    } else {
-      issuesByPath[path] = result.errors
+export function createCertRegistry(
+  moduleLoaders: Record<string, ModuleLoader>,
+  manifest: CertManifestEntry[],
+) {
+  const seenCodes = new Set<string>()
+  for (const entry of manifest) {
+    if (seenCodes.has(entry.exam.code)) {
+      throw new Error(
+        `Duplicate exam code "${entry.exam.code}" in the cert manifest. Remove or rename one of the entries before shipping.`,
+      )
+    }
+    seenCodes.add(entry.exam.code)
+    if (!moduleLoaders[`/src/assets/${entry.file}`]) {
+      throw new Error(
+        `Cert manifest references "${entry.file}" but no matching /src/assets/*questions.json file exists.`,
+      )
     }
   }
 
-  return { certs, issuesByPath }
-}
+  const certs = new Map<string, CertBundle>()
+  const issuesByPath: Record<string, string[]> = {}
 
-const { certs: availableCerts, issuesByPath: certLoadIssues } = loadBuiltInCerts(modules)
-
-if (Object.keys(certLoadIssues).length > 0) {
-  for (const [path, errors] of Object.entries(certLoadIssues)) {
-    console.error(`Cert bundle "${path}" was excluded due to load issues:`, errors)
+  async function ensureCertLoaded(examCode: string): Promise<boolean> {
+    if (certs.has(examCode)) return true
+    const entry = manifest.find((candidate) => candidate.exam.code === examCode)
+    if (!entry) return false
+    const path = `/src/assets/${entry.file}`
+    try {
+      const mod = await moduleLoaders[path]()
+      const result = validateCertBundle(mod.default)
+      if (!result.valid || !result.bundle) {
+        issuesByPath[path] = result.errors
+        console.error(`Cert bundle "${path}" was excluded due to load issues:`, result.errors)
+        return false
+      }
+      if (result.bundle.exam.code !== entry.exam.code) {
+        const errors = [
+          `Bundle exam code "${result.bundle.exam.code}" does not match manifest entry "${entry.exam.code}".`,
+        ]
+        issuesByPath[path] = errors
+        console.error(`Cert bundle "${path}" was excluded due to load issues:`, errors)
+        return false
+      }
+      certs.set(result.bundle.exam.code, result.bundle)
+      return true
+    } catch (error) {
+      const errors = [error instanceof Error ? error.message : String(error)]
+      issuesByPath[path] = errors
+      console.error(`Cert bundle "${path}" could not be loaded:`, error)
+      return false
+    }
   }
-}
 
-export function useQuizLoader() {
   function getCert(examCode: string): CertBundle | undefined {
-    return availableCerts.find((cert) => cert.exam.code === examCode)
+    return certs.get(examCode)
   }
 
   function activePool(examCode: string): Question[] {
@@ -54,11 +76,29 @@ export function useQuizLoader() {
     return questionIds.map((id) => byId.get(id)).filter((q): q is Question => q !== undefined)
   }
 
+  function availableCertMetas(): CertBundleMeta[] {
+    return manifest.map(({ exam, questionCount }) => ({ exam, questionCount }))
+  }
+
   return {
-    availableCerts,
-    certLoadIssues,
+    ensureCertLoaded,
     getCert,
     activePool,
     resolveQuestions,
+    availableCertMetas,
+    issuesByPath,
+  }
+}
+
+const registry = createCertRegistry(modules, certManifest)
+
+export function useQuizLoader() {
+  return {
+    availableCerts: registry.availableCertMetas(),
+    certLoadIssues: registry.issuesByPath,
+    ensureCertLoaded: registry.ensureCertLoaded,
+    getCert: registry.getCert,
+    activePool: registry.activePool,
+    resolveQuestions: registry.resolveQuestions,
   }
 }

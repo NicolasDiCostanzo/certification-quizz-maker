@@ -43,10 +43,10 @@ src/
   router/index.ts           Hash-history router; route guard redirects unknown :certCode to home
   views/                    Route-level components: CertSelectorView, QuizConfigureView, QuizSessionView, QuizReviewView
   stores/userProgress.ts    Pinia store: per-question progress keyed by exam code; export/import with merge
-  composables/useQuizLoader.ts  Build-time cert discovery (import.meta.glob) + validation
+  composables/useQuizLoader.ts  Lazy per-cert bundle loading (import.meta.glob + cert-manifest.json) + validation
   utils/schemaValidator.ts  Pure cert-bundle validator (+ isQuestionAnswerable); has tests
   utils/markdownImage.ts    Per-option inline image rendering helper
-  assets/                   Built-in cert bundles: "<CODE> questions.json" (DVA-C02 today)
+  assets/                   Built-in cert bundles: "<CODE> questions.json" + cert-manifest.json (DVA-C02 today)
 docs/
   DATA-MODEL.md             Full cert-bundle + user-progress schema spec
   FEATURES.md               Feature matrix / Phase 1 checklist / deliberate non-features
@@ -55,7 +55,7 @@ SKILL.md                    AI spec for converting a raw exam dump into a cert-b
 
 ## Core architecture rules (don't break these)
 
-1. **Cert bundles enter the app one way only**: a JSON file matching `/src/assets/*questions.json`, discovered at **build time** via `import.meta.glob` in `useQuizLoader.ts`. There is **no runtime upload and no client-side storage of bundles** — this was a deliberate design decision (see "Deliberate non-features" in `docs/FEATURES.md`); don't re-propose it.
+1. **Cert bundles enter the app one way only**: a JSON file matching `/src/assets/*questions.json` **plus a matching entry in `src/assets/cert-manifest.json`** (file name, exam metadata, question count), discovered at **build time** via `import.meta.glob` in `useQuizLoader.ts`. The manifest (tiny, statically bundled) drives the cert selector; each cert's question bank is loaded **lazily as its own chunk on first navigation** (the router guard calls `ensureCertLoaded`). There is **no runtime upload and no client-side storage of bundles** — this was a deliberate design decision (see "Deliberate non-features" in `docs/FEATURES.md`); don't re-propose it.
 2. **Everything exam-specific lives in the JSON bundle** (questions, themes, topics, weights, passing score, time limit). App mechanics are generic. Never hardcode a certification's data (theme group names like `services`/`concepts`/`questionTypes` are data, not code).
 3. **A bundle failing validation is excluded and logged**, never auto-fixed. The validator reports errors; it does not silently patch them (`docs/FEATURES.md`, non-features).
 4. **Progress is keyed by `exam.code`** (`byExamCode` in the Pinia store), so multiple certs coexist without mixing. Export format is versioned (`format: 'quiz-progress'`, `version: 1`); import merges per-question, newest `lastSeenAt` wins.
@@ -84,7 +84,7 @@ If a test would break only by changing copy (not behavior), it's too trivial. Te
 
 ## Adding a certification
 
-There is no in-app upload. A new cert = a new `src/assets/<CODE> questions.json` bundle. Raw exam dumps are converted by an LLM using the root **`SKILL.md`** (a maintainer/contributor spec with a strict stop-and-ask rule: never guess, never force-fit, never silently drop data). If your task is "convert these questions" or "add cert X", read `SKILL.md` first and follow it; the resulting JSON must pass `src/utils/schemaValidator.ts` (validate via `npm run test`, which covers the validator).
+There is no in-app upload. A new cert = a new `src/assets/<CODE> questions.json` bundle **and a matching entry in `src/assets/cert-manifest.json`** (file name, exam metadata, question count — the selector renders the manifest, the questions load lazily on first visit). Raw exam dumps are converted by an LLM using the root **`SKILL.md`** (a maintainer/contributor spec with a strict stop-and-ask rule: never guess, never force-fit, never silently drop data). If your task is "convert these questions" or "add cert X", read `SKILL.md` first and follow it; the resulting JSON must pass `src/utils/schemaValidator.ts` (validate via `npm run test`, which covers the validator).
 
 Known quirk: questions with no non-empty `options` are kept in the bundle but excluded from the active quiz pool by `isQuestionAnswerable` (the loader's `activePool()` filters them out, and the validator emits a warning). The DVA-C02 bank currently has zero such questions — but if you see the warning for a newly added bundle, it's expected behavior, not a bug: author the missing options rather than deleting the questions.
 

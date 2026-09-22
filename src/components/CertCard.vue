@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import { texts } from '../texts/en'
-import type { CertBundle } from '../types'
+import type { CertBundleMeta } from '../types'
 import { formatPassingScore } from '../utils/examDisplay'
 import Card from './BaseCard.vue'
 import CertCodeBadge from './CertCodeBadge.vue'
 import CertFact from './CertFact.vue'
 import WeightPill from './WeightPill.vue'
 
-defineProps<{ cert: CertBundle }>()
+defineProps<{ cert: CertBundleMeta }>()
 </script>
 
 <template>
@@ -24,7 +24,7 @@ defineProps<{ cert: CertBundle }>()
     <h2>{{ cert.exam.name }}</h2>
     <CertCodeBadge :code="cert.exam.code" />
     <dl class="cert-facts">
-      <CertFact :label="texts.questionBankLabel" :value="String(cert.questions.length)" />
+      <CertFact :label="texts.questionBankLabel" :value="String(cert.questionCount)" />
       <CertFact :label="texts.realExamLabel" :value="texts.realExamValue(cert.exam.totalQuestions)" />
       <CertFact :label="texts.timeLimitLabel" :value="texts.timeLimitValue(cert.exam.timeLimitMinutes)" />
       <CertFact :label="texts.passingScoreLabel" :value="formatPassingScore(cert.exam.passingScore)" />

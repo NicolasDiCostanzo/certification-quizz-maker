@@ -1,39 +1,124 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import type { CertManifestEntry } from '../types'
 import { cloneBundle, validCertBundle } from '../utils/fixtures/certBundle.fixture'
-import { loadBuiltInCerts } from './useQuizLoader'
+import { createCertRegistry } from './useQuizLoader'
 
-describe('loadBuiltInCerts', () => {
-  it('loads every valid bundle with a distinct exam code', () => {
+type ModuleLoader = () => Promise<{ default: unknown }>
+
+function manifestEntry(examCode: string, file: string, questionCount: number): CertManifestEntry {
+  return {
+    file,
+    exam: { ...validCertBundle.exam, code: examCode },
+    questionCount,
+  }
+}
+
+function loadersFor(bundles: Record<string, unknown>): Record<string, ModuleLoader> {
+  return Object.fromEntries(
+    Object.entries(bundles).map(([path, data]) => [path, vi.fn(async () => ({ default: data }))]),
+  )
+}
+
+describe('createCertRegistry', () => {
+  it('loads each manifest-listed bundle on demand and exposes its meta immediately', async () => {
     const second = cloneBundle(validCertBundle)
     second.exam.code = 'SECOND'
 
-    const { certs, issuesByPath } = loadBuiltInCerts({
-      '/src/assets/first.json': { default: validCertBundle },
-      '/src/assets/second.json': { default: second },
-    })
-
-    expect(certs.map((c) => c.exam.code).sort()).toEqual(['FIX-001', 'SECOND'])
-    expect(issuesByPath).toEqual({})
-  })
-
-  it('throws instead of silently dropping a bundle when two bundles share an exam code', () => {
-    const duplicate = cloneBundle(validCertBundle)
-
-    expect(() =>
-      loadBuiltInCerts({
-        '/src/assets/first.json': { default: validCertBundle },
-        '/src/assets/duplicate.json': { default: duplicate },
+    const registry = createCertRegistry(
+      loadersFor({
+        '/src/assets/first.json': validCertBundle,
+        '/src/assets/second.json': second,
       }),
-    ).toThrow(/Duplicate exam code "FIX-001".*first\.json.*duplicate\.json/s)
+      [manifestEntry('FIX-001', 'first.json', 2), manifestEntry('SECOND', 'second.json', 2)],
+    )
+
+    expect(registry.getCert('FIX-001')).toBeUndefined()
+    expect(registry.availableCertMetas().map((meta) => meta.exam.code).sort()).toEqual([
+      'FIX-001',
+      'SECOND',
+    ])
+    expect(registry.availableCertMetas().every((meta) => meta.questionCount === 2)).toBe(true)
+
+    await expect(registry.ensureCertLoaded('FIX-001')).resolves.toBe(true)
+    expect(registry.getCert('FIX-001')).toEqual(validCertBundle)
+    await expect(registry.ensureCertLoaded('SECOND')).resolves.toBe(true)
+    expect(registry.issuesByPath).toEqual({})
   })
 
-  it('excludes a bundle that fails schema validation and reports it under issuesByPath', () => {
-    const { certs, issuesByPath } = loadBuiltInCerts({
-      '/src/assets/broken.json': { default: { not: 'a cert bundle' } },
-    })
+  it('caches a loaded cert and never re-imports its bundle', async () => {
+    const loader = vi.fn(async () => ({ default: validCertBundle }))
+    const registry = createCertRegistry({ '/src/assets/first.json': loader }, [
+      manifestEntry('FIX-001', 'first.json', 2),
+    ])
 
-    expect(certs).toEqual([])
-    expect(issuesByPath['/src/assets/broken.json']).toBeInstanceOf(Array)
-    expect(issuesByPath['/src/assets/broken.json'].length).toBeGreaterThan(0)
+    await registry.ensureCertLoaded('FIX-001')
+    await registry.ensureCertLoaded('FIX-001')
+
+    expect(loader).toHaveBeenCalledTimes(1)
+  })
+
+  it('returns false for an exam code that is not in the manifest', async () => {
+    const registry = createCertRegistry(loadersFor({ '/src/assets/first.json': validCertBundle }), [
+      manifestEntry('FIX-001', 'first.json', 2),
+    ])
+
+    await expect(registry.ensureCertLoaded('NOPE-01')).resolves.toBe(false)
+  })
+
+  it('throws eagerly when two manifest entries share an exam code', () => {
+    expect(() =>
+      createCertRegistry(
+        loadersFor({
+          '/src/assets/first.json': validCertBundle,
+          '/src/assets/duplicate.json': validCertBundle,
+        }),
+        [manifestEntry('FIX-001', 'first.json', 2), manifestEntry('FIX-001', 'duplicate.json', 2)],
+      ),
+    ).toThrow(/Duplicate exam code "FIX-001" in the cert manifest/s)
+  })
+
+  it('throws eagerly when the manifest references a missing bundle file', () => {
+    expect(() =>
+      createCertRegistry(loadersFor({ '/src/assets/first.json': validCertBundle }), [
+        manifestEntry('FIX-001', 'missing.json', 2),
+      ]),
+    ).toThrow(/references "missing\.json" but no matching \/src\/assets\/\*questions\.json file exists/s)
+  })
+
+  it('excludes a bundle that fails schema validation and reports it under issuesByPath', async () => {
+    const registry = createCertRegistry(loadersFor({ '/src/assets/broken.json': { not: 'a cert bundle' } }), [
+      manifestEntry('FIX-001', 'broken.json', 2),
+    ])
+
+    await expect(registry.ensureCertLoaded('FIX-001')).resolves.toBe(false)
+    expect(registry.getCert('FIX-001')).toBeUndefined()
+    expect(registry.issuesByPath['/src/assets/broken.json']).toBeInstanceOf(Array)
+    expect(registry.issuesByPath['/src/assets/broken.json'].length).toBeGreaterThan(0)
+  })
+
+  it('excludes a bundle whose exam code does not match its manifest entry', async () => {
+    const mismatched = cloneBundle(validCertBundle)
+    mismatched.exam.code = 'OTHER'
+
+    const registry = createCertRegistry(loadersFor({ '/src/assets/mismatched.json': mismatched }), [
+      manifestEntry('FIX-001', 'mismatched.json', 2),
+    ])
+
+    await expect(registry.ensureCertLoaded('FIX-001')).resolves.toBe(false)
+    expect(registry.issuesByPath['/src/assets/mismatched.json'][0]).toMatch(
+      /"OTHER" does not match manifest entry "FIX-001"/s,
+    )
+  })
+
+  it('excludes a bundle whose import rejects and reports it under issuesByPath', async () => {
+    const registry = createCertRegistry(
+      { '/src/assets/failing.json': vi.fn(async () => {
+        throw new Error('network down')
+      }) },
+      [manifestEntry('FIX-001', 'failing.json', 2)],
+    )
+
+    await expect(registry.ensureCertLoaded('FIX-001')).resolves.toBe(false)
+    expect(registry.issuesByPath['/src/assets/failing.json']).toEqual(['network down'])
   })
 })

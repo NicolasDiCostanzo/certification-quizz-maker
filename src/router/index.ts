@@ -30,11 +30,12 @@ export const router = createRouter({
   ],
 })
 
-const { getCert } = useQuizLoader()
+const { ensureCertLoaded } = useQuizLoader()
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const certCode = to.params.certCode
-  if (typeof certCode === 'string' && !getCert(certCode)) {
+  if (typeof certCode !== 'string') return
+  if (!(await ensureCertLoaded(certCode))) {
     return { name: 'cert-selector' }
   }
 })
