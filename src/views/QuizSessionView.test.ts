@@ -35,6 +35,7 @@ const router = createRouter({
 
 vi.mock('../composables/useQuizLoader', () => ({
   useQuizLoader: () => ({
+    ensureCertLoaded: async () => true,
     getCert: () => ({
       exam: { name: 'Test', code: 'TEST', totalQuestions: 65, timeLimitMinutes: 130, passingScore: { passingScore: 700, scale: 1000 } },
     }),

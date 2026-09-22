@@ -43,7 +43,7 @@ npm run preview  # serves the production build locally
 There is no in-app upload. To add a certification:
 
 1. Open a GitHub issue requesting it. If you already have the questions formatted as JSON per `docs/DATA-MODEL.md`, attach it — that's enough for a maintainer to add it directly.
-2. Otherwise, if you have the raw questions (e.g. an ExamTopics dump as a `.txt` file), you can convert them yourself: give `SKILL.md` to any LLM of your choice together with your questions, and it returns the formatted JSON. Attach that to the issue, or open a PR adding it as `src/assets/<CODE> questions.json` directly.
+2. Otherwise, if you have the raw questions (e.g. an ExamTopics dump as a `.txt` file), you can convert them yourself: give `SKILL.md` to any LLM of your choice together with your questions, and it returns the formatted JSON. Attach that to the issue, or open a PR adding it as `src/assets/<CODE> questions.json` together with an entry in `src/assets/cert-manifest.json` directly.
 3. A maintainer validates the JSON and merges it. Since built-in certs are auto-discovered at build time, it's picked up automatically on the next deploy — no other code changes needed.
 
 ## Project layout

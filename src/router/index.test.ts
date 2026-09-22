@@ -53,7 +53,8 @@ describe('router', () => {
   })
 
   it('lets navigation through for a built-in cert code', async () => {
-    const { getCert } = useQuizLoader()
+    const { ensureCertLoaded, getCert } = useQuizLoader()
+    await ensureCertLoaded('DVA-C02')
     expect(getCert('DVA-C02')).toBeDefined()
 
     await router.push('/certs/DVA-C02/configure')

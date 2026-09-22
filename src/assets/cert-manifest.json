@@ -1,0 +1,22 @@
+[
+  {
+    "file": "DVA-C02 questions.json",
+    "exam": {
+      "name": "AWS Certified Developer - Associate",
+      "code": "DVA-C02",
+      "totalQuestions": 65,
+      "timeLimitMinutes": 130,
+      "passingScore": {
+        "passingScore": 700,
+        "scale": 1000
+      },
+      "weights": {
+        "Development with AWS Services": 32,
+        "Deployment": 24,
+        "Security": 26,
+        "Troubleshooting and Optimization": 18
+      }
+    },
+    "questionCount": 555
+  }
+]

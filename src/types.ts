@@ -36,6 +36,15 @@ export interface CertBundle {
   questions: Question[]
 }
 
+export interface CertBundleMeta {
+  exam: ExamInfo
+  questionCount: number
+}
+
+export interface CertManifestEntry extends CertBundleMeta {
+  file: string
+}
+
 export interface QuestionProgress {
   questionId: string
   attempts: number
