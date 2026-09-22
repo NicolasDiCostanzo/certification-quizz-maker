@@ -9,6 +9,7 @@ import QuizReviewView from './QuizReviewView.vue'
 
 vi.mock('../composables/useQuizLoader', () => ({
   useQuizLoader: () => ({
+    ensureCertLoaded: async () => true,
     getCert: () => ({
       exam: { name: 'Test', code: 'TEST', totalQuestions: 65, timeLimitMinutes: 130, passingScore: { passingScore: 700, scale: 1000 } },
       themes: { services: ['lambda', 's3'] },
