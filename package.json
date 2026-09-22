@@ -29,7 +29,7 @@
     "@aws-sdk/client-dynamodb": "^3.1127.0",
     "@aws-sdk/lib-dynamodb": "^3.1135.0",
     "@playwright/test": "^1.63.0",
-    "@types/node": "^26.5.1",
+    "@types/node": "^26.6.1",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/eslint-config-typescript": "^14.9.0",
     "@vue/test-utils": "^2.5.0",
