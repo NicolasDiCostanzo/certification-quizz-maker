@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CertSelector from '../components/CertSelector.vue';
+import CertSelector from '../components/cert/CertSelector.vue';
 import { useQuizLoader } from '../composables/useQuizLoader';
 
 const { availableCerts } = useQuizLoader()

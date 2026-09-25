@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import AuthLinkButton from '../components/AuthLinkButton.vue'
-import AuthTextField from '../components/AuthTextField.vue'
-import BaseCard from '../components/BaseCard.vue'
-import PrimaryButton from '../components/PrimaryButton.vue'
+import AuthLinkButton from '../components/auth/AuthLinkButton.vue'
+import AuthTextField from '../components/auth/AuthTextField.vue'
+import BaseCard from '../components/ui/BaseCard.vue'
+import PrimaryButton from '../components/ui/PrimaryButton.vue'
 import { useAccount } from '../composables/useAccount'
 import { texts } from '../texts/en'
 
