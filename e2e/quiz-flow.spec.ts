@@ -72,8 +72,9 @@ test.describe.serial('quiz journey on the DVA-C02 certification', () => {
 
   test('lists every declared certification as a card', async ({ sharedPage: page }) => {
     await page.goto('/#/cert')
-    await expect(page.locator('.cert-card')).toHaveCount(1)
+    await expect(page.locator('.cert-card')).toHaveCount(2)
     await expect(page.getByRole('heading', { name: certExamName })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'AWS Certified Cloud Practitioner' })).toBeVisible()
   })
 
   test('shows a blank dashboard before any quiz is taken', async ({ sharedPage: page }) => {

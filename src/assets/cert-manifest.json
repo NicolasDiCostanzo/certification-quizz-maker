@@ -18,5 +18,25 @@
       }
     },
     "questionCount": 555
+  },
+  {
+    "file": "CLF-C02 questions.json",
+    "exam": {
+      "name": "AWS Certified Cloud Practitioner",
+      "code": "CLF-C02",
+      "totalQuestions": 65,
+      "timeLimitMinutes": 90,
+      "passingScore": {
+        "passingScore": 700,
+        "scale": 1000
+      },
+      "weights": {
+        "Cloud Concepts": 24,
+        "Security and Compliance": 30,
+        "Cloud Technology and Services": 34,
+        "Billing, Pricing, and Support": 12
+      }
+    },
+    "questionCount": 716
   }
 ]

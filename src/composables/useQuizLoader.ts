@@ -1,6 +1,8 @@
-import certManifest from '../assets/cert-manifest.json'
+import certManifestRaw from '../assets/cert-manifest.json'
 import type { CertBundle, CertBundleMeta, CertManifestEntry, Question } from '../types'
 import { isQuestionAnswerable, validateCertBundle } from '../utils/schemaValidator'
+
+const certManifest = certManifestRaw as unknown as CertManifestEntry[]
 
 type ModuleLoader = () => Promise<{ default: unknown }>
 
