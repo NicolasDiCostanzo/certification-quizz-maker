@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import WelcomeCard from '../components/WelcomeCard.vue';
+import WelcomeCard from '../components/app/WelcomeCard.vue';
 import { useAccount } from '../composables/useAccount';
 import { isAuthAvailable, isSyncConfigured } from '../config';
 import { useQuizHistoryStore } from '../stores/quizHistory';

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import AppHeader from './components/AppHeader.vue'
-import SyncBanner from './components/SyncBanner.vue'
+import AppHeader from './components/app/AppHeader.vue'
+import SyncBanner from './components/app/SyncBanner.vue'
 import { syncError } from './composables/useSync'
 
 function dismissSyncError() {

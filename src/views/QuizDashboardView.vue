@@ -8,11 +8,11 @@ import { texts } from '../texts/en'
 import { passingScorePercent } from '../utils/examDisplay'
 import { breakdownByThemeAllTime, breakdownByTopicAllTime } from '../utils/scoreBreakdown'
 
-import ConfirmModal from '../components/ConfirmModal.vue'
-import PrimaryButton from '../components/PrimaryButton.vue'
-import QuizHistoryList from '../components/QuizHistoryList.vue'
-import ReviewBreakdown from '../components/ReviewBreakdown.vue'
-import SecondaryButton from '../components/SecondaryButton.vue'
+import ConfirmModal from '../components/ui/ConfirmModal.vue'
+import PrimaryButton from '../components/ui/PrimaryButton.vue'
+import QuizHistoryList from '../components/history/QuizHistoryList.vue'
+import ReviewBreakdown from '../components/review/ReviewBreakdown.vue'
+import SecondaryButton from '../components/ui/SecondaryButton.vue'
 import { useAccount } from '../composables/useAccount'
 
 const props = defineProps<{
