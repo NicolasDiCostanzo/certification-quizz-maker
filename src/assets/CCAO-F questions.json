@@ -1,0 +1,1470 @@
+{
+  "version": 2,
+  "exam": {
+    "name": "Claude Certified Associate - Foundations",
+    "code": "CCAO-F",
+    "totalQuestions": 60,
+    "timeLimitMinutes": 120,
+    "passingScore": {
+      "passingScore": 720,
+      "scale": 1000
+    },
+    "weights": {
+      "Prompting and Task Execution": 14,
+      "Output Evaluation and Validation": 21,
+      "Product and Model Selection": 12,
+      "Workflow Integration and Solution Design": 16,
+      "Configuration and Knowledge Management": 12,
+      "Governance, Risk, and Responsible Use": 15,
+      "Troubleshooting and Optimization": 10
+    }
+  },
+  "themes": {
+    "tasks": [
+      "mock-exam",
+      "practice-scenarios"
+    ]
+  },
+  "questions": [
+    {
+      "id": "1",
+      "question": "Claude summarizes a vendor contract for you and states that the termination clause requires 60 days' notice, citing section 14.2. You are about to send the summary to your legal team. What should you do first?",
+      "options": [
+        "Check section 14.2 of the contract and confirm the notice period before sending",
+        "Send it, since Claude cited a specific section",
+        "Ask Claude how confident it is and send if the confidence is high",
+        "Rephrase the summary in more formal language, then send"
+      ],
+      "answers": "A",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "Specific-looking citations can be fabricated, and material bound for legal review requires verification against the source document. A specific citation is not evidence of accuracy (B), self-reported confidence is not a reliability signal (C), and rewording does nothing about correctness (D).",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "2",
+      "question": "You ask Claude to draft a competitive analysis, and the output presents market share figures for three competitors without sources. The figures look plausible. What is the appropriate handling?",
+      "options": [
+        "Include the figures, since plausibility is sufficient for internal documents",
+        "Verify each figure against a market research source and keep only what checks out, with citations",
+        "Delete the figures and note that no market data was available",
+        "Ask Claude to regenerate until the numbers stabilize across runs"
+      ],
+      "answers": "B",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "Unsourced quantitative claims are a classic hallucination surface; the professional move is verification against an authoritative source, keeping what survives. Plausibility is not accuracy (A), deleting everything discards genuinely verifiable material (C), and consistency across regenerations does not establish truth (D).",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "3",
+      "question": "You need Claude to produce a quarterly report from meeting notes, a spreadsheet summary, and last quarter's report. The first attempt misses the required structure and tone. What is the most effective next step?",
+      "options": [
+        "Retry the identical prompt, since outputs vary between runs",
+        "Switch to the most capable model and resend the same prompt",
+        "Rewrite the prompt to state the role, the required sections in order, the tone, and attach last quarter's report as a format example",
+        "Break the work into forty single-sentence prompts"
+      ],
+      "answers": "C",
+      "topic": "Prompting and Task Execution",
+      "explanation": "Structure, explicit constraints, and an example of the target format are the most effective fixes for a formatting and tone miss. Re-rolling (A) leaves the deficiency in place, a larger model does not learn unstated requirements (B), and over-fragmentation destroys coherence (D).",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "4",
+      "question": "A colleague's prompt asks Claude to \"analyze our customer feedback and fix the problems.\" The output is generic. Which revision best applies task decomposition?",
+      "options": [
+        "Add \"be specific and detailed\" to the prompt",
+        "Ask the same question three times and merge the answers",
+        "Paste more feedback into the same prompt",
+        "Ask first for a categorized list of complaint themes with counts, then for the top three by frequency, then for a proposed action per theme"
+      ],
+      "answers": "D",
+      "topic": "Prompting and Task Execution",
+      "explanation": "Decomposition turns a vague compound request into a sequence of verifiable steps, each with a concrete output. Vague intensifiers (A) do not add structure, repetition (B) multiplies the vagueness, and more input without more structure (C) usually worsens focus.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "5",
+      "question": "Your team drafts hundreds of short, routine customer replies daily, and cost and speed matter more than nuance. Occasionally a complex escalation needs careful reasoning. What is the sound model strategy?",
+      "options": [
+        "Use the most capable model for everything to maximize quality",
+        "Use the fastest, lowest-cost model for routine replies and switch to a more capable model for the complex escalations",
+        "Use the fastest model for everything, including escalations",
+        "Alternate models randomly to balance the load"
+      ],
+      "answers": "B",
+      "topic": "Product and Model Selection",
+      "explanation": "**B** aligns model choice with task requirements in both directions, which is the tested judgment. **A** wastes cost and latency budget on routine work; **C** underserves exactly the cases that need depth; **D** matches nothing to anything.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "6",
+      "question": "Your monthly close process involves collecting figures, drafting a variance commentary, and formatting a board pack. You want Claude to help durably, not just once. What is the strongest approach?",
+      "options": [
+        "Create a Project with the commentary conventions and prior packs as knowledge, plus instructions for the structure, and run each close inside it",
+        "Paste everything into a fresh chat each month and ask for the pack",
+        "Ask Claude to do the whole close autonomously, including pulling the figures",
+        "Use Claude only for spellchecking the final pack"
+      ],
+      "answers": "A",
+      "topic": "Workflow Integration and Solution Design",
+      "explanation": "Durable, repeated workflows belong in a Project where instructions and knowledge persist and improve. Re-pasting monthly (B) rebuilds context by hand every time, full autonomy over financial figures without review (C) ignores appropriate-use judgment, and spellchecking (D) forfeits the actual value.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "7",
+      "question": "A department head asks you whether Claude could \"handle our customer onboarding.\" What is the right first move?",
+      "options": [
+        "Say yes and start building immediately",
+        "Map the onboarding steps, identify which involve drafting, summarizing, or lookup that Claude does well, and which need human judgment or system access it does not have",
+        "Say no, since onboarding involves customer data",
+        "Forward the question to Anthropic support"
+      ],
+      "answers": "B",
+      "topic": "Workflow Integration and Solution Design",
+      "explanation": "The Associate's core skill is translating a business ask into a realistic division of labor: where Claude adds value, where humans stay, and what the limits are. Unqualified yes (A) and unqualified no (C) both skip the analysis, and support (D) does not know your process.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "8",
+      "question": "Your team's Project answers policy questions from an uploaded handbook. HR publishes a new handbook version. What must happen for the Project to stay trustworthy?",
+      "options": [
+        "Nothing; Claude will find the new version on its own",
+        "Add the new handbook alongside the old one so both are available",
+        "Replace the outdated handbook in the Project knowledge and spot-check answers against the new version",
+        "Tell users to mention the new version in every prompt"
+      ],
+      "answers": "C",
+      "topic": "Configuration and Knowledge Management",
+      "explanation": "Project knowledge is maintained, not self-updating; stale sources are a quality defect the configurer owns. Claude does not fetch your internal documents on its own (A), keeping both versions invites contradictory answers (B), and pushing the burden onto every user (D) is not maintenance.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "9",
+      "question": "You want Claude to analyze churn patterns in an export that includes customer names, emails, and account numbers. Company policy forbids sharing personal data with external tools. What is the correct action?",
+      "options": [
+        "Upload the file, since churn analysis is an internal purpose",
+        "Upload it but instruct Claude to ignore the personal columns",
+        "Abandon the analysis",
+        "Remove or pseudonymize the identifying columns first, then upload and analyze"
+      ],
+      "answers": "D",
+      "topic": "Governance, Risk, and Responsible Use",
+      "explanation": "Make the task compliant, then do it: the identifiers are not needed for pattern analysis. Purpose does not override policy (A), an instruction to ignore data is not a control because the data still left the boundary (B), and abandoning the work (C) is unnecessary when anonymization enables it.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "10",
+      "question": "A prompt that worked well for weeks now produces off-target answers after your team added many new documents to the Project. What is the best first diagnostic?",
+      "options": [
+        "Check whether the newly added knowledge is diluting or contradicting the sources the answers should draw from",
+        "Rewrite the prompt from scratch",
+        "Switch to a larger model",
+        "Delete the Project and start over"
+      ],
+      "answers": "A",
+      "topic": "Troubleshooting and Optimization",
+      "explanation": "The change that coincided with the regression is the first suspect: new knowledge can crowd out or conflict with the relevant sources. Rewriting the prompt (B), upgrading the model (C), or rebuilding everything (D) all treat symptoms before diagnosing the actual change.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "11",
+      "question": "Claude produces a competitor comparison table where one row is marked “data unavailable” and the rest are filled in. A colleague asks you to delete the empty row so the table looks complete. What is the right response?",
+      "options": [
+        "Delete the row, since an incomplete table undermines confidence",
+        "Keep the row and its label, because the gap is itself a finding the reader needs",
+        "Fill the row with a reasonable estimate and mark it as approximate",
+        "Ask Claude to search harder until every row is populated"
+      ],
+      "answers": "B",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "A declared gap is information: it tells the reader where the analysis is thin. Deleting it (A) hides a limitation, an unmarked estimate (C) manufactures data, and pressing the model to fill the cell (D) invites fabrication rather than retrieval.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "12",
+      "question": "Two runs of the same prompt give different figures for the same metric. Which conclusion is supported?",
+      "options": [
+        "The higher figure is more likely correct because the model found more evidence",
+        "The figures should be averaged to reduce variance",
+        "Neither figure is established, and the metric must be checked against the source",
+        "The prompt is fine and the model needs a longer context window"
+      ],
+      "answers": "C",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "Disagreement between runs shows the figure is not grounded in a reliable source, so neither is established. Preferring the larger number (A) is arbitrary, averaging (B) treats two unverified numbers as measurements, and context length (D) is unrelated to whether the figure is true.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "13",
+      "question": "You ask Claude to extract every payment term from a 40-page contract. The output lists four terms, cleanly formatted. What is the first check?",
+      "options": [
+        "Confirm the formatting is consistent across the four entries",
+        "Ask Claude whether it found all of them",
+        "Run it again at a higher temperature to surface more terms",
+        "Read the contract's payment sections to confirm no term was omitted"
+      ],
+      "answers": "D",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "Extraction fails by omission more often than by error, and a tidy output gives no signal about completeness. Formatting (A) is cosmetic, self-report (B) is not evidence, and temperature (C) changes phrasing rather than recall.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "14",
+      "question": "A summary you commissioned states a conclusion that contradicts your own reading of the source. What should you do?",
+      "options": [
+        "Locate the passage the conclusion rests on and compare it against both readings",
+        "Defer to the summary, since the model read the whole document",
+        "Defer to your reading and treat the summary as wrong",
+        "Ask a colleague which of the two sounds more plausible"
+      ],
+      "answers": "A",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "The disagreement is resolvable by returning to the passage in question, which settles it on evidence. Deferring either way (B, C) decides without checking, and canvassing opinion (D) substitutes plausibility for the source.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "15",
+      "question": "Claude produces a well-argued recommendation with no citations, on a topic where you have no expertise. What is the appropriate use of it?",
+      "options": [
+        "Adopt it, since the reasoning is internally consistent",
+        "Treat it as a hypothesis to test against sources before acting",
+        "Discard it, because unsourced output has no value",
+        "Ask for citations and adopt whatever comes back"
+      ],
+      "answers": "B",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "Unsourced reasoning is a starting point, useful for structuring an enquiry but not for deciding. Internal consistency is not accuracy (A), the reasoning may still be useful (C), and citations produced on demand need the same verification as the claim (D).",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "16",
+      "question": "A team wants Claude to draft weekly customer health summaries from support tickets, CRM notes, and usage data. Which design detail matters most for the output to stay useful over months?",
+      "options": [
+        "Choosing the largest available model",
+        "Running the summary daily instead of weekly",
+        "Defining what a health summary must contain and keeping that definition in one place the team maintains",
+        "Letting each team member write their own prompt"
+      ],
+      "answers": "C",
+      "topic": "Workflow Integration and Solution Design",
+      "explanation": "A stable, maintained definition of the deliverable is what keeps output consistent as people and inputs change. Model size (A) does not fix an undefined task, higher frequency (B) multiplies an unclear output, and per-person prompts (D) guarantee drift.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "17",
+      "question": "Which task in a monthly reporting process is the weakest candidate for delegation to Claude?",
+      "options": [
+        "Drafting the narrative summary from agreed figures",
+        "Reformatting last month's report into the new template",
+        "Extracting the top five variances from a spreadsheet export",
+        "Deciding which underperforming account to escalate to the executive team"
+      ],
+      "answers": "D",
+      "topic": "Workflow Integration and Solution Design",
+      "explanation": "The escalation decision carries accountability and depends on relationships and context the model does not hold. Drafting (A), reformatting (B), and extraction (C) are all bounded tasks with checkable output.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "18",
+      "question": "A process works well for one analyst and poorly for three others using the same prompt. What is the most likely cause?",
+      "options": [
+        "The prompt relies on context the first analyst supplies without noticing",
+        "The other three need a more capable model",
+        "The task is unsuitable for Claude",
+        "The other three are using shorter inputs"
+      ],
+      "answers": "A",
+      "topic": "Workflow Integration and Solution Design",
+      "explanation": "One person succeeding with the same prompt usually means they are contributing unstated context, such as knowing which file to attach or what good looks like. A model change (B) does not supply missing context, the task clearly works (C), and input length (D) is a symptom rather than a cause.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "19",
+      "question": "When is it appropriate to keep a human approval step in an otherwise automated Claude workflow?",
+      "options": [
+        "Always, since automation is inherently risky",
+        "When the action is hard to reverse or carries external consequences",
+        "Only while the workflow is new, then remove it",
+        "Never, because approval steps defeat the purpose of automation"
+      ],
+      "answers": "B",
+      "topic": "Workflow Integration and Solution Design",
+      "explanation": "Approval earns its cost where a mistake is expensive or hard to undo. Blanket approval (A) and blanket removal (D) both ignore the specific risk, and a time-based rule (C) removes the check regardless of what the action does.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "20",
+      "question": "A colleague proposes pasting a customer list into a prompt to draft personalised outreach. What is the correct handling?",
+      "options": [
+        "Proceed, since the prompt is not stored anywhere permanent",
+        "Ask Claude to keep the names confidential",
+        "Remove or replace identifying details before drafting, and reattach them afterwards",
+        "Proceed but delete the conversation afterwards"
+      ],
+      "answers": "C",
+      "topic": "Governance, Risk, and Responsible Use",
+      "explanation": "Working on anonymised data and reattaching identifiers afterwards achieves the task without exposing the personal data. Assumptions about storage (A) are not a control, an instruction to the model (B) is not a safeguard, and deleting afterwards (D) does not undo the disclosure.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "21",
+      "question": "Which statement about instructing a model not to do something is accurate?",
+      "options": [
+        "An instruction in the prompt is an enforceable control",
+        "Instructions are enforceable if placed in a system prompt",
+        "Instructions are enforceable if repeated several times",
+        "An instruction shapes behavior but does not guarantee it, so controls belong outside the prompt"
+      ],
+      "answers": "D",
+      "topic": "Governance, Risk, and Responsible Use",
+      "explanation": "Prompt instructions influence behavior and are not guarantees, so anything that must hold is enforced in the surrounding system. Placement (B) and repetition (C) change the strength of the steer, not its nature, and treating it as enforcement (A) is the error the question tests.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "22",
+      "question": "A regulated report drafted with Claude is about to be filed. What is the reviewer accountable for?",
+      "options": [
+        "The accuracy and compliance of the filed document, regardless of how it was drafted",
+        "Confirming that Claude was used according to policy",
+        "Confirming the prompt included the relevant regulations",
+        "Recording which model version produced the draft"
+      ],
+      "answers": "A",
+      "topic": "Governance, Risk, and Responsible Use",
+      "explanation": "Accountability sits with the person who files, and the tool used does not transfer it. Policy compliance (B), prompt content (C), and version records (D) are all reasonable practices that do not replace responsibility for the document.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "23",
+      "question": "When is disclosing that AI assisted a piece of work most clearly warranted?",
+      "options": [
+        "Whenever any AI tool touched the work at any stage",
+        "When the audience's judgment of the work depends on how it was produced",
+        "Only when the output is published externally",
+        "Only when a written policy requires it"
+      ],
+      "answers": "B",
+      "topic": "Governance, Risk, and Responsible Use",
+      "explanation": "Disclosure matters where provenance would change how a reader weighs the work. A universal rule (A) makes the signal meaningless, and confining it to external publication (C) or written policy (D) misses internal cases where it genuinely matters.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "24",
+      "question": "A prompt produces output that is accurate but consistently too long. What is the most reliable fix?",
+      "options": [
+        "Add “be concise” to the prompt",
+        "Ask for a summary of the output afterwards",
+        "State the limit in concrete terms, such as a word count or a number of bullet points",
+        "Use a smaller model"
+      ],
+      "answers": "C",
+      "topic": "Prompting and Task Execution",
+      "explanation": "Concrete limits are checkable and reproducible in a way that adjectives are not. “Be concise” (A) is interpreted differently each run, summarising afterwards (B) adds a step and a second failure point, and a smaller model (D) trades accuracy for brevity.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "25",
+      "question": "You need output in a specific structure every time so it can be pasted into a template. What is the most effective technique?",
+      "options": [
+        "Describing the structure in prose at the end of the prompt",
+        "Asking for the output to be well organized",
+        "Requesting the output twice and taking the better one",
+        "Providing a filled example of the exact structure you want"
+      ],
+      "answers": "D",
+      "topic": "Prompting and Task Execution",
+      "explanation": "An example specifies the target unambiguously and is the strongest available signal for format. Prose description (A) leaves room for interpretation, a vague request (B) leaves more, and generating twice (C) does not define the target at all.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "26",
+      "question": "A long prompt with many rules produces output that follows some rules and ignores others. What should you try first?",
+      "options": [
+        "Separating the task into stages so each output is checked before the next",
+        "Repeating the ignored rules in capitals",
+        "Moving all the rules to the top of the prompt",
+        "Adding a rule that says all rules must be followed"
+      ],
+      "answers": "A",
+      "topic": "Prompting and Task Execution",
+      "explanation": "Splitting the work reduces how much must hold at once and gives a checkpoint between stages. Emphasis (B), ordering (C), and a meta-rule (D) all leave the same load in a single step.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "27",
+      "question": "Which detail most improves a prompt asking Claude to review a document?",
+      "options": [
+        "Stating that the review should be thorough",
+        "Stating what the review is for and what would count as a problem",
+        "Attaching several similar documents for comparison",
+        "Asking for the review as a numbered list"
+      ],
+      "answers": "B",
+      "topic": "Prompting and Task Execution",
+      "explanation": "Purpose and criteria tell the model what to look for, which is what a review depends on. Thoroughness (A) is unmeasurable, extra documents (C) add noise without criteria, and formatting (D) shapes presentation rather than substance.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "28",
+      "question": "A task involves reading a 200-page report once and answering a single question. Which consideration should lead the choice?",
+      "options": [
+        "The cheapest model available, since the task runs once",
+        "Whether the model supports the fastest response time",
+        "Whether the model can hold and reason over the whole document reliably",
+        "Whether the task can be split across several small models"
+      ],
+      "answers": "C",
+      "topic": "Product and Model Selection",
+      "explanation": "The binding constraint is reliable comprehension across a long document, which is what the choice must satisfy. Cost (A) and speed (B) matter only among models that can do the task, and splitting (D) risks losing the cross-document reasoning the question needs.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "29",
+      "question": "When does working in a Claude project make more sense than an API integration?",
+      "options": [
+        "When the volume is high and predictable",
+        "When the output must be inserted into another system automatically",
+        "When the task must run on a schedule",
+        "When the work is exploratory and done by people rather than systems"
+      ],
+      "answers": "D",
+      "topic": "Product and Model Selection",
+      "explanation": "Projects suit human, iterative work where the context is curated and reused by people. High volume (A), programmatic handoff (B), and scheduling (C) all describe system integration, which is what the API is for.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "30",
+      "question": "A team asks whether to move to a larger model because outputs are inconsistent. What should be established first?",
+      "options": [
+        "Whether the inconsistency comes from the prompt and the inputs rather than the model",
+        "The cost difference between the two models",
+        "Whether the larger model is available in their region",
+        "How much faster the current model is"
+      ],
+      "answers": "A",
+      "topic": "Product and Model Selection",
+      "explanation": "Inconsistency usually traces to an underspecified task or variable inputs, which a larger model does not fix. Cost (B), availability (C), and speed (D) are inputs to a decision that has not yet been shown to be the right one.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "31",
+      "question": "What belongs in a project's knowledge rather than in individual prompts?",
+      "options": [
+        "The specific question being asked today",
+        "Material that every conversation in the project should be able to draw on",
+        "The preferred output length for one report",
+        "A one-off document being reviewed this week"
+      ],
+      "answers": "B",
+      "topic": "Configuration and Knowledge Management",
+      "explanation": "Project knowledge holds what recurs, so each conversation starts from the same base. Today's question (A), a single formatting preference (C), and a one-off document (D) all belong in the prompt that needs them.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "32",
+      "question": "A project's answers have grown vaguer as more documents were added. What is the likely cause?",
+      "options": [
+        "The model version changed",
+        "The project has too few documents to ground answers",
+        "The knowledge now holds overlapping or outdated material competing with the right sources",
+        "The prompts have become too specific"
+      ],
+      "answers": "C",
+      "topic": "Configuration and Knowledge Management",
+      "explanation": "Accumulated, unmaintained knowledge dilutes retrieval, and the symptom is exactly this drift toward vagueness. A version change (A) is unrelated to what was added, and both too few documents (B) and overly specific prompts (D) contradict the described trend.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "33",
+      "question": "How should project knowledge be treated as the underlying material changes?",
+      "options": [
+        "It updates automatically from the source systems",
+        "It only needs review when answers are visibly wrong",
+        "It should be rebuilt from scratch each quarter",
+        "It must be maintained deliberately, because it does not update itself"
+      ],
+      "answers": "D",
+      "topic": "Configuration and Knowledge Management",
+      "explanation": "Project knowledge is a curated copy and stays as accurate as the person maintaining it. It does not sync (A), waiting for visible errors (B) means acting after the damage, and periodic rebuilds (C) are wasteful and still unscheduled against real change.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "34",
+      "question": "A workflow that has run reliably for months begins returning off-target output. What is the first diagnostic step?",
+      "options": [
+        "Establish what changed: the inputs, the configuration, or the knowledge",
+        "Rewrite the prompt from scratch",
+        "Switch to a different model",
+        "Increase the amount of context supplied"
+      ],
+      "answers": "A",
+      "topic": "Troubleshooting and Optimization",
+      "explanation": "A working system that degrades points to a change, and identifying it is faster and safer than rebuilding. Rewriting (B), switching models (C), and adding context (D) all alter the system before the cause is known.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "35",
+      "question": "Output quality is acceptable but the process takes too long to be worth using. What should be examined first?",
+      "options": [
+        "Whether a faster model would meet the quality bar",
+        "Whether the slow part is the model or the human steps around it",
+        "Whether the prompt can be shortened",
+        "Whether the task should be abandoned"
+      ],
+      "answers": "B",
+      "topic": "Troubleshooting and Optimization",
+      "explanation": "Locating the actual delay comes before optimising anything, and in practice the surrounding steps often dominate. Changing the model (A) or the prompt (C) assumes the model is the bottleneck, and abandoning (D) discards a process that already produces acceptable output.",
+      "themes": {
+        "tasks": [
+          "practice-scenarios"
+        ]
+      }
+    },
+    {
+      "id": "36",
+      "question": "A colleague shares a Claude-drafted policy summary that reads well and cites three internal documents by name. What is the appropriate review step before it circulates to the whole department?",
+      "options": [
+        "Circulate it, since the named sources demonstrate grounding",
+        "Ask Claude to double-check its own work and circulate if it agrees",
+        "Confirm each named document exists and says what the summary claims",
+        "Add a disclaimer that the summary was AI-generated and circulate"
+      ],
+      "answers": "C",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "Named sources can be fabricated; verification against the actual documents is the diligence step. Self-checking (B) is not independent evidence, and a disclaimer (D) does not make content correct",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "37",
+      "question": "You need a first draft of a stakeholder update from a long project log. Which prompt is most likely to produce a usable draft on the first attempt?",
+      "options": [
+        "\"Summarize this project log.\"",
+        "\"Write something good about this project log for my boss.\"",
+        "\"Summarize this project log. Be detailed and thorough and professional.\"",
+        "\"You are writing a weekly update for non-technical executives. From the log, produce: status in one line, three progress items, two risks with owners, and next week's focus. Keep it under 200 words.\""
+      ],
+      "answers": "D",
+      "topic": "Prompting and Task Execution",
+      "explanation": "Role, audience, explicit structure, and length constraints are what turn a vague request into a usable draft. Intensifiers like \"detailed and thorough\" (C) add no structure",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "38",
+      "question": "A workflow drafts hundreds of routine appointment confirmations each day. Latency and cost dominate; the language is formulaic. Which choice fits?",
+      "options": [
+        "A fast, low-cost model, reserving a more capable one for exceptions",
+        "The most capable model, for consistency",
+        "Whichever model is newest",
+        "Alternate between models to spread cost"
+      ],
+      "answers": "A",
+      "topic": "Product and Model Selection",
+      "explanation": "Match the model tier to the work: fast and cheap for formulaic volume, capable for exceptions",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "39",
+      "question": "Your team's Project answers questions from a product manual. Users report confident answers about a feature that was removed last quarter. What is the most likely cause?",
+      "options": [
+        "The model needs retraining",
+        "The Project's knowledge still contains the outdated manual",
+        "Users are asking the questions wrong",
+        "The context window is too small"
+      ],
+      "answers": "B",
+      "topic": "Configuration and Knowledge Management",
+      "explanation": "Project knowledge is maintained by you; stale documents produce confidently outdated answers",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "40",
+      "question": "Legal asks you to analyze a spreadsheet of support tickets containing customer names and email addresses. Your organization prohibits sending personal data to external tools. What do you do?",
+      "options": [
+        "Upload it, since legal requested the analysis",
+        "Upload it and ask Claude to disregard the personal columns",
+        "Strip or pseudonymize the personal columns, then analyze what remains",
+        "Tell legal the analysis is not possible"
+      ],
+      "answers": "C",
+      "topic": "Governance, Risk, and Responsible Use",
+      "explanation": "Make the task compliant, then do it. A requester's seniority does not override policy, and instructing the model to ignore data does not un-send it",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "41",
+      "question": "Claude produces a five-paragraph answer when you needed three bullet points, twice in a row. What is the most effective adjustment?",
+      "options": [
+        "Ask again and hope for variation",
+        "Switch to a more capable model",
+        "Manually reformat each response",
+        "State the format explicitly, including the number of bullets and their maximum length"
+      ],
+      "answers": "D",
+      "topic": "Prompting and Task Execution",
+      "explanation": "Format failures are fixed by stating the format, not by re-rolling or upgrading the model",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "42",
+      "question": "Which of these is the strongest signal that a Claude-generated claim needs verification before use?",
+      "options": [
+        "The claim is a specific number, date, or citation that would matter if wrong",
+        "The answer is long",
+        "The answer was produced quickly",
+        "The answer uses technical vocabulary"
+      ],
+      "answers": "A",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "Specific, consequential details are the highest-risk surface for fabrication. Length, speed, and vocabulary carry no accuracy signal",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "43",
+      "question": "A manager wants to know whether Claude can \"replace our weekly reporting process.\" What is the most useful response?",
+      "options": [
+        "Yes, automation is what AI is for",
+        "A breakdown of which reporting steps Claude can draft or summarize, which need human judgment or system access, and what the review step would be",
+        "No, reporting requires human oversight",
+        "A recommendation to hire a consultant"
+      ],
+      "answers": "B",
+      "topic": "Workflow Integration and Solution Design",
+      "explanation": "The valued skill is a realistic division of labor with a review step, not a yes or a no",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "44",
+      "question": "You are configuring a Project that several colleagues will use for consistent client communications. What belongs in the Project instructions rather than in each individual prompt?",
+      "options": [
+        "The specific client's name for today's message",
+        "Today's date",
+        "The house tone, required disclaimers, and the standard structure of a client message",
+        "The colleague's personal writing preferences"
+      ],
+      "answers": "C",
+      "topic": "Configuration and Knowledge Management",
+      "explanation": "Durable, shared conventions belong in instructions; per-message specifics belong in the prompt",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "45",
+      "question": "A summary Claude produced omits a material caveat that appears in the source document. What does this failure mode illustrate?",
+      "options": [
+        "Hallucination through fabricated detail",
+        "A context window limit",
+        "A prompt injection attack",
+        "Omission, which requires reading the source rather than only reviewing the output"
+      ],
+      "answers": "D",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "Omission is as damaging as fabrication and is only visible if you read the source, not just the output",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "46",
+      "question": "Your prompt worked well last month and now returns weaker results after your team added twelve documents to the Project's knowledge. What is the first thing to investigate?",
+      "options": [
+        "Whether the new documents are diluting or contradicting the sources the answers should use",
+        "Whether the model changed",
+        "Whether colleagues are using different browsers",
+        "Whether the prompt should be longer"
+      ],
+      "answers": "A",
+      "topic": "Troubleshooting and Optimization",
+      "explanation": "Diagnose the change that coincided with the regression before rewriting anything",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "47",
+      "question": "For which task is a Project with persistent instructions and knowledge clearly better than a one-off chat?",
+      "options": [
+        "Asking for a synonym",
+        "A monthly report that follows the same structure and draws on the same reference documents",
+        "Checking a single fact",
+        "Rewriting one email"
+      ],
+      "answers": "B",
+      "topic": "Workflow Integration and Solution Design",
+      "explanation": "Repeated work with stable context and structure is exactly what Projects are for",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "48",
+      "question": "Which practice best reduces the risk of sharing an inaccurate Claude output with a customer?",
+      "options": [
+        "Reading the output for tone before sending",
+        "Sending it with a note that AI assisted",
+        "Verifying the claims that would cause harm if wrong, then having a second person review customer-facing material",
+        "Using the largest available model"
+      ],
+      "answers": "C",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "Verification of consequential claims plus human review for customer-facing material. Model size is not a control",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "49",
+      "question": "You want Claude to help redesign a slow approval process rather than just speed up its current steps. Which prompt direction fits that goal?",
+      "options": [
+        "\"Make our approval process faster.\"",
+        "\"Automate our approvals.\"",
+        "\"What do other companies do for approvals?\"",
+        "\"Here are the current approval steps and where delays occur. Propose two redesigns: one that keeps the current structure and one that reorders or removes steps, with the tradeoffs of each.\""
+      ],
+      "answers": "D",
+      "topic": "Workflow Integration and Solution Design",
+      "explanation": "Process redesign requires giving Claude the current steps, the pain points, and asking for alternatives with tradeoffs",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "50",
+      "question": "Which situation most clearly calls for escalating to a technical colleague rather than solving it yourself?",
+      "options": [
+        "A request to connect Claude directly to the company's internal order database through an integration",
+        "A prompt that needs better structure",
+        "An output with the wrong tone",
+        "A Project that needs its knowledge updated"
+      ],
+      "answers": "A",
+      "topic": "Governance, Risk, and Responsible Use",
+      "explanation": "System integrations belong to the Developer and Architect scope; recognizing that boundary is an Associate competency",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "51",
+      "question": "Claude returns a policy answer that matches your expectation exactly, with no citation. What does the match tell you?",
+      "options": [
+        "The answer is confirmed, since it agrees with your understanding",
+        "The answer is probably correct but should be reworded",
+        "Nothing about accuracy, because agreement with an expectation is not evidence",
+        "The model has read the policy document"
+      ],
+      "answers": "C",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "Agreement with what you already believed is the easiest error to miss, since nothing prompts a check. Neither confirmation (A), rewording (B), nor an assumption about retrieval (D) establishes that the claim is true",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "52",
+      "question": "A colleague asks Claude to check its own earlier answer, and it confirms the answer. How much weight does the confirmation carry?",
+      "options": [
+        "None on its own, because the check is not independent of the thing being checked",
+        "Substantial, because the model reviewed its own reasoning",
+        "Substantial if the confirmation is detailed",
+        "It depends on the model used"
+      ],
+      "answers": "A",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "Self-review is not an independent source and cannot establish correctness. Detail (C) and model choice (D) do not make a self-check independent",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "53",
+      "question": "A report drafted with Claude contains one figure you cannot verify from any available source. What is the appropriate handling before circulation?",
+      "options": [
+        "Circulate it with a general disclaimer about AI assistance",
+        "Keep the figure and mark it as an estimate",
+        "Ask Claude to provide a source and keep whatever it returns",
+        "Remove the figure and note that it could not be verified"
+      ],
+      "answers": "D",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "An unverifiable claim should not be presented as fact, and a labeled gap is honest. A blanket disclaimer (A) does not address the specific figure, an unfounded estimate (B) misrepresents it, and a citation produced on demand (C) needs the same verification",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "54",
+      "question": "Which of these is the strongest candidate to hand to Claude in a monthly close process?",
+      "options": [
+        "Approving the final journal entries",
+        "Drafting the variance commentary from figures that are already agreed",
+        "Deciding which variances require investigation",
+        "Signing off the reconciliation"
+      ],
+      "answers": "B",
+      "topic": "Workflow Integration and Solution Design",
+      "explanation": "Drafting from agreed inputs is bounded and checkable. Approval (A), sign-off (D), and the decision about what to investigate (C) all carry accountability",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "55",
+      "question": "A workflow produces good output but nobody uses it. What should be examined first?",
+      "options": [
+        "Whether the model should be upgraded",
+        "Whether the output arrives where the work actually happens, in a form people can act on",
+        "Whether the prompt is long enough",
+        "Whether more people need training"
+      ],
+      "answers": "B",
+      "topic": "Workflow Integration and Solution Design",
+      "explanation": "Adoption usually fails on fit with the existing process rather than on output quality. Model (A) and prompt length (C) address quality that is already acceptable, and training (D) treats a symptom",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "56",
+      "question": "A team wants to paste anonymised customer feedback into Claude for theme analysis. What remains a risk after names are removed?",
+      "options": [
+        "Nothing, since anonymisation removes the risk entirely",
+        "The model may store the text permanently",
+        "Theme analysis is unreliable on anonymised data",
+        "Free text can still identify people through specific details, so review before sending is still needed"
+      ],
+      "answers": "D",
+      "topic": "Governance, Risk, and Responsible Use",
+      "explanation": "Removing names does not remove identifying detail from free text, which is why a review step remains. Treating anonymisation as complete (A) is the error tested, and neither storage assumptions (B) nor reliability (C) is the governance issue here",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "57",
+      "question": "Who should decide whether a Claude-assisted output is fit to send to a customer?",
+      "options": [
+        "The person accountable for the customer relationship",
+        "Whoever wrote the prompt",
+        "The model, if asked to assess its own output",
+        "Nobody, if the workflow was approved in advance"
+      ],
+      "answers": "A",
+      "topic": "Governance, Risk, and Responsible Use",
+      "explanation": "Accountability for the outgoing communication decides the question. Prompt authorship (B) is incidental, self-assessment (C) is not independent, and prior approval of a workflow (D) does not review this instance",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "58",
+      "question": "A prompt works well until the input document is much longer than usual, when quality drops. What is the most likely explanation?",
+      "options": [
+        "The model became less capable",
+        "The prompt is too short",
+        "The relevant material is now competing with far more surrounding text",
+        "Longer documents always produce worse output"
+      ],
+      "answers": "C",
+      "topic": "Prompting and Task Execution",
+      "explanation": "Dilution across a much longer input is the usual cause of this pattern. The model has not changed (A), prompt length (B) is not the variable that changed, and length alone is not determinative (D)",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "59",
+      "question": "You want the same analysis applied to fifty documents with consistent output. What matters most?",
+      "options": [
+        "Using the largest model available",
+        "Processing the documents in one conversation",
+        "Reviewing only a sample of the outputs",
+        "Fixing the prompt and the required output structure, and applying both unchanged to every document"
+      ],
+      "answers": "D",
+      "topic": "Prompting and Task Execution",
+      "explanation": "Consistency across a set comes from holding the instruction and the output shape constant. Model size (A) does not create consistency, one long conversation (B) invites drift, and sampling (C) is a review policy rather than a design",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "60",
+      "question": "A task must return an answer within a second for an interactive interface, and the work is simple classification. What follows?",
+      "options": [
+        "Use the most capable model to be safe",
+        "Batch the requests",
+        "Use the smallest model that meets the accuracy requirement, since latency is the binding constraint",
+        "Increase the context supplied"
+      ],
+      "answers": "C",
+      "topic": "Product and Model Selection",
+      "explanation": "With a hard latency requirement and a simple task, the smallest sufficient model is the fit. The most capable model (A) spends latency for accuracy that is not needed, batching (B) breaks interactivity, and more context (D) adds cost and time",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "61",
+      "question": "What is the correct reading of a model's published benchmark score when choosing for a specific business task?",
+      "options": [
+        "It predicts performance on your task",
+        "It is a general signal that does not substitute for evaluating on your own task",
+        "It is irrelevant",
+        "It determines the price you should expect to pay"
+      ],
+      "answers": "B",
+      "topic": "Product and Model Selection",
+      "explanation": "Benchmarks indicate general capability and cannot stand in for measurement on the actual task. Treating them as predictive (A) or irrelevant (C) are both wrong, and they do not set price (D)",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "62",
+      "question": "Two teams keep separate copies of the same reference documents in their own projects. What is the main risk?",
+      "options": [
+        "The copies drift apart, and the two teams begin answering the same question differently",
+        "Higher storage cost",
+        "Slower responses",
+        "The model becomes confused between projects"
+      ],
+      "answers": "A",
+      "topic": "Configuration and Knowledge Management",
+      "explanation": "Duplicated knowledge diverges as each copy is maintained separately, producing inconsistent answers. Storage (B) and speed (C) are minor, and projects do not leak into one another (D)",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "63",
+      "question": "What is the right first step when setting up a project for a recurring task?",
+      "options": [
+        "Decide what the task needs to know every time, and add only that",
+        "Upload every document the team owns",
+        "Write the longest possible instruction",
+        "Add documents as questions come up, without review"
+      ],
+      "answers": "A",
+      "topic": "Configuration and Knowledge Management",
+      "explanation": "A deliberate, minimal base keeps retrieval sharp and is maintainable. Uploading everything (B) and accumulating without review (D) both dilute, and instruction length (C) is not the question",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "64",
+      "question": "A user reports that Claude gave a wrong answer, but you cannot reproduce it. What is the most useful next step?",
+      "options": [
+        "Assume the user made an error",
+        "Obtain the exact prompt, inputs, and configuration they used",
+        "Increase the model size for everyone",
+        "Add a warning to the interface"
+      ],
+      "answers": "B",
+      "topic": "Troubleshooting and Optimization",
+      "explanation": "Reproduction depends on the exact conditions, and gathering them is the only way to diagnose. Dismissing the report (A) discards the signal, and a model change (C) or a warning (D) acts before the cause is known",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "65",
+      "question": "Output quality varies between runs of an identical prompt on identical input. What does this indicate?",
+      "options": [
+        "The system is broken",
+        "The temperature must be zero for all tasks",
+        "Some variation is expected, and the task needs constraints tight enough that the variation does not matter",
+        "The input must be shortened"
+      ],
+      "answers": "C",
+      "topic": "Troubleshooting and Optimization",
+      "explanation": "Generation is not deterministic, so the design must tolerate variation within acceptable bounds. Treating it as breakage (A) misreads normal behavior, a universal temperature rule (B) is too blunt, and input length (D) is unrelated",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "66",
+      "question": "A summary cites a statistic that turns out to be correct. Does that validate the rest of the summary?",
+      "options": [
+        "Yes, one verified claim indicates the whole is reliable",
+        "Yes, if the statistic was the hardest claim",
+        "No, each material claim needs its own check",
+        "Only if the source was named"
+      ],
+      "answers": "C",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "Verification does not generalise from one claim to the others. Treating it as a proxy for the whole (A, B) is the error tested, and naming a source (D) does not verify the remaining claims",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "67",
+      "question": "Claude declines to answer part of a request and explains why. How should this be read?",
+      "options": [
+        "As information about a limit or a policy that is worth understanding before proceeding",
+        "As a failure that should be worked around",
+        "As a sign the prompt was too long",
+        "As a reason to switch models"
+      ],
+      "answers": "A",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "A refusal with a reason is a signal about the task, not an obstacle to route around. Working around it (B) ignores the reason, and neither prompt length (C) nor model choice (D) is indicated",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "68",
+      "question": "You need to know whether a long report supports a specific conclusion. What is the most reliable approach?",
+      "options": [
+        "Ask for a summary and read that",
+        "Ask whether the report supports the conclusion",
+        "Ask for a confidence score",
+        "Ask for the passages that bear on the conclusion, then read those passages yourself"
+      ],
+      "answers": "D",
+      "topic": "Output Evaluation and Validation",
+      "explanation": "Retrieving the evidence and reading it keeps the judgment with you. A summary (A) and a direct verdict (B) hand the judgment to the model, and a confidence score (C) is not evidence",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "69",
+      "question": "A manual process takes four hours and produces a document nobody reads. What should happen before automating it?",
+      "options": [
+        "Automate it, since four hours is significant",
+        "Establish whether the document is needed at all",
+        "Automate it and measure adoption afterwards",
+        "Split it across more people"
+      ],
+      "answers": "B",
+      "topic": "Workflow Integration and Solution Design",
+      "explanation": "Automating unnecessary work makes waste faster. Proceeding regardless (A, C) skips the question, and redistributing it (D) does not address whether it is needed",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "70",
+      "question": "Which sequencing is correct when introducing Claude to a recurring team process?",
+      "options": [
+        "Automate the whole process, then refine",
+        "Start with the step that is bounded and checkable, prove it, then extend",
+        "Start with the hardest step, since it has most value",
+        "Let each person adopt it however they prefer"
+      ],
+      "answers": "B",
+      "topic": "Workflow Integration and Solution Design",
+      "explanation": "A bounded first step produces evidence and trust cheaply. Full automation first (A) risks everything at once, the hardest step (C) is the least likely to succeed early, and uncoordinated adoption (D) produces drift",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "71",
+      "question": "A policy forbids sending customer data to external services. A colleague asks Claude to summarise a customer email. What applies?",
+      "options": [
+        "Nothing, because summarising is not sending",
+        "The policy only if the customer is named",
+        "Nothing, because the output stays internal",
+        "The policy, since the email is customer data"
+      ],
+      "answers": "D",
+      "topic": "Governance, Risk, and Responsible Use",
+      "explanation": "Submitting the content is the act the policy governs. Framing it as summarising (A) or by where the output goes (C) misreads the policy, and it is not limited to named individuals (B)",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "72",
+      "question": "What is the correct response to a request that a model output be presented as human-written to a customer?",
+      "options": [
+        "Decline to misrepresent it, and raise the disclosure question with whoever owns the relationship",
+        "Comply, since the customer cares about quality not provenance",
+        "Comply if the output was heavily edited",
+        "Comply and record the decision internally"
+      ],
+      "answers": "A",
+      "topic": "Governance, Risk, and Responsible Use",
+      "explanation": "Actively misrepresenting provenance is the issue, and it belongs to the person accountable for the relationship. Editing (C) and internal records (D) do not make the representation true, and quality (B) is not the point",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "73",
+      "question": "A prompt asks for a recommendation and gets a balanced discussion instead. What is the most likely cause?",
+      "options": [
+        "The model is incapable of recommending",
+        "The temperature is too high",
+        "The prompt did not state that a single recommendation with a reason was required",
+        "The input was too short"
+      ],
+      "answers": "C",
+      "topic": "Prompting and Task Execution",
+      "explanation": "Output shape follows the instruction, and no decision was requested. Incapability (A) is not the issue, and neither temperature (B) nor input length (D) determines whether a recommendation is given",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "74",
+      "question": "What is the most effective way to get output pitched at the right level for a specific audience?",
+      "options": [
+        "Ask for it to be clear",
+        "Ask for a shorter response",
+        "Ask for simpler words",
+        "Name the audience and what they already know"
+      ],
+      "answers": "D",
+      "topic": "Prompting and Task Execution",
+      "explanation": "Naming the reader and their prior knowledge is what calibrates level. Clarity (A), length (B), and vocabulary (C) are consequences rather than the instruction",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "75",
+      "question": "A colleague uses the largest model for every task including formatting. What should you point out?",
+      "options": [
+        "Nothing, capability is never wasted",
+        "That the largest model is less accurate on simple tasks",
+        "That matching the model to the work saves cost without losing anything on simple tasks",
+        "That formatting should be done manually"
+      ],
+      "answers": "C",
+      "topic": "Product and Model Selection",
+      "explanation": "Fit-to-task is the principle, and simple work does not benefit from extra capability. Capability is not free (A), larger models are not less accurate on simple tasks (B), and manual work (D) is not the alternative",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "76",
+      "question": "When does the choice of interface matter more than the choice of model?",
+      "options": [
+        "Never, the model determines the outcome",
+        "When the obstacle is how people supply context and act on output, not the quality of the answer",
+        "Only for very large teams",
+        "Only when cost is constrained"
+      ],
+      "answers": "B",
+      "topic": "Product and Model Selection",
+      "explanation": "Where adoption or context-supply is the bottleneck, interface dominates. Treating the model as decisive (A) misses that, and neither team size (C) nor cost (D) defines the case",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "77",
+      "question": "What is the risk of adding a document to project knowledge without removing the version it replaces?",
+      "options": [
+        "Both versions can be drawn on, producing answers that mix current and superseded material",
+        "Storage cost",
+        "Slower responses",
+        "The project will refuse to answer"
+      ],
+      "answers": "A",
+      "topic": "Configuration and Knowledge Management",
+      "explanation": "Superseded material remains retrievable and contradicts the current version. Storage (B) and speed (C) are minor, and the project does not refuse (D)",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "78",
+      "question": "Which is the better test of whether something belongs in project knowledge?",
+      "options": [
+        "Whether every conversation in the project would benefit from it",
+        "Whether it is long enough to be worth uploading",
+        "Whether it was recently created",
+        "Whether it is confidential"
+      ],
+      "answers": "A",
+      "topic": "Configuration and Knowledge Management",
+      "explanation": "Recurrence across conversations is what distinguishes shared knowledge from prompt content. Length (B), recency (C), and sensitivity (D) are unrelated to that test",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "79",
+      "question": "A previously reliable prompt now returns shorter answers than before. What is worth checking first?",
+      "options": [
+        "Whether the model is deprecated",
+        "Whether the input or the instructions changed, including anything added to the project",
+        "Whether the network is slow",
+        "Whether the account has hit a limit"
+      ],
+      "answers": "B",
+      "topic": "Troubleshooting and Optimization",
+      "explanation": "A behavioral change points to a change in inputs or configuration. Deprecation (A), network (C), and limits (D) produce errors rather than shorter answers",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    },
+    {
+      "id": "80",
+      "question": "Someone reports that Claude is wrong about a fact that it stated correctly last week. What is the most useful first question?",
+      "options": [
+        "Which model did you use",
+        "How long was the conversation",
+        "What exactly did you ask, and what did it reply",
+        "Have you tried again"
+      ],
+      "answers": "C",
+      "topic": "Troubleshooting and Optimization",
+      "explanation": "The exact exchange is what makes the claim examinable. Model (A), length (B), and retrying (D) may matter later but none of them establishes what happened",
+      "themes": {
+        "tasks": [
+          "mock-exam"
+        ]
+      }
+    }
+  ]
+}
