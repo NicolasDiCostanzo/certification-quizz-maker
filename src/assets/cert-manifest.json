@@ -38,5 +38,27 @@
       }
     },
     "questionCount": 716
+  },
+  {
+    "file": "CCA-F questions.json",
+    "exam": {
+      "name": "Claude Certified Architect - Foundations",
+      "code": "CCA-F",
+      "totalQuestions": 60,
+      "timeLimitMinutes": 120,
+      "passingScore": {
+        "passingScore": 720,
+        "scale": 1000
+      },
+      "weights": {
+        "Agentic Architecture & Orchestration": 27,
+        "Tool Design & MCP Integration": 18,
+        "Claude Code Configuration & Workflows": 20,
+        "Prompt Engineering & Structured Output": 20,
+        "Context Management & Reliability": 15
+      },
+      "instructions": "Multiple choice, 4 options per question (1 correct, 3 distractors). Unanswered questions are scored as incorrect. No penalty for guessing. Result: pass/fail designation."
+    },
+    "questionCount": 157
   }
 ]
