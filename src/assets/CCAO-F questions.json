@@ -21,8 +21,44 @@
   },
   "themes": {
     "tasks": [
-      "mock-exam",
-      "practice-scenarios"
+      "appropriate-use",
+      "audience-adaptation",
+      "compliance-policy",
+      "context-management",
+      "data-privacy-sensitivity",
+      "effective-prompt-design",
+      "fact-checking-verification",
+      "feature-selection",
+      "feedback-iteration",
+      "hallucination-bias-detection",
+      "human-in-the-loop-review",
+      "model-tradeoffs",
+      "project-instructions",
+      "project-knowledge",
+      "prompt-diagnosis",
+      "requirements-analysis",
+      "task-decomposition",
+      "task-strategy-adaptation",
+      "workflow-integration",
+      "workflow-optimization"
+    ],
+    "tools": [
+      "claude-app",
+      "messages-api",
+      "models",
+      "projects"
+    ],
+    "questionTypes": [
+      "architecture-decision",
+      "behavior-identification",
+      "configuration",
+      "feature-selection",
+      "most-cost-effective",
+      "most-performant",
+      "most-secure",
+      "output-evaluation",
+      "responsibility-identification",
+      "troubleshooting"
     ]
   },
   "questions": [
@@ -40,7 +76,14 @@
       "explanation": "Specific-looking citations can be fabricated, and material bound for legal review requires verification against the source document. A specific citation is not evidence of accuracy (B), self-reported confidence is not a reliability signal (C), and rewording does nothing about correctness (D).",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "fact-checking-verification"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "output-evaluation",
+          "architecture-decision"
         ]
       }
     },
@@ -58,7 +101,13 @@
       "explanation": "Unsourced quantitative claims are a classic hallucination surface; the professional move is verification against an authoritative source, keeping what survives. Plausibility is not accuracy (A), deleting everything discards genuinely verifiable material (C), and consistency across regenerations does not establish truth (D).",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "hallucination-bias-detection"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -76,7 +125,13 @@
       "explanation": "Structure, explicit constraints, and an example of the target format are the most effective fixes for a formatting and tone miss. Re-rolling (A) leaves the deficiency in place, a larger model does not learn unstated requirements (B), and over-fragmentation destroys coherence (D).",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "effective-prompt-design"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -94,7 +149,13 @@
       "explanation": "Decomposition turns a vague compound request into a sequence of verifiable steps, each with a concrete output. Vague intensifiers (A) do not add structure, repetition (B) multiplies the vagueness, and more input without more structure (C) usually worsens focus.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "task-decomposition"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -112,7 +173,14 @@
       "explanation": "**B** aligns model choice with task requirements in both directions, which is the tested judgment. **A** wastes cost and latency budget on routine work; **C** underserves exactly the cases that need depth; **D** matches nothing to anything.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "model-tradeoffs"
+        ],
+        "tools": [
+          "models"
+        ],
+        "questionTypes": [
+          "most-cost-effective",
+          "most-performant"
         ]
       }
     },
@@ -130,7 +198,13 @@
       "explanation": "Durable, repeated workflows belong in a Project where instructions and knowledge persist and improve. Re-pasting monthly (B) rebuilds context by hand every time, full autonomy over financial figures without review (C) ignores appropriate-use judgment, and spellchecking (D) forfeits the actual value.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "workflow-integration"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -148,7 +222,13 @@
       "explanation": "The Associate's core skill is translating a business ask into a realistic division of labor: where Claude adds value, where humans stay, and what the limits are. Unqualified yes (A) and unqualified no (C) both skip the analysis, and support (D) does not know your process.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "requirements-analysis"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -166,7 +246,14 @@
       "explanation": "Project knowledge is maintained, not self-updating; stale sources are a quality defect the configurer owns. Claude does not fetch your internal documents on its own (A), keeping both versions invites contradictory answers (B), and pushing the burden onto every user (D) is not maintenance.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "project-knowledge"
+        ],
+        "tools": [
+          "projects"
+        ],
+        "questionTypes": [
+          "output-evaluation",
+          "behavior-identification"
         ]
       }
     },
@@ -184,7 +271,14 @@
       "explanation": "Make the task compliant, then do it: the identifiers are not needed for pattern analysis. Purpose does not override policy (A), an instruction to ignore data is not a control because the data still left the boundary (B), and abandoning the work (C) is unnecessary when anonymization enables it.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "data-privacy-sensitivity"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "most-secure",
+          "architecture-decision"
         ]
       }
     },
@@ -202,7 +296,13 @@
       "explanation": "The change that coincided with the regression is the first suspect: new knowledge can crowd out or conflict with the relevant sources. Rewriting the prompt (B), upgrading the model (C), or rebuilding everything (D) all treat symptoms before diagnosing the actual change.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "prompt-diagnosis"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -220,7 +320,13 @@
       "explanation": "A declared gap is information: it tells the reader where the analysis is thin. Deleting it (A) hides a limitation, an unmarked estimate (C) manufactures data, and pressing the model to fill the cell (D) invites fabrication rather than retrieval.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "hallucination-bias-detection"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -238,7 +344,14 @@
       "explanation": "Disagreement between runs shows the figure is not grounded in a reliable source, so neither is established. Preferring the larger number (A) is arbitrary, averaging (B) treats two unverified numbers as measurements, and context length (D) is unrelated to whether the figure is true.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "fact-checking-verification"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "output-evaluation",
+          "behavior-identification"
         ]
       }
     },
@@ -256,7 +369,13 @@
       "explanation": "Extraction fails by omission more often than by error, and a tidy output gives no signal about completeness. Formatting (A) is cosmetic, self-report (B) is not evidence, and temperature (C) changes phrasing rather than recall.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "hallucination-bias-detection"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "output-evaluation"
         ]
       }
     },
@@ -274,7 +393,13 @@
       "explanation": "The disagreement is resolvable by returning to the passage in question, which settles it on evidence. Deferring either way (B, C) decides without checking, and canvassing opinion (D) substitutes plausibility for the source.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "fact-checking-verification"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "output-evaluation"
         ]
       }
     },
@@ -292,7 +417,13 @@
       "explanation": "Unsourced reasoning is a starting point, useful for structuring an enquiry but not for deciding. Internal consistency is not accuracy (A), the reasoning may still be useful (C), and citations produced on demand need the same verification as the claim (D).",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "fact-checking-verification"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "output-evaluation"
         ]
       }
     },
@@ -310,7 +441,14 @@
       "explanation": "A stable, maintained definition of the deliverable is what keeps output consistent as people and inputs change. Model size (A) does not fix an undefined task, higher frequency (B) multiplies an unclear output, and per-person prompts (D) guarantee drift.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "workflow-integration"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "feature-selection",
+          "architecture-decision"
         ]
       }
     },
@@ -328,7 +466,13 @@
       "explanation": "The escalation decision carries accountability and depends on relationships and context the model does not hold. Drafting (A), reformatting (B), and extraction (C) are all bounded tasks with checkable output.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "requirements-analysis"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -346,7 +490,13 @@
       "explanation": "One person succeeding with the same prompt usually means they are contributing unstated context, such as knowing which file to attach or what good looks like. A model change (B) does not supply missing context, the task clearly works (C), and input length (D) is a symptom rather than a cause.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "workflow-integration"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -364,7 +514,13 @@
       "explanation": "Approval earns its cost where a mistake is expensive or hard to undo. Blanket approval (A) and blanket removal (D) both ignore the specific risk, and a time-based rule (C) removes the check regardless of what the action does.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "human-in-the-loop-review"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -382,7 +538,15 @@
       "explanation": "Working on anonymised data and reattaching identifiers afterwards achieves the task without exposing the personal data. Assumptions about storage (A) are not a control, an instruction to the model (B) is not a safeguard, and deleting afterwards (D) does not undo the disclosure.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "data-privacy-sensitivity"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "behavior-identification",
+          "architecture-decision",
+          "most-secure"
         ]
       }
     },
@@ -400,7 +564,14 @@
       "explanation": "Prompt instructions influence behavior and are not guarantees, so anything that must hold is enforced in the surrounding system. Placement (B) and repetition (C) change the strength of the steer, not its nature, and treating it as enforcement (A) is the error the question tests.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "compliance-policy"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "behavior-identification",
+          "most-secure"
         ]
       }
     },
@@ -418,7 +589,14 @@
       "explanation": "Accountability sits with the person who files, and the tool used does not transfer it. Policy compliance (B), prompt content (C), and version records (D) are all reasonable practices that do not replace responsibility for the document.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "compliance-policy"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "behavior-identification",
+          "most-secure"
         ]
       }
     },
@@ -436,7 +614,13 @@
       "explanation": "Disclosure matters where provenance would change how a reader weighs the work. A universal rule (A) makes the signal meaningless, and confining it to external publication (C) or written policy (D) misses internal cases where it genuinely matters.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "appropriate-use"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "responsibility-identification"
         ]
       }
     },
@@ -454,7 +638,13 @@
       "explanation": "Concrete limits are checkable and reproducible in a way that adjectives are not. “Be concise” (A) is interpreted differently each run, summarising afterwards (B) adds a step and a second failure point, and a smaller model (D) trades accuracy for brevity.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "effective-prompt-design"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -472,7 +662,13 @@
       "explanation": "An example specifies the target unambiguously and is the strongest available signal for format. Prose description (A) leaves room for interpretation, a vague request (B) leaves more, and generating twice (C) does not define the target at all.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "effective-prompt-design"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -490,7 +686,13 @@
       "explanation": "Splitting the work reduces how much must hold at once and gives a checkpoint between stages. Emphasis (B), ordering (C), and a meta-rule (D) all leave the same load in a single step.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "task-decomposition"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -508,7 +710,13 @@
       "explanation": "Purpose and criteria tell the model what to look for, which is what a review depends on. Thoroughness (A) is unmeasurable, extra documents (C) add noise without criteria, and formatting (D) shapes presentation rather than substance.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "effective-prompt-design"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -526,7 +734,13 @@
       "explanation": "The binding constraint is reliable comprehension across a long document, which is what the choice must satisfy. Cost (A) and speed (B) matter only among models that can do the task, and splitting (D) risks losing the cross-document reasoning the question needs.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "context-management"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -544,7 +758,14 @@
       "explanation": "Projects suit human, iterative work where the context is curated and reused by people. High volume (A), programmatic handoff (B), and scheduling (C) all describe system integration, which is what the API is for.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "feature-selection"
+        ],
+        "tools": [
+          "projects",
+          "messages-api"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -562,7 +783,13 @@
       "explanation": "Inconsistency usually traces to an underspecified task or variable inputs, which a larger model does not fix. Cost (B), availability (C), and speed (D) are inputs to a decision that has not yet been shown to be the right one.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "model-tradeoffs"
+        ],
+        "tools": [
+          "models"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -580,7 +807,13 @@
       "explanation": "Project knowledge holds what recurs, so each conversation starts from the same base. Today's question (A), a single formatting preference (C), and a one-off document (D) all belong in the prompt that needs them.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "project-knowledge"
+        ],
+        "tools": [
+          "projects"
+        ],
+        "questionTypes": [
+          "configuration"
         ]
       }
     },
@@ -598,7 +831,13 @@
       "explanation": "Accumulated, unmaintained knowledge dilutes retrieval, and the symptom is exactly this drift toward vagueness. A version change (A) is unrelated to what was added, and both too few documents (B) and overly specific prompts (D) contradict the described trend.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "project-knowledge"
+        ],
+        "tools": [
+          "projects"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -616,7 +855,13 @@
       "explanation": "Project knowledge is a curated copy and stays as accurate as the person maintaining it. It does not sync (A), waiting for visible errors (B) means acting after the damage, and periodic rebuilds (C) are wasteful and still unscheduled against real change.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "project-knowledge"
+        ],
+        "tools": [
+          "projects"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -634,7 +879,13 @@
       "explanation": "A working system that degrades points to a change, and identifying it is faster and safer than rebuilding. Rewriting (B), switching models (C), and adding context (D) all alter the system before the cause is known.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "prompt-diagnosis"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -652,7 +903,13 @@
       "explanation": "Locating the actual delay comes before optimising anything, and in practice the surrounding steps often dominate. Changing the model (A) or the prompt (C) assumes the model is the bottleneck, and abandoning (D) discards a process that already produces acceptable output.",
       "themes": {
         "tasks": [
-          "practice-scenarios"
+          "workflow-optimization"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "most-performant"
         ]
       }
     },
@@ -670,7 +927,13 @@
       "explanation": "Named sources can be fabricated; verification against the actual documents is the diligence step. Self-checking (B) is not independent evidence, and a disclaimer (D) does not make content correct",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "fact-checking-verification"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "output-evaluation"
         ]
       }
     },
@@ -688,7 +951,13 @@
       "explanation": "Role, audience, explicit structure, and length constraints are what turn a vague request into a usable draft. Intensifiers like \"detailed and thorough\" (C) add no structure",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "effective-prompt-design"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -706,7 +975,15 @@
       "explanation": "Match the model tier to the work: fast and cheap for formulaic volume, capable for exceptions",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "model-tradeoffs"
+        ],
+        "tools": [
+          "models"
+        ],
+        "questionTypes": [
+          "most-cost-effective",
+          "most-performant",
+          "feature-selection"
         ]
       }
     },
@@ -724,7 +1001,13 @@
       "explanation": "Project knowledge is maintained by you; stale documents produce confidently outdated answers",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "project-knowledge"
+        ],
+        "tools": [
+          "projects"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -742,7 +1025,13 @@
       "explanation": "Make the task compliant, then do it. A requester's seniority does not override policy, and instructing the model to ignore data does not un-send it",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "data-privacy-sensitivity"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "most-secure"
         ]
       }
     },
@@ -760,7 +1049,13 @@
       "explanation": "Format failures are fixed by stating the format, not by re-rolling or upgrading the model",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "effective-prompt-design"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -778,7 +1073,15 @@
       "explanation": "Specific, consequential details are the highest-risk surface for fabrication. Length, speed, and vocabulary carry no accuracy signal",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "hallucination-bias-detection"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "output-evaluation",
+          "feature-selection",
+          "behavior-identification"
         ]
       }
     },
@@ -796,7 +1099,13 @@
       "explanation": "The valued skill is a realistic division of labor with a review step, not a yes or a no",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "requirements-analysis"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -814,7 +1123,13 @@
       "explanation": "Durable, shared conventions belong in instructions; per-message specifics belong in the prompt",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "project-instructions"
+        ],
+        "tools": [
+          "projects"
+        ],
+        "questionTypes": [
+          "configuration"
         ]
       }
     },
@@ -832,7 +1147,14 @@
       "explanation": "Omission is as damaging as fabrication and is only visible if you read the source, not just the output",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "hallucination-bias-detection"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "troubleshooting",
+          "behavior-identification"
         ]
       }
     },
@@ -850,7 +1172,13 @@
       "explanation": "Diagnose the change that coincided with the regression before rewriting anything",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "prompt-diagnosis"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -868,7 +1196,13 @@
       "explanation": "Repeated work with stable context and structure is exactly what Projects are for",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "workflow-integration"
+        ],
+        "tools": [
+          "projects"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -886,7 +1220,13 @@
       "explanation": "Verification of consequential claims plus human review for customer-facing material. Model size is not a control",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "human-in-the-loop-review"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -904,7 +1244,13 @@
       "explanation": "Process redesign requires giving Claude the current steps, the pain points, and asking for alternatives with tradeoffs",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "requirements-analysis"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -922,7 +1268,13 @@
       "explanation": "System integrations belong to the Developer and Architect scope; recognizing that boundary is an Associate competency",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "appropriate-use"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -940,7 +1292,14 @@
       "explanation": "Agreement with what you already believed is the easiest error to miss, since nothing prompts a check. Neither confirmation (A), rewording (B), nor an assumption about retrieval (D) establishes that the claim is true",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "hallucination-bias-detection"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "output-evaluation",
+          "behavior-identification"
         ]
       }
     },
@@ -958,7 +1317,13 @@
       "explanation": "Self-review is not an independent source and cannot establish correctness. Detail (C) and model choice (D) do not make a self-check independent",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "fact-checking-verification"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "output-evaluation"
         ]
       }
     },
@@ -976,7 +1341,14 @@
       "explanation": "An unverifiable claim should not be presented as fact, and a labeled gap is honest. A blanket disclaimer (A) does not address the specific figure, an unfounded estimate (B) misrepresents it, and a citation produced on demand (C) needs the same verification",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "fact-checking-verification"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "output-evaluation",
+          "architecture-decision"
         ]
       }
     },
@@ -994,7 +1366,13 @@
       "explanation": "Drafting from agreed inputs is bounded and checkable. Approval (A), sign-off (D), and the decision about what to investigate (C) all carry accountability",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "workflow-integration"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -1012,7 +1390,13 @@
       "explanation": "Adoption usually fails on fit with the existing process rather than on output quality. Model (A) and prompt length (C) address quality that is already acceptable, and training (D) treats a symptom",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "workflow-integration"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -1030,7 +1414,13 @@
       "explanation": "Removing names does not remove identifying detail from free text, which is why a review step remains. Treating anonymisation as complete (A) is the error tested, and neither storage assumptions (B) nor reliability (C) is the governance issue here",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "data-privacy-sensitivity"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "most-secure"
         ]
       }
     },
@@ -1048,7 +1438,14 @@
       "explanation": "Accountability for the outgoing communication decides the question. Prompt authorship (B) is incidental, self-assessment (C) is not independent, and prior approval of a workflow (D) does not review this instance",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "appropriate-use"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "output-evaluation",
+          "responsibility-identification"
         ]
       }
     },
@@ -1066,7 +1463,13 @@
       "explanation": "Dilution across a much longer input is the usual cause of this pattern. The model has not changed (A), prompt length (B) is not the variable that changed, and length alone is not determinative (D)",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "context-management"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -1084,7 +1487,13 @@
       "explanation": "Consistency across a set comes from holding the instruction and the output shape constant. Model size (A) does not create consistency, one long conversation (B) invites drift, and sampling (C) is a review policy rather than a design",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "task-strategy-adaptation"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -1102,7 +1511,14 @@
       "explanation": "With a hard latency requirement and a simple task, the smallest sufficient model is the fit. The most capable model (A) spends latency for accuracy that is not needed, batching (B) breaks interactivity, and more context (D) adds cost and time",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "model-tradeoffs"
+        ],
+        "tools": [
+          "models"
+        ],
+        "questionTypes": [
+          "most-performant",
+          "behavior-identification"
         ]
       }
     },
@@ -1120,7 +1536,13 @@
       "explanation": "Benchmarks indicate general capability and cannot stand in for measurement on the actual task. Treating them as predictive (A) or irrelevant (C) are both wrong, and they do not set price (D)",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "model-tradeoffs"
+        ],
+        "tools": [
+          "models"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -1138,7 +1560,13 @@
       "explanation": "Duplicated knowledge diverges as each copy is maintained separately, producing inconsistent answers. Storage (B) and speed (C) are minor, and projects do not leak into one another (D)",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "project-knowledge"
+        ],
+        "tools": [
+          "projects"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -1156,7 +1584,13 @@
       "explanation": "A deliberate, minimal base keeps retrieval sharp and is maintainable. Uploading everything (B) and accumulating without review (D) both dilute, and instruction length (C) is not the question",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "project-knowledge"
+        ],
+        "tools": [
+          "projects"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -1174,7 +1608,13 @@
       "explanation": "Reproduction depends on the exact conditions, and gathering them is the only way to diagnose. Dismissing the report (A) discards the signal, and a model change (C) or a warning (D) acts before the cause is known",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "feedback-iteration"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -1192,7 +1632,13 @@
       "explanation": "Generation is not deterministic, so the design must tolerate variation within acceptable bounds. Treating it as breakage (A) misreads normal behavior, a universal temperature rule (B) is too blunt, and input length (D) is unrelated",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "feedback-iteration"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -1210,7 +1656,13 @@
       "explanation": "Verification does not generalise from one claim to the others. Treating it as a proxy for the whole (A, B) is the error tested, and naming a source (D) does not verify the remaining claims",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "fact-checking-verification"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "output-evaluation"
         ]
       }
     },
@@ -1228,7 +1680,13 @@
       "explanation": "A refusal with a reason is a signal about the task, not an obstacle to route around. Working around it (B) ignores the reason, and neither prompt length (C) nor model choice (D) is indicated",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "appropriate-use"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -1246,7 +1704,13 @@
       "explanation": "Retrieving the evidence and reading it keeps the judgment with you. A summary (A) and a direct verdict (B) hand the judgment to the model, and a confidence score (C) is not evidence",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "fact-checking-verification"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "output-evaluation"
         ]
       }
     },
@@ -1264,7 +1728,13 @@
       "explanation": "Automating unnecessary work makes waste faster. Proceeding regardless (A, C) skips the question, and redistributing it (D) does not address whether it is needed",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "requirements-analysis"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -1282,7 +1752,13 @@
       "explanation": "A bounded first step produces evidence and trust cheaply. Full automation first (A) risks everything at once, the hardest step (C) is the least likely to succeed early, and uncoordinated adoption (D) produces drift",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "workflow-integration"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -1300,7 +1776,13 @@
       "explanation": "Submitting the content is the act the policy governs. Framing it as summarising (A) or by where the output goes (C) misreads the policy, and it is not limited to named individuals (B)",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "compliance-policy"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "most-secure"
         ]
       }
     },
@@ -1318,7 +1800,13 @@
       "explanation": "Actively misrepresenting provenance is the issue, and it belongs to the person accountable for the relationship. Editing (C) and internal records (D) do not make the representation true, and quality (B) is not the point",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "appropriate-use"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -1336,7 +1824,13 @@
       "explanation": "Output shape follows the instruction, and no decision was requested. Incapability (A) is not the issue, and neither temperature (B) nor input length (D) determines whether a recommendation is given",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "effective-prompt-design"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -1354,7 +1848,13 @@
       "explanation": "Naming the reader and their prior knowledge is what calibrates level. Clarity (A), length (B), and vocabulary (C) are consequences rather than the instruction",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "audience-adaptation"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -1372,7 +1872,13 @@
       "explanation": "Fit-to-task is the principle, and simple work does not benefit from extra capability. Capability is not free (A), larger models are not less accurate on simple tasks (B), and manual work (D) is not the alternative",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "model-tradeoffs"
+        ],
+        "tools": [
+          "models"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
         ]
       }
     },
@@ -1390,7 +1896,13 @@
       "explanation": "Where adoption or context-supply is the bottleneck, interface dominates. Treating the model as decisive (A) misses that, and neither team size (C) nor cost (D) defines the case",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "feature-selection"
+        ],
+        "tools": [
+          "models"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -1408,7 +1920,13 @@
       "explanation": "Superseded material remains retrievable and contradicts the current version. Storage (B) and speed (C) are minor, and the project does not refuse (D)",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "project-knowledge"
+        ],
+        "tools": [
+          "projects"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -1426,7 +1944,13 @@
       "explanation": "Recurrence across conversations is what distinguishes shared knowledge from prompt content. Length (B), recency (C), and sensitivity (D) are unrelated to that test",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "project-knowledge"
+        ],
+        "tools": [
+          "projects"
+        ],
+        "questionTypes": [
+          "configuration"
         ]
       }
     },
@@ -1444,7 +1968,13 @@
       "explanation": "A behavioral change points to a change in inputs or configuration. Deprecation (A), network (C), and limits (D) produce errors rather than shorter answers",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "prompt-diagnosis"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -1462,7 +1992,14 @@
       "explanation": "The exact exchange is what makes the claim examinable. Model (A), length (B), and retrying (D) may matter later but none of them establishes what happened",
       "themes": {
         "tasks": [
-          "mock-exam"
+          "feedback-iteration"
+        ],
+        "tools": [
+          "claude-app"
+        ],
+        "questionTypes": [
+          "troubleshooting",
+          "output-evaluation"
         ]
       }
     }

@@ -22,10 +22,48 @@
   },
   "themes": {
     "tasks": [
-      "practice-questions",
-      "mock-exam-1",
-      "mock-exam-2",
-      "mock-exam-3"
+      "agent-architecture",
+      "agent-construction",
+      "agent-patterns",
+      "agentic-customization",
+      "ai-application-security",
+      "api-mechanics",
+      "application-design",
+      "claude-code-core",
+      "configuration-management",
+      "context-engineering",
+      "cost-token-management",
+      "eval-testing-debugging",
+      "guardrails-safe-deployment",
+      "mcp-server-development",
+      "model-selection-tradeoffs",
+      "output-handling",
+      "prompt-engineering",
+      "software-engineering-foundations",
+      "tool-implementation"
+    ],
+    "tools": [
+      "claude-code",
+      "evals",
+      "mcp",
+      "message-batches",
+      "messages-api",
+      "models",
+      "prompt-caching",
+      "streaming",
+      "structured-outputs",
+      "tool-use"
+    ],
+    "questionTypes": [
+      "architecture-decision",
+      "behavior-identification",
+      "configuration",
+      "feature-selection",
+      "most-cost-effective",
+      "most-performant",
+      "most-secure",
+      "output-evaluation",
+      "troubleshooting"
     ]
   },
   "questions": [
@@ -43,7 +81,16 @@
       "explanation": "A stable prefix plus caching lets repeated content be reused, cutting both time-to-first-token and per-request cost without losing context. Truncation (A) discards required policy, relocating text (C) changes nothing about reuse, and splitting calls (D) adds overhead.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "api-mechanics"
+        ],
+        "tools": [
+          "prompt-caching",
+          "messages-api"
+        ],
+        "questionTypes": [
+          "most-cost-effective",
+          "most-performant",
+          "feature-selection"
         ]
       }
     },
@@ -61,7 +108,16 @@
       "explanation": "Latency-tolerant bulk work is exactly what the Batches API is for: 50% of the cost, results within a 24-hour window, correlated by custom_id. Parallel synchronous calls (A) pay full price for speed nobody needs, max_tokens (B) does not change per-token pricing, and a single request (D) exceeds any context window.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "api-mechanics"
+        ],
+        "tools": [
+          "message-batches",
+          "messages-api"
+        ],
+        "questionTypes": [
+          "most-cost-effective",
+          "feature-selection",
+          "architecture-decision"
         ]
       }
     },
@@ -79,7 +135,13 @@
       "explanation": "Schema-enforced output plus a validation-retry loop treats model output as untrusted input and gives the model the information to correct itself. Louder instructions (A) reduce but do not eliminate failures, silent skipping (B) hides data loss, and temperature (C) does not guarantee syntax.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "output-handling"
+        ],
+        "tools": [
+          "structured-outputs"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -97,7 +159,13 @@
       "explanation": "When the sequence is fixed, orchestrate it in code and use the model where the model adds value. Autonomy buys nothing on a known path and adds nondeterminism (B), skipping validation is a defect rather than a feature (C), and supervision hierarchies (D) are for problems that need delegation, not four fixed steps.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "agent-architecture"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -115,7 +183,14 @@
       "explanation": "That is the agentic loop: \"tool_use\" means the model is waiting for a tool result before it can continue. Ending the turn (A) abandons the model mid-task, re-rolling (C) re-asks the same question while ignoring the request, and max_tokens (D) is unrelated to tool dispatch.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "agent-construction"
+        ],
+        "tools": [
+          "tool-use",
+          "messages-api"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -133,7 +208,13 @@
       "explanation": "Version pinning makes model behavior a controlled dependency; upgrades then pass through evaluation like any other change. Prompting for old behavior (A) is not a contract, failover (B) trades one behavior change for another, and empty responses (D) institutionalize the failure.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "configuration-management"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "configuration"
         ]
       }
     },
@@ -151,7 +232,13 @@
       "explanation": "Drift and bloat are managed by context hygiene: prune, compact, and isolate. A bigger window (A) delays the same failure while raising cost, repetition (B) accelerates the bloat, and asking the model to ignore confusion (C) is not a mechanism.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "context-engineering"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -169,7 +256,14 @@
       "explanation": "Injection defense is structural: separate untrusted content from trusted instructions and deny injected text access to consequential capabilities through least privilege and guardrails. Polite instructions (B) are not enforcement, model size (C) does not remove the attack surface, and keyword scanning (D) is trivially evaded.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "ai-application-security"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "most-secure",
+          "behavior-identification"
         ]
       }
     },
@@ -187,7 +281,13 @@
       "explanation": "Reusable, independently maintained, model-facing capabilities are the MCP server's exact job. Copied tools (A) drift apart, pasted data (C) is stale and wastes context, and a Skill (D) carries instructions, not a live connection.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "mcp-server-development"
+        ],
+        "tools": [
+          "mcp"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -205,7 +305,14 @@
       "explanation": "The traces localize the fault: the model is correct given its inputs, and the inputs are wrong. That is an integration-layer defect. Model upgrades (A) and prompt exhortations (B) cannot fix inputs, and blaming users (D) ignores the evidence.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "eval-testing-debugging"
+        ],
+        "tools": [
+          "evals"
+        ],
+        "questionTypes": [
+          "troubleshooting",
+          "output-evaluation"
         ]
       }
     },
@@ -223,7 +330,15 @@
       "explanation": "A large, unchanging prefix is exactly what prompt caching exists for, and it cuts both cost and time to first token without changing behavior. Trimming instructions (A) sacrifices capability, a smaller model (B) trades quality for price, and batching (C) breaks a per-request service.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "api-mechanics"
+        ],
+        "tools": [
+          "prompt-caching",
+          "messages-api"
+        ],
+        "questionTypes": [
+          "most-cost-effective",
+          "most-performant"
         ]
       }
     },
@@ -241,7 +356,14 @@
       "explanation": "Streaming is the mechanism for incremental delivery and is what perceived latency depends on. A smaller model (B) and a shorter cap (D) reduce total time without changing when the first token appears, and splitting (C) adds round trips.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "api-mechanics"
+        ],
+        "tools": [
+          "streaming",
+          "messages-api"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -259,7 +381,15 @@
       "explanation": "Work that is large, uniform, and not time-critical is what batch processing is for, and it is materially cheaper. Streaming (A) serves interactive use, maximum concurrency (C) risks rate limits for no benefit here, and splitting keys (D) is an evasion rather than a design.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "api-mechanics"
+        ],
+        "tools": [
+          "message-batches",
+          "messages-api"
+        ],
+        "questionTypes": [
+          "feature-selection",
+          "architecture-decision"
         ]
       }
     },
@@ -277,7 +407,15 @@
       "explanation": "Backoff with a retry ceiling relieves the pressure that caused the limit and still fails predictably. Immediate retries (A) worsen the condition, treating it as terminal (B) discards recoverable work, and shrinking requests (D) does not address a rate that is measured in calls.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "software-engineering-foundations"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "troubleshooting",
+          "behavior-identification",
+          "architecture-decision"
         ]
       }
     },
@@ -295,7 +433,13 @@
       "explanation": "A declared schema turns structure into a contract the response must satisfy, which is what a typed insert needs. Asking in prose (A) and retrying on failure (B) both leave the shape to chance, and regular expressions over prose (C) are brittle by construction.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "output-handling"
+        ],
+        "tools": [
+          "structured-outputs"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -313,7 +457,13 @@
       "explanation": "Compaction preserves the meaning of earlier exchanges within a much smaller footprint, which is what continuity requires. Blind truncation (B) drops facts silently, the output cap (C) is unrelated, and starting fresh (D) discards the state entirely.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "context-engineering"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -331,7 +481,14 @@
       "explanation": "A client error means the request itself is wrong, and repeating it unchanged cannot succeed. Latency (A) and a single prior failure (C) are consistent with transient faults, and a spending limit (D) is an operational matter rather than a property of the request.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "software-engineering-foundations"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "troubleshooting",
+          "feature-selection"
         ]
       }
     },
@@ -349,7 +506,13 @@
       "explanation": "Hitting the output cap produces exactly this symptom and is reported as such in the stop reason. An oversized input (A) fails before generation, an unsupported format (B) produces wrong shape rather than a cut, and a dropped connection (D) is an error rather than a clean stop.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "api-mechanics"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -367,7 +530,13 @@
       "explanation": "Model selection is a fit-to-requirement decision, and a simple, repetitive task is where a smaller model most often suffices. Treating accuracy as unbounded (A) ignores cost, a longer prompt (B) adds expense for no stated need, and reducing frequency (C) changes the requirement rather than meeting it.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "model-selection-tradeoffs"
+        ],
+        "tools": [
+          "models"
+        ],
+        "questionTypes": [
+          "output-evaluation"
         ]
       }
     },
@@ -385,7 +554,13 @@
       "explanation": "Deep, multi-step reasoning over interacting constraints is where capability differences show. The other three are mechanical or single-signal tasks that a small model handles at a fraction of the cost.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "model-selection-tradeoffs"
+        ],
+        "tools": [
+          "models"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -403,7 +578,13 @@
       "explanation": "With volume flat, cost per request must have grown, and context sent per call is the usual driver. Published price (A) would be a known change, key count (C) does not affect cost, and latency (D) is not billed.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "cost-token-management"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
         ]
       }
     },
@@ -421,7 +602,13 @@
       "explanation": "Model choice is empirical and task-specific, which is what a representative evaluation establishes. Benchmarks (A) may not reflect the task, recency (B) is not a measurement, and defaulting to size (D) decides before evidence.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "model-selection-tradeoffs"
+        ],
+        "tools": [
+          "models"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -439,7 +626,14 @@
       "explanation": "When the path is known in advance, encoding it directly is cheaper, faster, and far easier to debug than letting a model rediscover it each run. Runtime decisions (A, B) add nondeterminism with no benefit, and a single prompt (C) removes the checkpoints between steps.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "agent-architecture"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "feature-selection",
+          "architecture-decision"
         ]
       }
     },
@@ -457,7 +651,13 @@
       "explanation": "Agents earn their cost where the path must be discovered during execution. Length (B), tool count (C), and structured output (D) are all satisfied by a fixed workflow.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "agent-architecture"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -475,7 +675,13 @@
       "explanation": "Delegation trades context for isolation, and quality falls when the handoff omits what the subtask needed. A larger model (A) cannot supply missing context, subagents are widely used in pipelines (C), and adding more (D) multiplies the same fault.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "agent-patterns"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -493,7 +699,13 @@
       "explanation": "A step ceiling is a safety bound for the non-terminating case, which is the failure mode that matters. Successful runs (A) usually finish well inside the limit, and neither speed (B) nor prompt clarity (D) is what the limit governs.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "agent-construction"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -511,7 +723,13 @@
       "explanation": "A worked example makes the constraints concrete and demonstrates their interaction, which prose cannot. Emphasis (A) and repetition (B) restate without clarifying, and higher temperature (C) increases variance, which is the opposite of reliability.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "prompt-engineering"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -529,7 +747,13 @@
       "explanation": "The system prompt is the designated place for persistent framing and keeps it separate from turn-specific content. Placing it in user turns (B, C, D) mixes configuration with input and invites drift.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "prompt-engineering"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "configuration"
         ]
       }
     },
@@ -547,7 +771,13 @@
       "explanation": "Context is a budget rather than a free resource, and irrelevant material dilutes attention to what matters. More is not automatically better (A), the model does not reliably filter for you (C), and the effect is on quality as well as cost (D).",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "context-engineering"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -565,7 +795,13 @@
       "explanation": "A tool description is the model's only guide to selection and use, so it is where correctness is won or lost. Tool count (A) and declaration order (B) matter far less, and the return format (D) affects consumption rather than selection.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "tool-implementation"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -583,7 +819,14 @@
       "explanation": "Ambiguity between tools is a design problem in the interface and is fixed by making each tool distinct. Instructions (A) do not resolve genuine overlap, context size (B) is not the constraint, and ordering (C) does not clarify purpose.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "tool-implementation"
+        ],
+        "tools": [
+          "mcp",
+          "tool-use"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -601,7 +844,15 @@
       "explanation": "Feeding the error back keeps the model in the loop and lets it correct its arguments or choose another path. Raw errors (B) leak internals, blind retries (C) repeat the fault, and abandoning (D) discards recoverable runs.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "tool-implementation"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "troubleshooting",
+          "behavior-identification",
+          "architecture-decision"
         ]
       }
     },
@@ -619,7 +870,14 @@
       "explanation": "Retrieved content is untrusted input, and the durable defense is that the model's authority is limited by the surrounding system rather than by its own compliance. Prompt instructions (A), phrase filters (C), and model size (D) are all bypassable.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "ai-application-security"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "most-secure",
+          "architecture-decision"
         ]
       }
     },
@@ -637,7 +895,14 @@
       "explanation": "Least privilege bounds the consequences of any mistake or manipulation, and it is enforced outside the prompt. Full credentials (A) and instruction-based restraint (B) rely on behavior rather than control, and an unscoped tool (D) removes the boundary.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "guardrails-safe-deployment"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "most-secure",
+          "architecture-decision"
         ]
       }
     },
@@ -655,7 +920,14 @@
       "explanation": "Three hand-picked examples cannot distinguish a real improvement from noise, which is what an evaluation set exists to settle. Self-assessment (B) is not measurement, and shipping first (A, C) makes users the test set.",
       "themes": {
         "tasks": [
-          "practice-questions"
+          "eval-testing-debugging"
+        ],
+        "tools": [
+          "evals"
+        ],
+        "questionTypes": [
+          "output-evaluation",
+          "architecture-decision"
         ]
       }
     },
@@ -673,7 +945,14 @@
       "explanation": "\"end_turn\" means the model has finished; \"tool_use\" is the signal to execute a tool and continue the loop",
       "themes": {
         "tasks": [
-          "mock-exam-1"
+          "agent-construction"
+        ],
+        "tools": [
+          "tool-use",
+          "messages-api"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -691,7 +970,14 @@
       "explanation": "Latency-tolerant bulk work is the Batches API's purpose: 50% of the cost within a 24-hour window",
       "themes": {
         "tasks": [
-          "mock-exam-1"
+          "api-mechanics"
+        ],
+        "tools": [
+          "message-batches",
+          "messages-api"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -709,7 +995,16 @@
       "explanation": "Caching reuses a stable prefix, cutting time-to-first-token and per-request cost. Position matters: stable content first",
       "themes": {
         "tasks": [
-          "mock-exam-1"
+          "api-mechanics"
+        ],
+        "tools": [
+          "prompt-caching",
+          "messages-api"
+        ],
+        "questionTypes": [
+          "most-cost-effective",
+          "most-performant",
+          "feature-selection"
         ]
       }
     },
@@ -727,7 +1022,14 @@
       "explanation": "Schema enforcement plus a validation-retry loop treats model output as untrusted input and lets the model self-correct",
       "themes": {
         "tasks": [
-          "mock-exam-1"
+          "output-handling"
+        ],
+        "tools": [
+          "structured-outputs",
+          "messages-api"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -745,7 +1047,13 @@
       "explanation": "Autonomy is justified when the path is unknown. A fixed path belongs in deterministic code that can be tested",
       "themes": {
         "tasks": [
-          "mock-exam-1"
+          "agent-architecture"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -763,7 +1071,13 @@
       "explanation": "Subagents delegate and isolate context; that isolation is their main architectural value",
       "themes": {
         "tasks": [
-          "mock-exam-1"
+          "agent-patterns"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -781,7 +1095,13 @@
       "explanation": "Capability the agent does not hold cannot be misused. Prompts and confirmations are not enforcement",
       "themes": {
         "tasks": [
-          "mock-exam-1"
+          "guardrails-safe-deployment"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "most-secure"
         ]
       }
     },
@@ -799,7 +1119,14 @@
       "explanation": "Pinning makes model behavior a controlled dependency so upgrades pass through evaluation",
       "themes": {
         "tasks": [
-          "mock-exam-1"
+          "configuration-management"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "configuration",
+          "behavior-identification"
         ]
       }
     },
@@ -817,7 +1144,13 @@
       "explanation": "An MCP server is a reusable, independently maintained capability that multiple clients share",
       "themes": {
         "tasks": [
-          "mock-exam-1"
+          "mcp-server-development"
+        ],
+        "tools": [
+          "mcp"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -835,7 +1168,13 @@
       "explanation": "Context drift and bloat are managed by pruning, compaction, and isolation",
       "themes": {
         "tasks": [
-          "mock-exam-1"
+          "context-engineering"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -853,7 +1192,13 @@
       "explanation": "Few-shot examples fix format and edge-case behavior far better than more instructions",
       "themes": {
         "tasks": [
-          "mock-exam-1"
+          "prompt-engineering"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -871,7 +1216,13 @@
       "explanation": "Injection defense is structural: separate untrusted content and apply least privilege to consequential tools",
       "themes": {
         "tasks": [
-          "mock-exam-1"
+          "ai-application-security"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "most-secure"
         ]
       }
     },
@@ -889,7 +1240,14 @@
       "explanation": "Reduced cost, asynchronous window, custom_id correlation, and no multi-turn tool calling inside a batch",
       "themes": {
         "tasks": [
-          "mock-exam-1"
+          "api-mechanics"
+        ],
+        "tools": [
+          "message-batches",
+          "messages-api"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -907,7 +1265,13 @@
       "explanation": "Headless CI use means non-interactive invocation with structured, schema-validated output",
       "themes": {
         "tasks": [
-          "mock-exam-1"
+          "claude-code-core"
+        ],
+        "tools": [
+          "claude-code"
+        ],
+        "questionTypes": [
+          "configuration"
         ]
       }
     },
@@ -925,7 +1289,13 @@
       "explanation": "Traces localize the fault to the integration layer: correct reasoning over wrong inputs is a retrieval defect",
       "themes": {
         "tasks": [
-          "mock-exam-1"
+          "eval-testing-debugging"
+        ],
+        "tools": [
+          "evals"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -943,7 +1313,14 @@
       "explanation": "A large unchanging prefix repeated per call is what caching addresses, without losing any instruction. Shortening (A) sacrifices capability, a cheaper model (B) trades quality, and fewer requests (D) changes the product",
       "themes": {
         "tasks": [
-          "mock-exam-2"
+          "api-mechanics"
+        ],
+        "tools": [
+          "prompt-caching",
+          "messages-api"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
         ]
       }
     },
@@ -961,7 +1338,13 @@
       "explanation": "Decoupling acceptance from completion satisfies the latency contract without degrading the answer. Truncation (B) and a minimal model (C) sacrifice the result, and the timeout (D) is the stated constraint",
       "themes": {
         "tasks": [
-          "mock-exam-2"
+          "software-engineering-foundations"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "most-performant"
         ]
       }
     },
@@ -979,7 +1362,13 @@
       "explanation": "That stop reason reports that generation hit the output ceiling. An oversized input (A) fails before generation, and neither a malformed request (B) nor a refusal (C) produces this reason",
       "themes": {
         "tasks": [
-          "mock-exam-2"
+          "api-mechanics"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -997,7 +1386,13 @@
       "explanation": "Tools should return what the task requires, which preserves context for reasoning. A larger window (A) delays the problem, a second call (C) adds cost and failure surface, and calling less often (D) does not change the payload",
       "themes": {
         "tasks": [
-          "mock-exam-2"
+          "tool-implementation"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -1015,7 +1410,14 @@
       "explanation": "Rate limits and transient server errors are the recoverable class. An invalid parameter (A) will fail identically, and disagreement (C) or length (D) are not transport failures",
       "themes": {
         "tasks": [
-          "mock-exam-2"
+          "software-engineering-foundations"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "troubleshooting",
+          "behavior-identification"
         ]
       }
     },
@@ -1033,7 +1435,13 @@
       "explanation": "Large, uniform, latency-tolerant work is exactly the batch case, and it is materially cheaper. Streaming (A) serves interactive use, the largest model (B) raises cost, and concurrency (C) does not change unit price",
       "themes": {
         "tasks": [
-          "mock-exam-2"
+          "cost-token-management"
+        ],
+        "tools": [
+          "message-batches"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -1051,7 +1459,13 @@
       "explanation": "Where the requirement is met, the cheaper option is correct, and changing inputs are handled by re-evaluating. Insurance against hypothetical change (B), alternation (C), and recency (D) all spend without benefit",
       "themes": {
         "tasks": [
-          "mock-exam-2"
+          "model-selection-tradeoffs"
+        ],
+        "tools": [
+          "models"
+        ],
+        "questionTypes": [
+          "output-evaluation"
         ]
       }
     },
@@ -1069,7 +1483,13 @@
       "explanation": "Multi-step reasoning under interacting constraints is where capability differences show. A small model (A) and splitting (B) both fragment the reasoning, and prompt length (D) does not add capability",
       "themes": {
         "tasks": [
-          "mock-exam-2"
+          "model-selection-tradeoffs"
+        ],
+        "tools": [
+          "models"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -1087,7 +1507,13 @@
       "explanation": "Overlapping tools make selection ambiguous, which is where agents go wrong. Overlap does not improve speed (A), reduce cost (B), or help error handling (C)",
       "themes": {
         "tasks": [
-          "mock-exam-2"
+          "agent-patterns"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -1105,7 +1531,13 @@
       "explanation": "A defined success condition ends the loop correctly, and the ceiling bounds the failure case. A timeout alone (A) does not recognize success, the model's own judgment (B) is not a guarantee, and exhausting context (D) is a failure rather than a termination",
       "themes": {
         "tasks": [
-          "mock-exam-2"
+          "agent-construction"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -1123,7 +1555,13 @@
       "explanation": "The system prompt is designed for persistent framing across the exchange. Placing it in user turns (A, C) mixes configuration with input, and tool descriptions (D) govern tool selection",
       "themes": {
         "tasks": [
-          "mock-exam-2"
+          "prompt-engineering"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "configuration"
         ]
       }
     },
@@ -1141,7 +1579,13 @@
       "explanation": "An example defines the target unambiguously, which is what formatting consistency needs. Higher temperature (B) increases variance, a vague adjective (C) does not specify, and a larger model (D) does not know your format",
       "themes": {
         "tasks": [
-          "mock-exam-2"
+          "prompt-engineering"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "feature-selection"
         ]
       }
     },
@@ -1159,7 +1603,13 @@
       "explanation": "The description is the model's only basis for choosing and calling the tool correctly. Brevity (B) is secondary to clarity, and implementation detail (C) and naming (D) do not guide selection",
       "themes": {
         "tasks": [
-          "mock-exam-2"
+          "tool-implementation"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -1177,7 +1627,13 @@
       "explanation": "The durable control is that the model cannot exceed its granted permissions regardless of what the content says. Prompt instructions (A) and phrase filters (C) are bypassable, and context size (D) is irrelevant",
       "themes": {
         "tasks": [
-          "mock-exam-2"
+          "guardrails-safe-deployment"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "most-secure"
         ]
       }
     },
@@ -1195,7 +1651,13 @@
       "explanation": "Five hand-picked cases cannot separate a real gain from noise, which is what an evaluation set settles. Self-comparison (B) is not measurement, and shipping first (A, D) makes users the test",
       "themes": {
         "tasks": [
-          "mock-exam-2"
+          "eval-testing-debugging"
+        ],
+        "tools": [
+          "evals"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -1213,7 +1675,13 @@
       "explanation": "Authentication failures point at the credential rather than the payload. A transient fault (A) presents differently, and neither prompt length (B) nor deprecation (D) produces an auth error",
       "themes": {
         "tasks": [
-          "mock-exam-3"
+          "software-engineering-foundations"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -1231,7 +1699,13 @@
       "explanation": "Correlation exists for traceability, which is what debugging asynchronous or batched work depends on. It does not affect cost (B) or accuracy (C), and it is a design practice rather than a requirement (D)",
       "themes": {
         "tasks": [
-          "mock-exam-3"
+          "software-engineering-foundations"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -1249,7 +1723,13 @@
       "explanation": "A tool-use stop is a handoff, and the loop continues once the result is returned. Retrying (A) repeats the request, returning partial text (B) discards the work, and the token limit (C) is unrelated",
       "themes": {
         "tasks": [
-          "mock-exam-3"
+          "agent-construction"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -1267,7 +1747,13 @@
       "explanation": "A queue smooths demand against a rate-limited dependency. It does not change accuracy (A) or token counts (C), and retries remain necessary (D)",
       "themes": {
         "tasks": [
-          "mock-exam-3"
+          "software-engineering-foundations"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -1285,7 +1771,14 @@
       "explanation": "A well-formed but wrong answer points at what the model was told, not how it was delivered. Transport (A), limits (C), and output caps (D) produce failures of delivery rather than of meaning",
       "themes": {
         "tasks": [
-          "mock-exam-3"
+          "application-design"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "troubleshooting",
+          "configuration"
         ]
       }
     },
@@ -1303,7 +1796,13 @@
       "explanation": "Unused capacity is paid for in cost and time. A larger window does not itself improve accuracy (A), reduce rate limiting (B), or make structure more reliable (C)",
       "themes": {
         "tasks": [
-          "mock-exam-3"
+          "cost-token-management"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -1321,7 +1820,13 @@
       "explanation": "The decision is evidence-led against a defined bar. Budget (B), volume (C), and latency (D) create pressure to look, but they do not establish that quality holds",
       "themes": {
         "tasks": [
-          "mock-exam-3"
+          "model-selection-tradeoffs"
+        ],
+        "tools": [
+          "models"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -1339,7 +1844,14 @@
       "explanation": "Durable state must be explicit, because context is finite and compaction is lossy. Relying on the window (A) fails at length, temperature (B) is unrelated, and restarting (D) loses the decision",
       "themes": {
         "tasks": [
-          "mock-exam-3"
+          "agent-patterns"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "feature-selection",
+          "architecture-decision"
         ]
       }
     },
@@ -1357,7 +1869,13 @@
       "explanation": "Who decides the next step is the distinction that matters. Length (A) is incidental, agents do use tools (B), and workflows do call the model (C)",
       "themes": {
         "tasks": [
-          "mock-exam-3"
+          "agent-architecture"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -1375,7 +1893,13 @@
       "explanation": "Contradictory signals produce inconsistent behavior rather than a defined precedence. Neither the instruction (A) nor the example (B) reliably wins, and the request is not rejected (D)",
       "themes": {
         "tasks": [
-          "mock-exam-3"
+          "prompt-engineering"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -1393,7 +1917,13 @@
       "explanation": "Material at the edges of a long input is attended to more reliably than material buried in the middle. Position is not neutral (A) or advantageous here (C), and it does not error (D)",
       "themes": {
         "tasks": [
-          "mock-exam-3"
+          "prompt-engineering"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "behavior-identification"
         ]
       }
     },
@@ -1411,7 +1941,13 @@
       "explanation": "Returning a handle keeps context free when the payload is only needed for a later call. Always returning everything (B) or nothing (C) ignores the task, and the rule is not about writes (D)",
       "themes": {
         "tasks": [
-          "mock-exam-3"
+          "tool-implementation"
+        ],
+        "tools": [
+          "tool-use"
+        ],
+        "questionTypes": [
+          "architecture-decision"
         ]
       }
     },
@@ -1429,7 +1965,14 @@
       "explanation": "A new tool surface most often degrades selection through overlap and unclear descriptions. Uptime (B) and latency (D) present as errors or slowness, and the model did not change (C)",
       "themes": {
         "tasks": [
-          "mock-exam-3"
+          "agentic-customization"
+        ],
+        "tools": [
+          "mcp",
+          "tool-use"
+        ],
+        "questionTypes": [
+          "troubleshooting"
         ]
       }
     },
@@ -1447,7 +1990,14 @@
       "explanation": "Anything rendered into a page is escaped regardless of source, since output can be influenced by input. Assuming safety (A) and instructing the model (C) are not controls, and model size (D) is irrelevant",
       "themes": {
         "tasks": [
-          "mock-exam-3"
+          "ai-application-security"
+        ],
+        "tools": [
+          "messages-api"
+        ],
+        "questionTypes": [
+          "most-secure",
+          "architecture-decision"
         ]
       }
     },
@@ -1465,7 +2015,14 @@
       "explanation": "Regressions are silent by definition and are caught by continuously testing what must not break. Latency (A), limits (B), and cost (D) are operational signals rather than correctness",
       "themes": {
         "tasks": [
-          "mock-exam-3"
+          "eval-testing-debugging"
+        ],
+        "tools": [
+          "evals"
+        ],
+        "questionTypes": [
+          "troubleshooting",
+          "behavior-identification"
         ]
       }
     }
