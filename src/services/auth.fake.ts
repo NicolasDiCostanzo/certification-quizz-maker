@@ -1,11 +1,32 @@
 import type { AuthUser } from '../types'
 
 export const FAKE_AUTH_STORAGE_KEY = 'e2e-fake-auth-users'
+export const FAKE_AUTH_SESSION_KEY = 'e2e-fake-auth-session'
 
 interface FakeUserRecord {
   password: string
   confirmed: boolean
   userId: string
+}
+
+let currentSession: AuthUser | null = null
+
+function loadSession(): AuthUser | null {
+  if (currentSession) return currentSession
+  try {
+    return JSON.parse(localStorage.getItem(FAKE_AUTH_SESSION_KEY) ?? 'null') as AuthUser | null
+  } catch {
+    return null
+  }
+}
+
+function saveSession(user: AuthUser | null): void {
+  currentSession = user
+  if (user) {
+    localStorage.setItem(FAKE_AUTH_SESSION_KEY, JSON.stringify(user))
+  } else {
+    localStorage.removeItem(FAKE_AUTH_SESSION_KEY)
+  }
 }
 
 function loadUsers(): Record<string, FakeUserRecord> {
@@ -75,11 +96,28 @@ export async function signIn(email: string, password: string): Promise<AuthUser>
     error.name = 'UserNotConfirmedException'
     throw error
   }
-  return { userId: user.userId, email }
+  const signedIn: AuthUser = { userId: user.userId, email }
+  saveSession(signedIn)
+  return signedIn
 }
 
-export async function signOut(): Promise<void> {}
+export async function signOut(): Promise<void> {
+  saveSession(null)
+}
 
 export async function configureAuth(): Promise<boolean> {
   return true
+}
+
+export async function restoreSession(): Promise<AuthUser | null> {
+  const session = loadSession()
+  if (!session) return null
+  const user = session.email ? loadUsers()[session.email] : undefined
+  if (!user || !user.confirmed) {
+    saveSession(null)
+    return null
+  }
+  const restored: AuthUser = { userId: user.userId, email: session.email }
+  saveSession(restored)
+  return restored
 }

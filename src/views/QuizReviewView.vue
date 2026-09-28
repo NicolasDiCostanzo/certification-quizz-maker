@@ -35,8 +35,7 @@ function resetSession() {
     :summary-result="result"
     :topic-breakdown="topicBreakdown"
     :theme-breakdown="themeBreakdown"
-    :back-route="{ name: 'cert-selector' }"
-    :back-label="texts.backToHomeCta"
+    :back-route="{ name: 'quiz-dashboard', params: { certCode } }"
     :before-back="resetSession"
   />
 </template>

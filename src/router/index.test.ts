@@ -19,6 +19,7 @@ const sessionQuestions: Question[] = [
 describe('router', () => {
   beforeEach(async () => {
     setActivePinia(createPinia())
+    authConfigured = true
     useUserAccountStore().accountMode = 'local'
     await router.push({ name: 'cert-selector' })
   })
@@ -50,6 +51,33 @@ describe('router', () => {
     authConfigured = false
     await router.push('/auth')
     expect(router.currentRoute.value.name).toBe('welcome')
+  })
+
+  it('sends a returning signed-in user from / to the cert selector', async () => {
+    const account = useUserAccountStore()
+    account.accountMode = 'account'
+    account.user = { userId: 'sub-1', email: 'dev@example.com' }
+
+    await router.push('/welcome')
+    await router.push('/')
+
+    expect(router.currentRoute.value.name).toBe('cert-selector')
+  })
+
+  it('keeps a local-only user on the welcome screen', async () => {
+    useUserAccountStore().accountMode = 'local'
+    await router.push('/welcome')
+    await router.push('/')
+    expect(router.currentRoute.value.name).toBe('welcome')
+  })
+
+  it('lets a signed-in user leave the welcome screen explicitly', async () => {
+    authConfigured = true
+    const account = useUserAccountStore()
+    account.accountMode = 'account'
+    account.user = { userId: 'sub-1', email: 'dev@example.com' }
+    await router.push('/auth')
+    expect(router.currentRoute.value.name).toBe('auth')
   })
 
   it('lets navigation through for a built-in cert code', async () => {

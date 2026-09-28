@@ -1,4 +1,5 @@
 import { useRouter } from 'vue-router'
+import { isSyncConfigured } from '../config'
 import * as auth from '../services/auth'
 import type { RemoteSyncPayload } from '../services/remoteSync'
 import { getSyncAdapter, InvalidPullPayload } from '../services/remoteSync'
@@ -57,7 +58,7 @@ export function useAccount() {
     return true
   }
 
-  async function loadAccountData(signal: AbortSignal): Promise<boolean> {
+  async function loadAccountData(signal: AbortSignal, keepLocalOnFailure = false): Promise<boolean> {
     try {
       const payload = await sync.pull(signal)
       if (signal.aborted) return false
@@ -68,12 +69,9 @@ export function useAccount() {
       return true
     } catch (err) {
       if (signal.aborted) return false
-      if (err instanceof InvalidPullPayload) {
-        // Remote data failed validation — keep local stores intact, just report the error.
-        syncError.value = texts.syncFailed
-        return false
+      if (!keepLocalOnFailure && !(err instanceof InvalidPullPayload)) {
+        applyRemoteData(null)
       }
-      applyRemoteData(null)
       syncError.value = texts.syncFailed
       return false
     }
@@ -189,6 +187,39 @@ export function useAccount() {
     await router.push({ name: 'cert-selector' })
   }
 
+  async function restoreAccountSession(): Promise<boolean> {
+    const user = await auth.restoreSession()
+    if (!user) {
+      if (account.accountMode === 'account') {
+        const guest = account.takeGuestSnapshot()
+        progressStore.replaceAll(guest.progress?.byExamCode ?? {})
+        historyStore.replaceAll(guest.history?.entries ?? [])
+        account.accountMode = null
+        account.user = null
+      }
+      return false
+    }
+    const attempt = ++authAttempt
+    activeAttemptAbort?.abort()
+    const controller = new AbortController()
+    activeAttemptAbort = controller
+    syncSession = null
+    account.user = user
+    account.accountMode = 'account'
+
+    if (!isSyncConfigured()) {
+      syncError.value = null
+      accountDataLoadFailed = false
+      return true
+    }
+
+    const ok = await loadAccountData(controller.signal, true)
+    if (authAttempt !== attempt) return true
+    syncSession = ok ? Symbol() : null
+    accountDataLoadFailed = !ok
+    return true
+  }
+
   async function signUp(email: string, password: string): Promise<boolean> {
     return auth.signUp(email, password)
   }
@@ -296,6 +327,7 @@ export function useAccount() {
     signIn,
     signOut,
     continueLocal,
+    restoreAccountSession,
     pushLocalData,
     pushLocalDataDebounced,
     syncError,

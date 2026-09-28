@@ -36,8 +36,7 @@ export async function signIn(email: string, password: string): Promise<AuthUser>
     throw error
   }
   const { userId } = await getCurrentUser()
-  const attributes = await fetchUserAttributes()
-  return { userId, email: attributes.email ?? null }
+  return { userId, email: await readEmail() }
 }
 
 export async function configureAuth(userPoolId: string, userPoolClientId: string): Promise<boolean> {
@@ -47,6 +46,25 @@ export async function configureAuth(userPoolId: string, userPoolClientId: string
     return true
   } catch {
     return false
+  }
+}
+
+export async function restoreSession(): Promise<AuthUser | null> {
+  let userId: string
+  try {
+    ;({ userId } = await getCurrentUser())
+  } catch {
+    return null
+  }
+  return { userId, email: await readEmail() }
+}
+
+async function readEmail(): Promise<string | null> {
+  try {
+    const attributes = await fetchUserAttributes()
+    return attributes.email ?? null
+  } catch {
+    return null
   }
 }
 
