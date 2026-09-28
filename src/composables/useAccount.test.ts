@@ -974,4 +974,22 @@ describe('useAccount session restore on load', () => {
 
     expect(adapter.push).not.toHaveBeenCalled()
   })
+
+  it('preserves the persisted account data when the startup pull fails, instead of blanking it', async () => {
+    seedDeviceData()
+    vi.mocked(auth.restoreSession).mockResolvedValue(USER)
+    adapter.pull.mockRejectedValue(new Error('offline'))
+
+    const progressStore = useUserProgressStore()
+    const historyStore = useQuizHistoryStore()
+    const beforeProgress = JSON.parse(JSON.stringify(progressStore.byExamCode))
+    const beforeHistory = JSON.parse(JSON.stringify(historyStore.entries))
+
+    const { restoreAccountSession, syncError } = useAccount()
+    await expect(restoreAccountSession()).resolves.toBe(true)
+
+    expect(progressStore.byExamCode).toEqual(beforeProgress)
+    expect(historyStore.entries).toEqual(beforeHistory)
+    expect(syncError.value).toBe(texts.syncFailed)
+  })
 })

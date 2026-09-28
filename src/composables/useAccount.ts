@@ -58,7 +58,7 @@ export function useAccount() {
     return true
   }
 
-  async function loadAccountData(signal: AbortSignal): Promise<boolean> {
+  async function loadAccountData(signal: AbortSignal, keepLocalOnFailure = false): Promise<boolean> {
     try {
       const payload = await sync.pull(signal)
       if (signal.aborted) return false
@@ -69,12 +69,9 @@ export function useAccount() {
       return true
     } catch (err) {
       if (signal.aborted) return false
-      if (err instanceof InvalidPullPayload) {
-        // Remote data failed validation — keep local stores intact, just report the error.
-        syncError.value = texts.syncFailed
-        return false
+      if (!keepLocalOnFailure && !(err instanceof InvalidPullPayload)) {
+        applyRemoteData(null)
       }
-      applyRemoteData(null)
       syncError.value = texts.syncFailed
       return false
     }
@@ -213,7 +210,7 @@ export function useAccount() {
       return true
     }
 
-    const ok = await loadAccountData(controller.signal)
+    const ok = await loadAccountData(controller.signal, true)
     if (authAttempt !== attempt) return true
     syncSession = ok ? Symbol() : null
     accountDataLoadFailed = !ok

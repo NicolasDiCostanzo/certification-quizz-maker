@@ -23,12 +23,12 @@ async function bootstrap() {
 
   const app = createApp(App)
   app.use(pinia)
-  app.use(router)
 
   if (userPoolId && userPoolClientId) {
     await useAccount().restoreAccountSession()
   }
 
+  app.use(router)
   app.mount('#app')
 }
 
