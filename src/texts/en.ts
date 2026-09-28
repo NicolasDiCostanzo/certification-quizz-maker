@@ -1,5 +1,5 @@
 export const texts = {
-  appTitle: 'Quiz',
+  appTitle: 'Home',
   selectCertification: 'Choose your certification',
   emptyStateBefore: 'No certification bundles loaded. Valid bundles placed in',
   emptyStateHighlight: 'src/assets/',
@@ -15,6 +15,8 @@ export const texts = {
   requestNoticeBefore: 'Missing a certification? There is no in-app upload —',
   requestNoticeLink: 'open a GitHub issue',
   requestNoticeAfter: 'to request it as a new built-in bundle.',
+  githubLinkLabel: 'View this project on GitHub',
+  sponsorLinkLabel: 'Buy me a coffee',
   modeLabel: 'Mode',
   modePreparation: 'Prep',
   modePreparationDescription: 'No timer. Can click "Submit answer" to reveal the answer.',

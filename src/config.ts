@@ -5,6 +5,11 @@ export interface AwsConfig {
   syncApiUrl: string | undefined
 }
 
+export const links = {
+  repo: 'https://github.com/NicolasDiCostanzo/certification-quizz-maker',
+  sponsor: 'https://github.com/sponsors/NicolasDiCostanzo',
+} as const
+
 function readEnv(name: string): string | undefined {
   const value = import.meta.env[name]
   return typeof value === 'string' && value.length > 0 ? value : undefined

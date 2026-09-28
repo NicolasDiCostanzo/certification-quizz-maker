@@ -12,7 +12,8 @@ import WelcomeView from './WelcomeView.vue'
 
 let authConfigured = true
 let syncConfigured = true
-vi.mock('../config', () => ({
+vi.mock('../config', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../config')>()),
   awsConfig: { region: undefined, userPoolId: undefined, userPoolClientId: undefined, syncApiUrl: undefined },
   isAuthAvailable: () => authConfigured,
   isSyncConfigured: () => syncConfigured,

@@ -1,9 +1,12 @@
 <script setup lang="ts">
   import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import ExternalLink from '../components/app/ExternalLink.vue';
 import WelcomeCard from '../components/app/WelcomeCard.vue';
+import IconCoffee from '../components/icons/IconCoffee.vue';
+import IconGithub from '../components/icons/IconGithub.vue';
 import { useAccount } from '../composables/useAccount';
-import { isAuthAvailable, isSyncConfigured } from '../config';
+import { isAuthAvailable, isSyncConfigured, links } from '../config';
 import { useQuizHistoryStore } from '../stores/quizHistory';
 import { useUserProgressStore } from '../stores/userProgress';
 import { texts } from '../texts/en';
@@ -33,7 +36,6 @@ import { texts } from '../texts/en';
 
 <template>
   <section id="center" class="welcome">
-    <h1>{{ texts.appTitle }}</h1>
     <div class="welcome__options">
       <template v-if="authAvailable">
         <WelcomeCard :title="texts.welcomeExistingAccount"
@@ -48,6 +50,14 @@ import { texts } from '../texts/en';
       <WelcomeCard v-if="authAvailable && syncAvailable && hasLocalData" :title="texts.welcomeUploadData"
         :description="texts.welcomeUploadDataDesc" :cta-label="texts.welcomeUploadDataCta" @select="openUpload" />
     </div>
+    <div class="welcome__links">
+      <ExternalLink :href="links.repo" :label="texts.githubLinkLabel">
+        <template #icon><IconGithub /></template>
+      </ExternalLink>
+      <ExternalLink :href="links.sponsor" :label="texts.sponsorLinkLabel">
+        <template #icon><IconCoffee /></template>
+      </ExternalLink>
+    </div>
   </section>
 </template>
 
@@ -57,6 +67,14 @@ import { texts } from '../texts/en';
     flex-direction: column;
     gap: 20px;
     max-width: 600px;
+  }
+
+  .welcome__links {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    margin-top: auto;
+    padding-top: 25px;
   }
 
   @media (max-width: 1024px) {
