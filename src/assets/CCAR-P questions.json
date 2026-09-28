@@ -1,0 +1,1472 @@
+{
+  "version": 2,
+  "exam": {
+    "name": "Claude Certified Architect - Professional",
+    "code": "CCAR-P",
+    "totalQuestions": 63,
+    "timeLimitMinutes": 120,
+    "passingScore": {
+      "passingScore": 720,
+      "scale": 1000
+    },
+    "weights": {
+      "Solution Design & Architecture": 17,
+      "Claude Models, Prompting & Context Engineering": 13,
+      "Integration": 19,
+      "Evaluation, Testing & Optimization": 16,
+      "Governance, Safety & Risk Management": 14,
+      "Stakeholder Communication & Lifecycle Management": 14,
+      "Developer Productivity & Operational Enablement": 7
+    }
+  },
+  "themes": {
+    "tasks": [
+      "practice-questions",
+      "mock-exam-1",
+      "mock-exam-2",
+      "mock-exam-3"
+    ]
+  },
+  "questions": [
+    {
+      "id": "1",
+      "question": "An internal agent for account managers can read CRM records, draft emails, update opportunities, and delete contacts. Account managers only ever read records and draft emails through it. Under least privilege, what is the right change?",
+      "options": [
+        "Log every update and deletion for later audit",
+        "Add a confirmation dialog before updates and deletions",
+        "Restrict deletions to business hours",
+        "Remove the update and delete capabilities from the agent's configuration entirely"
+      ],
+      "answers": "D",
+      "topic": "Integration",
+      "explanation": "Least privilege removes capabilities the role does not need, eliminating the attack and error surface rather than monitoring it. Logging (A) and confirmations (B) are compensating controls around a privilege that should not exist, and scheduling (C) narrows the window without closing it.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "2",
+      "question": "After a nightly document refresh, your RAG assistant's answers turned confident but wrong. Model version, prompts, and latency are unchanged. Where do you look first?",
+      "options": [
+        "The retrieval and indexing layer: whether the refresh broke the index, changed chunking, or introduced mismatched embeddings",
+        "The model, which may have degraded overnight",
+        "The system prompt wording",
+        "The temperature setting"
+      ],
+      "answers": "A",
+      "topic": "Integration",
+      "explanation": "The only thing that changed is the document pipeline, and confident-but-wrong is the signature of plausible-but-irrelevant retrieved context. The pinned model (B), unchanged prompt (C), and sampling (D) do not correlate with the refresh.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "3",
+      "question": "Your platform will expose forty internal capabilities to agents across many teams. Loading all forty tool definitions into every agent's context is bloating prompts and degrading tool selection. What is the architectural remedy?",
+      "options": [
+        "Shorter tool descriptions across the board",
+        "Progressive discovery: agents load a small task-relevant toolset, with search or namespacing to pull in others when needed",
+        "One mega-tool with a mode parameter selecting among forty behaviors",
+        "Limit the platform to ten capabilities"
+      ],
+      "answers": "B",
+      "topic": "Integration",
+      "explanation": "At large tool counts, progressive discovery beats monolithic context: each agent sees what its task needs. Uniformly terser descriptions (A) trade selection quality for tokens, a mode-switch mega-tool (C) hides forty behaviors from the selection mechanism entirely, and capping the platform (D) sacrifices the requirement.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "4",
+      "question": "A bank wants a system that answers loan officers' policy questions with citations, and separately drafts decline letters from structured decision data. A vendor proposes one autonomous multi-agent system for both. What is the sounder architecture?",
+      "options": [
+        "The proposed multi-agent system, since both tasks involve documents",
+        "One agent with all tools and a routing prompt",
+        "Two simple components: a retrieval-augmented answer service for policy questions, and a templated generation workflow for letters, each evaluated on its own metrics",
+        "A single fine-tuned model for both"
+      ],
+      "answers": "C",
+      "topic": "Solution Design & Architecture",
+      "explanation": "Two well-understood problems with different shapes deserve the two cheapest reliable structures, independently testable and governable. Shared document-ness (A) is not an architectural argument, one agent with everything (B) couples unrelated risk profiles, and fine-tuning (D) is the most expensive path to problems retrieval and templates already solve.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "5",
+      "question": "Your architecture review board asks why you chose a deterministic workflow over an autonomous agent for claims intake. Which justification reflects the tested decision framework?",
+      "options": [
+        "Agents are a newer pattern and less proven in general",
+        "Workflows always outperform agents",
+        "The team lacked time to build an agent",
+        "The intake path is fully known in advance, so deterministic orchestration is cheaper, auditable, and reliable; autonomy earns its complexity only where the model must choose the path"
+      ],
+      "answers": "D",
+      "topic": "Solution Design & Architecture",
+      "explanation": "The framework is structural fit: known path, deterministic orchestration; open-ended path, agent. Novelty (A) and universal claims (B) are not engineering arguments, and resourcing (C) justifies a schedule, not an architecture.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "6",
+      "question": "Legal review quality is subjective, and your team disagrees about whether the assistant's clause summaries are \"good.\" What makes evaluation tractable?",
+      "options": [
+        "Define a rubric with the failure modes that matter, build a labeled evaluation set with counsel, and combine rubric-based model grading with periodic human review",
+        "Ship and count complaints",
+        "Exact string match against one reference summary per clause",
+        "Grade outputs by length"
+      ],
+      "answers": "A",
+      "topic": "Evaluation, Testing & Optimization",
+      "explanation": "Subjective quality becomes measurable through rubrics, labeled sets, and mixed methodology with humans anchoring the judgment. Complaint-counting (B) measures too late, exact match (C) fails every valid paraphrase, and length (D) measures nothing.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "7",
+      "question": "A prompt change looks better in demos. Before rolling it to all users, what is the disciplined path?",
+      "options": [
+        "Roll it out; demos are representative",
+        "Run it against the regression evaluation set, then A/B it against the current prompt on real traffic with predefined metrics before full rollout",
+        "Ask the team to vote",
+        "Roll out to everyone with a feedback banner"
+      ],
+      "answers": "B",
+      "topic": "Evaluation, Testing & Optimization",
+      "explanation": "Changes to prompts are production changes: regression evaluation catches breakage, and an A/B on defined metrics establishes improvement before exposure. Demos (A) and votes (C) are anecdotes, and full rollout with a banner (D) is the experiment without the control.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "8",
+      "question": "A healthcare client requires that no protected health information reach the model provider, while clinicians want free-text queries about patients. Which design meets both?",
+      "options": [
+        "Trust clinicians to avoid typing identifiers",
+        "A system prompt instructing the model to forget PHI",
+        "A de-identification layer that strips or tokenizes PHI before the API call, re-associating results locally, with logging and periodic audits of the boundary",
+        "Blocking free-text queries entirely"
+      ],
+      "answers": "C",
+      "topic": "Governance, Safety & Risk Management",
+      "explanation": "Compliance boundaries are enforced by architecture: PHI is removed before it crosses, and the control is auditable. Trust (A) is not a control, model instructions (B) act after the data already crossed, and a hard block (D) fails the stated business need that a compliant design can meet.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "9",
+      "question": "Your Claude solution's executive sponsor asks for \"99.9% accuracy or we cancel.\" Accuracy on the task plateaus near 92% with human review catching the rest. What is the architect's correct move?",
+      "options": [
+        "Promise 99.9% and hope model upgrades close the gap",
+        "Decline to discuss numbers with non-engineers",
+        "Quietly redefine accuracy so the number reads higher",
+        "Reframe the target around the end-to-end process: the system plus confidence-routed human review achieves the business outcome, with measured rates, costs, and the tradeoff curve made explicit"
+      ],
+      "answers": "D",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "explanation": "Managing expectations with explicit, honest tradeoffs is scored material at this level: the deliverable is the business outcome of the whole pipeline, not a raw model metric. Overpromising (A), stonewalling (B), and metric games (C) each destroy the trust the role exists to build.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "10",
+      "question": "Three teams configure Claude Code independently: conventions drift, and new engineers take days to become productive. What is the enablement fix?",
+      "options": [
+        "Ship a shared baseline: version-controlled team configuration, common skills and commands, and an onboarding path, with team-specific rules layered on top",
+        "Mandate that engineers memorize the conventions",
+        "Prohibit Claude Code until conventions settle",
+        "Let each engineer keep personal settings only"
+      ],
+      "answers": "A",
+      "topic": "Developer Productivity & Operational Enablement",
+      "explanation": "Team-level enablement means shared, versioned configuration with local extension, which is what makes tooling productive at organizational scale. Memorization (B) does not configure anything, prohibition (C) discards the productivity the domain exists to deliver, and personal-only settings (D) is the drift you started with.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "11",
+      "question": "A customer requires that no request data leave their AWS account. Which deployment satisfies the constraint?",
+      "options": [
+        "The Claude API with a signed data processing agreement",
+        "Claude through Amazon Bedrock within the customer's own account and region",
+        "The Claude API with request logging disabled",
+        "Any deployment, provided the data is encrypted in transit"
+      ],
+      "answers": "B",
+      "topic": "Integration",
+      "explanation": "A residency constraint of this kind is met by running within the customer's own cloud boundary, which is what Bedrock provides. A contractual agreement (A), disabled logging (C), and transport encryption (D) all still involve the data leaving the account.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "12",
+      "question": "An enterprise standardised on Google Cloud and requires identity, billing, and audit to run through existing controls. What follows?",
+      "options": [
+        "Deploy on Bedrock for feature parity",
+        "Use the Claude API and replicate the controls",
+        "Deploy through Vertex AI so the platform's identity, billing, and audit apply",
+        "Let each team choose its own path"
+      ],
+      "answers": "C",
+      "topic": "Integration",
+      "explanation": "Aligning with the platform the enterprise already governs is what makes existing controls apply without duplication. A different cloud (A) creates a second control plane, replication (B) is expensive and drifts, and per-team choice (D) removes governance.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "13",
+      "question": "A design places Claude behind an internal service that every application calls. What is the principal benefit?",
+      "options": [
+        "It reduces token cost",
+        "It removes the need for evaluation",
+        "It guarantees lower latency",
+        "Authentication, rate limiting, logging, and model routing are enforced in one place"
+      ],
+      "answers": "D",
+      "topic": "Integration",
+      "explanation": "A single integration point is where cross-cutting concerns can be applied consistently and changed once. It does not reduce token cost (A) or remove the need to evaluate (B), and an extra hop generally adds latency (C).",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "14",
+      "question": "A legacy system can only call synchronous endpoints with a two-second timeout, but the task needs long reasoning. What is the appropriate design?",
+      "options": [
+        "Accept the request, return an identifier immediately, and deliver the result asynchronously",
+        "Force the model to answer within two seconds",
+        "Increase the legacy timeout",
+        "Use the smallest model available"
+      ],
+      "answers": "A",
+      "topic": "Integration",
+      "explanation": "Decoupling submission from delivery lets the constraint and the workload coexist without degrading either. Truncating the reasoning (B, D) sacrifices the task, and changing the legacy system (C) is usually the constraint rather than an option.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "15",
+      "question": "What is the most important consideration when a solution must run across two clouds?",
+      "options": [
+        "Using identical prompts in both",
+        "Establishing which behaviors must be identical and evaluating for those on each platform",
+        "Choosing the cheaper platform for both",
+        "Deploying to whichever region is nearest"
+      ],
+      "answers": "B",
+      "topic": "Integration",
+      "explanation": "Cross-platform equivalence is a requirement to be defined and then verified, not assumed. Identical prompts (A) do not guarantee identical behavior, and cost (C) and proximity (D) do not address consistency.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "16",
+      "question": "A stakeholder asks for an autonomous agent to handle an end-to-end financial approval process. What should the architect establish first?",
+      "options": [
+        "Which model to use",
+        "The expected token cost",
+        "Which decisions carry accountability and must remain with a person",
+        "Whether the agent can be built in the available time"
+      ],
+      "answers": "C",
+      "topic": "Solution Design & Architecture",
+      "explanation": "Where accountability sits determines the shape of the solution and what may be automated at all. Model choice (A), cost (B), and schedule (D) are all downstream of that boundary.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "17",
+      "question": "Two designs meet the functional requirement. One is simpler and slightly less capable. What should decide?",
+      "options": [
+        "The more capable design, since capability is the point",
+        "The design the team finds more interesting",
+        "The design with more components, for future flexibility",
+        "Whether the extra capability is needed by a stated requirement, weighed against the cost of complexity"
+      ],
+      "answers": "D",
+      "topic": "Solution Design & Architecture",
+      "explanation": "Complexity is a cost paid continuously in operation and maintenance, so it must be bought by a real requirement. Capability for its own sake (A), preference (B), and speculative flexibility (C) all pay that cost without justification.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "18",
+      "question": "A proposed architecture depends on the model behaving correctly for a control that regulation requires. What is the correct judgment?",
+      "options": [
+        "Unacceptable: a required control must be enforced deterministically outside the model",
+        "Acceptable if evaluation shows high accuracy",
+        "Acceptable with a disclaimer to the regulator",
+        "Acceptable if a larger model is used"
+      ],
+      "answers": "A",
+      "topic": "Solution Design & Architecture",
+      "explanation": "A regulatory control needs a guarantee, and probabilistic behavior cannot supply one however high the measured accuracy. Accuracy (B), disclosure (C), and model size (D) do not convert a tendency into a guarantee.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "19",
+      "question": "What is the clearest sign that a solution has been over-engineered?",
+      "options": [
+        "It uses more than one model",
+        "Components exist that no stated requirement depends on",
+        "It has an evaluation suite",
+        "It includes a human approval step"
+      ],
+      "answers": "B",
+      "topic": "Solution Design & Architecture",
+      "explanation": "Unjustified components are the definition of over-engineering and are the parts that will rot. Multiple models (A), evaluation (C), and approval steps (D) are all defensible when a requirement calls for them.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "20",
+      "question": "What must exist before a solution can be said to be ready for production?",
+      "options": [
+        "A demonstration that impressed stakeholders",
+        "Agreement from the engineering team",
+        "A defined success criterion and measured performance against representative data",
+        "A completed cost estimate"
+      ],
+      "answers": "C",
+      "topic": "Evaluation, Testing & Optimization",
+      "explanation": "Readiness is a measured claim against a stated bar, which is what distinguishes it from an impression. Demonstrations (A), consensus (B), and cost (D) do not establish whether the system works.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "21",
+      "question": "An evaluation set is drawn entirely from cases the system already handles well. What is the consequence?",
+      "options": [
+        "It gives a reliable measure of quality",
+        "It is acceptable if it is large enough",
+        "It only matters for regulated systems",
+        "It overstates performance and hides the failure modes that matter"
+      ],
+      "answers": "D",
+      "topic": "Evaluation, Testing & Optimization",
+      "explanation": "An unrepresentative set measures the wrong distribution, and size cannot correct a biased sample. It is not reliable (A), scale does not fix bias (B), and the problem is universal rather than sector-specific (C).",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "22",
+      "question": "A prompt change improves the target metric but degrades an unmeasured behavior. How is this best prevented?",
+      "options": [
+        "Maintaining a regression suite that covers behaviors the system must not lose",
+        "Changing one thing at a time",
+        "Reviewing changes more carefully",
+        "Limiting how often prompts change"
+      ],
+      "answers": "A",
+      "topic": "Evaluation, Testing & Optimization",
+      "explanation": "Silent regressions are caught by explicitly testing what must not break. Single changes (B) and careful review (C) reduce risk without detecting it, and slowing change (D) does not make it safe.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "23",
+      "question": "What should trigger re-evaluation of a deployed solution?",
+      "options": [
+        "Only a reported incident",
+        "A change to the model, the prompt, the data distribution, or the requirement",
+        "A fixed annual schedule",
+        "A change in cost"
+      ],
+      "answers": "B",
+      "topic": "Evaluation, Testing & Optimization",
+      "explanation": "Any change to the things that determine behavior invalidates prior measurement. Waiting for incidents (A) detects late, a fixed schedule (C) is unrelated to actual change, and cost (D) does not affect correctness.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "24",
+      "question": "How should an architect treat a request to log full prompts and responses for audit?",
+      "options": [
+        "Implement it, since audit requirements take precedence",
+        "Refuse, since logging creates risk",
+        "Establish what the audit actually requires, since prompts and responses may contain personal or confidential data",
+        "Log responses only"
+      ],
+      "answers": "C",
+      "topic": "Governance, Safety & Risk Management",
+      "explanation": "Audit and data protection are both real constraints, and the design must satisfy the audit purpose without retaining more than is warranted. Blanket implementation (A) and blanket refusal (B) ignore one side, and a partial rule (D) is arbitrary without knowing the requirement.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "25",
+      "question": "What is the correct treatment of content retrieved from an untrusted source before it reaches the model?",
+      "options": [
+        "It is safe once scanned for known attack strings",
+        "It is safe if the model is instructed to disregard instructions within it",
+        "It is safe if it comes over an encrypted channel",
+        "It is untrusted data throughout, and the model's authority must be bounded regardless of its content"
+      ],
+      "answers": "D",
+      "topic": "Governance, Safety & Risk Management",
+      "explanation": "The durable control is that the model cannot exceed its permissions whatever the content persuades it to attempt. String scanning (A) and prompt instructions (B) are bypassable, and transport security (C) says nothing about the content.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "26",
+      "question": "Who is accountable for a wrong decision produced by an automated Claude workflow?",
+      "options": [
+        "The organization that deployed the workflow",
+        "The model provider",
+        "The engineer who wrote the prompt",
+        "Nobody, since the output was automated"
+      ],
+      "answers": "A",
+      "topic": "Governance, Safety & Risk Management",
+      "explanation": "Deploying an automated decision means owning its outcomes, which is why the boundaries of automation are an architectural decision. The provider (B) supplies a capability, individual authorship (C) does not transfer organizational responsibility, and automation does not remove accountability (D).",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "27",
+      "question": "An executive sponsor asks for a single number showing how good the solution is. What is the right response?",
+      "options": [
+        "Provide the headline accuracy figure",
+        "Provide the measure that matches the decision they face, with its limits stated",
+        "Explain that quality cannot be summarised",
+        "Provide the model's benchmark score"
+      ],
+      "answers": "B",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "explanation": "A useful metric is one tied to the decision at hand and honest about what it does not cover. A bare accuracy figure (A) and a benchmark score (D) can mislead, and refusing to summarise (C) fails the sponsor.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "28",
+      "question": "A pilot succeeded with ten users and the business wants to roll out to two thousand. What should the architect raise first?",
+      "options": [
+        "The cost of additional licenses",
+        "The need for a larger model",
+        "Which assumptions held at ten users and may not hold at two thousand",
+        "The training schedule"
+      ],
+      "answers": "C",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "explanation": "Scale invalidates assumptions about inputs, support, and edge cases, and naming those is the architect's contribution. Licenses (A), model size (B), and training (D) are downstream of knowing what breaks.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "29",
+      "question": "What most reduces the risk that a delivered solution decays after handover?",
+      "options": [
+        "Full documentation at delivery",
+        "A longer warranty period",
+        "Training every user",
+        "A named owner with a defined routine for evaluation, monitoring, and update"
+      ],
+      "answers": "D",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "explanation": "Decay is prevented by ongoing ownership and a routine, not by artefacts produced once. Documentation (A) and training (C) age, and a warranty (B) covers defects rather than drift.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "30",
+      "question": "How should an architect choose a model for a solution with several different tasks?",
+      "options": [
+        "Match each task to the smallest model that meets its requirement, and evaluate the choices",
+        "One model for everything, for simplicity",
+        "The largest model for everything, for safety",
+        "The newest model for everything"
+      ],
+      "answers": "A",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "explanation": "Different tasks have different requirements, and matching each keeps cost proportionate while evidence supports the choice. Uniform choices (B, C, D) optimise for convenience rather than fit.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "31",
+      "question": "What is the correct treatment of the context window in a production design?",
+      "options": [
+        "A capacity to fill as fully as possible",
+        "A budget to allocate deliberately between instructions, retrieved material, and working state",
+        "A limit that only matters for long documents",
+        "A setting to raise when quality drops"
+      ],
+      "answers": "B",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "explanation": "Context is a scarce resource whose allocation determines quality, so it is designed rather than consumed. Filling it (A) invites dilution, it matters well beyond long documents (C), and enlarging it (D) does not fix an allocation problem.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "32",
+      "question": "A solution's prompts are maintained by three teams and have diverged. What is the appropriate remedy?",
+      "options": [
+        "Appoint one team to own all prompting",
+        "Freeze the prompts",
+        "Version the prompts as artefacts with defined ownership, review, and evaluation on change",
+        "Move all prompts into the system prompt"
+      ],
+      "answers": "C",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "explanation": "Prompts that determine production behavior deserve the same lifecycle as code. Centralising ownership (A) may not fit the organization, freezing (B) blocks improvement, and relocation (D) does not address governance.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "33",
+      "question": "An organization wants consistent Claude Code practice across many repositories. What is the most durable approach?",
+      "options": [
+        "A written policy circulated by email",
+        "A one-off training session",
+        "Requiring approval for each use",
+        "Committed project memory and shared skills in each repository, reviewed like code"
+      ],
+      "answers": "D",
+      "topic": "Developer Productivity & Operational Enablement",
+      "explanation": "Conventions travel when they live in the repository and are reviewed with the work. Policies (A) and training (B) fade, and per-use approval (C) creates friction without conveying practice.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "34",
+      "question": "What is the most useful measure of whether a developer enablement program is working?",
+      "options": [
+        "Change in the outcomes the tooling was adopted to improve",
+        "The number of people trained",
+        "License utilization",
+        "The volume of tool calls"
+      ],
+      "answers": "A",
+      "topic": "Developer Productivity & Operational Enablement",
+      "explanation": "Enablement is justified by the outcome it moves, which is what should be measured. Attendance (B), utilization (C), and activity (D) measure uptake rather than benefit.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "35",
+      "question": "A team reports that Claude Code helps with new code but hurts on a legacy service. What should the architect investigate?",
+      "options": [
+        "Whether the team needs more training",
+        "Whether the legacy service lacks the committed context and conventions the model needs",
+        "Whether a larger model would help",
+        "Whether the legacy service should be rewritten"
+      ],
+      "answers": "B",
+      "topic": "Developer Productivity & Operational Enablement",
+      "explanation": "A difference between codebases usually reflects a difference in the context available in each. Training (A) does not supply repository context, a larger model (C) cannot infer undocumented conventions, and a rewrite (D) is a disproportionate response to a diagnosis not yet made.",
+      "themes": {
+        "tasks": [
+          "practice-questions"
+        ]
+      }
+    },
+    {
+      "id": "36",
+      "question": "A retailer wants Claude to answer product questions from a 40,000-document catalog that changes daily. Which architecture fits?",
+      "options": [
+        "Fine-tune a model on the catalog nightly",
+        "Load the catalog into the system prompt",
+        "Retrieval over an index refreshed as the catalog changes, with the model answering from retrieved context",
+        "An autonomous agent that browses the public website"
+      ],
+      "answers": "C",
+      "topic": "Solution Design & Architecture",
+      "explanation": "Frequently changing knowledge belongs in retrieval, not in weights or a context window",
+      "themes": {
+        "tasks": [
+          "mock-exam-1"
+        ]
+      }
+    },
+    {
+      "id": "37",
+      "question": "After a re-index, your retrieval system returns semantically similar but commercially wrong products. Which investigation comes first?",
+      "options": [
+        "The generation prompt",
+        "The model version",
+        "The user interface",
+        "Chunking and embedding configuration, and whether the index was rebuilt consistently"
+      ],
+      "answers": "D",
+      "topic": "Integration",
+      "explanation": "Degradation following a re-index points at chunking, embeddings, and index consistency",
+      "themes": {
+        "tasks": [
+          "mock-exam-1"
+        ]
+      }
+    },
+    {
+      "id": "38",
+      "question": "An agent used by 300 employees exposes 45 tools across eight systems. Selection quality is degrading. What is the architectural response?",
+      "options": [
+        "Scope toolsets per task or role, with progressive discovery for the rest",
+        "Shorten all tool descriptions",
+        "Merge tools into a few multi-mode tools",
+        "Replace the agent with a larger model"
+      ],
+      "answers": "A",
+      "topic": "Integration",
+      "explanation": "At large tool counts, scoping and progressive discovery preserve selection quality",
+      "themes": {
+        "tasks": [
+          "mock-exam-1"
+        ]
+      }
+    },
+    {
+      "id": "39",
+      "question": "Which evaluation design best fits a summarization feature where quality is subjective?",
+      "options": [
+        "Exact match against reference summaries",
+        "A rubric covering the failure modes that matter, applied by model graders and periodically audited by humans on a labeled set",
+        "Average output length compared to references",
+        "User thumbs-up counts alone"
+      ],
+      "answers": "B",
+      "topic": "Evaluation, Testing & Optimization",
+      "explanation": "Subjective quality becomes measurable through rubrics, labeled sets, and mixed methodology",
+      "themes": {
+        "tasks": [
+          "mock-exam-1"
+        ]
+      }
+    },
+    {
+      "id": "40",
+      "question": "Before a prompt change reaches all users, what is the disciplined sequence?",
+      "options": [
+        "Ship it and monitor complaints",
+        "Team vote followed by rollout",
+        "Regression evaluation, then a controlled A/B against the current prompt on predefined metrics, then rollout",
+        "Rollout with a feedback form"
+      ],
+      "answers": "C",
+      "topic": "Evaluation, Testing & Optimization",
+      "explanation": "Prompt changes are production changes: regression first, then a controlled comparison",
+      "themes": {
+        "tasks": [
+          "mock-exam-1"
+        ]
+      }
+    },
+    {
+      "id": "41",
+      "question": "A hospital system requires that protected health information never reach the model provider, while clinicians need free-text search. Which design satisfies both?",
+      "options": [
+        "A policy instructing clinicians not to type identifiers",
+        "A system prompt instructing the model to disregard PHI",
+        "Restricting the feature to structured queries only",
+        "A de-identification layer that removes or tokenizes PHI before the call, with local re-association and auditing"
+      ],
+      "answers": "D",
+      "topic": "Governance, Safety & Risk Management",
+      "explanation": "Compliance boundaries are enforced architecturally before data crosses, and audited",
+      "themes": {
+        "tasks": [
+          "mock-exam-1"
+        ]
+      }
+    },
+    {
+      "id": "42",
+      "question": "Which is the correct application of human-in-the-loop review at scale?",
+      "options": [
+        "Route by confidence and consequence, so low-confidence and high-impact cases reach humans while routine cases flow through",
+        "Review every output regardless of risk",
+        "Review a fixed 10% sample chosen at random",
+        "Review only what users complain about"
+      ],
+      "answers": "A",
+      "topic": "Governance, Safety & Risk Management",
+      "explanation": "Confidence and consequence routing makes human review affordable and effective",
+      "themes": {
+        "tasks": [
+          "mock-exam-1"
+        ]
+      }
+    },
+    {
+      "id": "43",
+      "question": "An executive sponsor demands a single accuracy number for a system whose performance varies sharply by document type. What does a competent architect present?",
+      "options": [
+        "The highest observed number",
+        "Performance broken out by document type with the aggregate, the measurement method, and what the business outcome is after human review",
+        "A refusal to quantify",
+        "An average weighted to look favorable"
+      ],
+      "answers": "B",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "explanation": "Honest segmentation plus method and end-to-end outcome is what earns and keeps trust",
+      "themes": {
+        "tasks": [
+          "mock-exam-1"
+        ]
+      }
+    },
+    {
+      "id": "44",
+      "question": "Your design must satisfy GDPR for EU customer data. Which requirement most directly shapes the architecture?",
+      "options": [
+        "Response latency targets",
+        "The choice of programming language",
+        "Data minimization, purpose limitation, and the ability to delete personal data on request",
+        "The number of model providers"
+      ],
+      "answers": "C",
+      "topic": "Governance, Safety & Risk Management",
+      "explanation": "GDPR drives minimization, purpose limitation, and erasure, all of which shape design",
+      "themes": {
+        "tasks": [
+          "mock-exam-1"
+        ]
+      }
+    },
+    {
+      "id": "45",
+      "question": "Which is the correct reason to prefer a workflow over an agent for a document intake process?",
+      "options": [
+        "Workflows are always more accurate",
+        "Agents cannot process documents",
+        "Workflows use less context",
+        "The processing path is known in advance, so deterministic orchestration is cheaper, testable, and auditable"
+      ],
+      "answers": "D",
+      "topic": "Solution Design & Architecture",
+      "explanation": "Known path, deterministic orchestration; autonomy earns its complexity only when the path is not known",
+      "themes": {
+        "tasks": [
+          "mock-exam-1"
+        ]
+      }
+    },
+    {
+      "id": "46",
+      "question": "An application sends an identical 12,000-token policy preamble on every request. Which optimization addresses both latency and cost?",
+      "options": [
+        "Ordering the static preamble first and enabling prompt caching",
+        "Splitting the preamble across two requests",
+        "Summarizing the preamble with the model at request time",
+        "Moving the preamble into a few-shot block"
+      ],
+      "answers": "A",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "explanation": "A stable cached prefix cuts time-to-first-token and per-request cost together",
+      "themes": {
+        "tasks": [
+          "mock-exam-1"
+        ]
+      }
+    },
+    {
+      "id": "47",
+      "question": "What belongs in an architecture decision record for a Claude system?",
+      "options": [
+        "The final design only",
+        "The decision, the alternatives considered, the tradeoffs, and the constraints that drove the choice",
+        "The team members involved",
+        "The implementation timeline"
+      ],
+      "answers": "B",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "explanation": "A decision record captures alternatives and tradeoffs, not just the outcome",
+      "themes": {
+        "tasks": [
+          "mock-exam-1"
+        ]
+      }
+    },
+    {
+      "id": "48",
+      "question": "Observability for a production agent should capture which of the following to make incidents diagnosable?",
+      "options": [
+        "Final outputs only",
+        "Aggregate latency metrics only",
+        "Traces of tool calls, retrieved context, and decision points alongside outputs",
+        "User feedback only"
+      ],
+      "answers": "C",
+      "topic": "Evaluation, Testing & Optimization",
+      "explanation": "Without traces of tool calls and retrieved context, failures cannot be localized to a layer",
+      "themes": {
+        "tasks": [
+          "mock-exam-1"
+        ]
+      }
+    },
+    {
+      "id": "49",
+      "question": "A partner team wants to adopt your Claude Code setup. What makes adoption durable rather than a one-time handoff?",
+      "options": [
+        "A recorded walkthrough",
+        "A shared chat channel",
+        "Individual coaching sessions",
+        "Version-controlled shared configuration, common skills and commands, and an onboarding path that new engineers follow"
+      ],
+      "answers": "D",
+      "topic": "Developer Productivity & Operational Enablement",
+      "explanation": "Shared, versioned configuration with an onboarding path is what makes adoption stick",
+      "themes": {
+        "tasks": [
+          "mock-exam-1"
+        ]
+      }
+    },
+    {
+      "id": "50",
+      "question": "Which change best reduces risk in an agent that can both read and modify production records?",
+      "options": [
+        "Separating read and write capabilities, granting write access only where the role requires it, and gating writes behind explicit approval",
+        "Logging modifications for later review",
+        "Requiring a longer system prompt about caution",
+        "Running the agent during business hours only"
+      ],
+      "answers": "A",
+      "topic": "Integration",
+      "explanation": "Least privilege plus approval gates on writes reduces the surface rather than monitoring it",
+      "themes": {
+        "tasks": [
+          "mock-exam-1"
+        ]
+      }
+    },
+    {
+      "id": "51",
+      "question": "A client requires that inference run inside their own AWS account. What does this determine?",
+      "options": [
+        "The model family only",
+        "That a data processing agreement is sufficient",
+        "Deployment through Amazon Bedrock in the client's account and region",
+        "That request logging must be disabled"
+      ],
+      "answers": "C",
+      "topic": "Integration",
+      "explanation": "Running inside the client's own cloud boundary is what the requirement describes. A contract (B) and logging settings (D) do not keep the data in the account, and the model family (A) is a separate choice",
+      "themes": {
+        "tasks": [
+          "mock-exam-2"
+        ]
+      }
+    },
+    {
+      "id": "52",
+      "question": "An enterprise standardised on Google Cloud wants identity and audit handled by existing controls. What follows?",
+      "options": [
+        "Deploy through Vertex AI so the platform's identity, billing, and audit apply",
+        "Use the Claude API and rebuild the controls",
+        "Use Bedrock for feature parity",
+        "Let each team decide"
+      ],
+      "answers": "A",
+      "topic": "Integration",
+      "explanation": "Aligning with the governed platform makes existing controls apply without duplication. Rebuilding (B) drifts, a different cloud (C) creates a second control plane, and per-team choice (D) removes governance",
+      "themes": {
+        "tasks": [
+          "mock-exam-2"
+        ]
+      }
+    },
+    {
+      "id": "53",
+      "question": "What is the main architectural benefit of routing all model traffic through one internal service?",
+      "options": [
+        "Lower token prices",
+        "It removes the need for evaluation",
+        "It guarantees lower latency",
+        "Authentication, rate limiting, logging, and routing are applied consistently in one place"
+      ],
+      "answers": "D",
+      "topic": "Integration",
+      "explanation": "A single integration point is where cross-cutting concerns are enforced and changed once. It does not change unit price (A), remove evaluation (B), or reduce latency (C)",
+      "themes": {
+        "tasks": [
+          "mock-exam-2"
+        ]
+      }
+    },
+    {
+      "id": "54",
+      "question": "Two designs both satisfy the requirement; one is materially simpler. What decides?",
+      "options": [
+        "The more capable design, since headroom is valuable",
+        "Whether any stated requirement needs the extra capability, against the ongoing cost of complexity",
+        "Whichever the team prefers to build",
+        "The one with more components, for flexibility"
+      ],
+      "answers": "B",
+      "topic": "Solution Design & Architecture",
+      "explanation": "Complexity is paid for continuously, so it must be bought by a real requirement. Headroom (A), preference (C), and speculative flexibility (D) pay that cost without justification",
+      "themes": {
+        "tasks": [
+          "mock-exam-2"
+        ]
+      }
+    },
+    {
+      "id": "55",
+      "question": "A required compliance control depends on the model behaving correctly. What is the correct judgment?",
+      "options": [
+        "Acceptable if measured accuracy is very high",
+        "Not acceptable: a required control must be enforced deterministically outside the model",
+        "Acceptable with a documented residual risk",
+        "Acceptable if a larger model is used"
+      ],
+      "answers": "B",
+      "topic": "Solution Design & Architecture",
+      "explanation": "A control that must hold needs a guarantee, which probabilistic behavior cannot supply. High accuracy (A), documentation (C), and model size (D) do not convert a tendency into a guarantee",
+      "themes": {
+        "tasks": [
+          "mock-exam-2"
+        ]
+      }
+    },
+    {
+      "id": "56",
+      "question": "Where should the boundary of automation be drawn in a solution that makes customer-affecting decisions?",
+      "options": [
+        "Wherever the model performs well in testing",
+        "As far as the budget allows",
+        "At whatever the client requests",
+        "Where accountability for the decision sits, keeping those decisions with a person"
+      ],
+      "answers": "D",
+      "topic": "Solution Design & Architecture",
+      "explanation": "Accountability determines what may be automated at all, and that boundary is an architectural decision. Test performance (A), budget (B), and unexamined requests (C) do not address responsibility",
+      "themes": {
+        "tasks": [
+          "mock-exam-2"
+        ]
+      }
+    },
+    {
+      "id": "57",
+      "question": "What must exist before a solution is declared production-ready?",
+      "options": [
+        "A defined success criterion and measured performance against representative data",
+        "A successful demonstration",
+        "Sign-off from the engineering team",
+        "A completed cost model"
+      ],
+      "answers": "A",
+      "topic": "Evaluation, Testing & Optimization",
+      "explanation": "Readiness is a measured claim against a stated bar. A demonstration (B), consensus (C), and cost (D) do not establish whether it works",
+      "themes": {
+        "tasks": [
+          "mock-exam-2"
+        ]
+      }
+    },
+    {
+      "id": "58",
+      "question": "An evaluation set contains only cases the system already handles. What is the effect?",
+      "options": [
+        "It provides a reliable quality measure",
+        "It is fine if it is large",
+        "It overstates performance and conceals the failures that matter",
+        "It matters only in regulated contexts"
+      ],
+      "answers": "C",
+      "topic": "Evaluation, Testing & Optimization",
+      "explanation": "An unrepresentative sample measures the wrong distribution, and size does not correct bias. It is not reliable (A), scale does not fix it (B), and the problem is general (D)",
+      "themes": {
+        "tasks": [
+          "mock-exam-2"
+        ]
+      }
+    },
+    {
+      "id": "59",
+      "question": "How should a request to log every prompt and response for audit be handled?",
+      "options": [
+        "Implement it, since audit takes precedence",
+        "Decline, because logging creates risk",
+        "Log responses but not prompts",
+        "Establish what the audit requires, because prompts and responses may contain personal or confidential data"
+      ],
+      "answers": "D",
+      "topic": "Governance, Safety & Risk Management",
+      "explanation": "Audit and data protection are both real, and the design must serve the audit purpose without retaining more than warranted. Blanket action (A) or refusal (B) ignores one side, and an arbitrary split (C) is unjustified",
+      "themes": {
+        "tasks": [
+          "mock-exam-2"
+        ]
+      }
+    },
+    {
+      "id": "60",
+      "question": "Who is accountable when an automated Claude workflow produces a harmful decision?",
+      "options": [
+        "The model provider",
+        "The engineer who wrote the prompt",
+        "The organization that deployed it",
+        "No one, because the decision was automated"
+      ],
+      "answers": "C",
+      "topic": "Governance, Safety & Risk Management",
+      "explanation": "Deploying an automated decision means owning its outcomes. The provider (A) supplies a capability, individual authorship (B) does not transfer organizational responsibility, and automation does not remove accountability (D)",
+      "themes": {
+        "tasks": [
+          "mock-exam-2"
+        ]
+      }
+    },
+    {
+      "id": "61",
+      "question": "A sponsor asks for one number that shows whether the solution is working. What is the right response?",
+      "options": [
+        "Give the headline accuracy figure",
+        "Give the measure tied to the decision they face, and state what it does not cover",
+        "Explain that this cannot be reduced to a number",
+        "Give the model's benchmark score"
+      ],
+      "answers": "B",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "explanation": "A useful metric matches the decision and is honest about its limits. A bare accuracy figure (A) and a benchmark (D) can mislead, and refusing (C) fails the sponsor",
+      "themes": {
+        "tasks": [
+          "mock-exam-2"
+        ]
+      }
+    },
+    {
+      "id": "62",
+      "question": "A ten-user pilot is about to expand to two thousand users. What should the architect raise first?",
+      "options": [
+        "Which assumptions held at ten users and may not hold at two thousand",
+        "License cost",
+        "Whether a larger model is needed",
+        "The training rollout plan"
+      ],
+      "answers": "A",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "explanation": "Scale invalidates assumptions about inputs, support, and edge cases, and surfacing those is the architect's contribution. Cost (B), model size (C), and training (D) follow from knowing what breaks",
+      "themes": {
+        "tasks": [
+          "mock-exam-2"
+        ]
+      }
+    },
+    {
+      "id": "63",
+      "question": "How should a model be chosen for a solution containing several distinct tasks?",
+      "options": [
+        "Match each task to the smallest model meeting its requirement, and evaluate the choices",
+        "One model everywhere, for simplicity",
+        "The largest model everywhere, for safety",
+        "The newest model everywhere"
+      ],
+      "answers": "A",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "explanation": "Different tasks have different requirements, and matching each keeps cost proportionate on evidence. Uniform choices (B, C, D) optimise for convenience rather than fit",
+      "themes": {
+        "tasks": [
+          "mock-exam-2"
+        ]
+      }
+    },
+    {
+      "id": "64",
+      "question": "How should the context window be treated in a production design?",
+      "options": [
+        "As capacity to fill as completely as possible",
+        "As a budget allocated deliberately between instructions, retrieved material, and working state",
+        "As a concern only for long documents",
+        "As a setting to increase whenever quality drops"
+      ],
+      "answers": "B",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "explanation": "Context is scarce and its allocation drives quality, so it is designed. Filling it (A) dilutes, it matters beyond long documents (C), and enlarging it (D) does not fix allocation",
+      "themes": {
+        "tasks": [
+          "mock-exam-2"
+        ]
+      }
+    },
+    {
+      "id": "65",
+      "question": "An organization wants consistent Claude Code practice across dozens of repositories. What is most durable?",
+      "options": [
+        "A policy document circulated once",
+        "A single training session",
+        "Committed project memory and shared skills in each repository, reviewed like code",
+        "Requiring approval for every use"
+      ],
+      "answers": "C",
+      "topic": "Developer Productivity & Operational Enablement",
+      "explanation": "Conventions persist when they live in the repository and are reviewed with the work. Policies (A) and training (B) fade, and per-use approval (D) adds friction without conveying practice",
+      "themes": {
+        "tasks": [
+          "mock-exam-2"
+        ]
+      }
+    },
+    {
+      "id": "66",
+      "question": "A client will not accept a solution whose behavior cannot be explained to their auditor. What does this constrain?",
+      "options": [
+        "The model family only",
+        "The cost model",
+        "The architecture, which must make decisions traceable and the controls inspectable",
+        "The deployment region"
+      ],
+      "answers": "C",
+      "topic": "Integration",
+      "explanation": "Auditability is an architectural property covering tracing and inspectable controls. Model family (A), cost (B), and region (D) do not by themselves make behavior explicable",
+      "themes": {
+        "tasks": [
+          "mock-exam-3"
+        ]
+      }
+    },
+    {
+      "id": "67",
+      "question": "What is the main risk of building directly against a single cloud's model service with no abstraction?",
+      "options": [
+        "Moving later becomes expensive, because the coupling reaches into application code",
+        "Higher token cost",
+        "Lower accuracy",
+        "Slower responses"
+      ],
+      "answers": "A",
+      "topic": "Integration",
+      "explanation": "Coupling determines the cost of change, which is the architectural concern. Cost (B), accuracy (C), and latency (D) are not consequences of the coupling itself",
+      "themes": {
+        "tasks": [
+          "mock-exam-3"
+        ]
+      }
+    },
+    {
+      "id": "68",
+      "question": "A solution must serve users in two regions with different data residency rules. What follows?",
+      "options": [
+        "One deployment in the cheaper region",
+        "A single deployment with encryption in transit",
+        "Whichever region has the lowest latency",
+        "Separate deployments whose data stays within each region's boundary"
+      ],
+      "answers": "D",
+      "topic": "Integration",
+      "explanation": "Residency is satisfied by keeping the data within each boundary. A single deployment (A, B) moves data across it, and latency (C) does not address the rule",
+      "themes": {
+        "tasks": [
+          "mock-exam-3"
+        ]
+      }
+    },
+    {
+      "id": "69",
+      "question": "A requirement is stated as make it as accurate as possible. What should the architect do?",
+      "options": [
+        "Choose the largest model and optimise from there",
+        "Establish the accuracy the use case actually needs and what an error costs",
+        "Build the most complex design the budget allows",
+        "Defer the question until after the pilot"
+      ],
+      "answers": "B",
+      "topic": "Solution Design & Architecture",
+      "explanation": "An unbounded requirement cannot be designed against or verified, so it must be made concrete. Defaulting to maximum capability (A, C) spends without a target, and deferring (D) leaves the design unanchored",
+      "themes": {
+        "tasks": [
+          "mock-exam-3"
+        ]
+      }
+    },
+    {
+      "id": "70",
+      "question": "Two components each work correctly but the system fails intermittently at their boundary. What does this suggest?",
+      "options": [
+        "One component needs a larger model",
+        "The contract between them is underspecified, particularly for edge and error cases",
+        "The system needs more components",
+        "The failure is transient and can be retried"
+      ],
+      "answers": "B",
+      "topic": "Solution Design & Architecture",
+      "explanation": "Boundary failures between correct components point at the contract. Capability (A) and more components (C) do not define the interface, and retrying (D) hides it",
+      "themes": {
+        "tasks": [
+          "mock-exam-3"
+        ]
+      }
+    },
+    {
+      "id": "71",
+      "question": "A design proposes storing every model interaction indefinitely. What should the architect raise?",
+      "options": [
+        "Nothing, retention is always safer",
+        "That storage is expensive",
+        "That it will slow the system",
+        "Why the data is needed, for how long, and what obligations retention creates"
+      ],
+      "answers": "D",
+      "topic": "Governance, Safety & Risk Management",
+      "explanation": "Retention creates obligations and risk, so purpose and duration must justify it. Treating retention as free of risk (A) is the error, and cost (B) and speed (C) are minor by comparison",
+      "themes": {
+        "tasks": [
+          "mock-exam-3"
+        ]
+      }
+    },
+    {
+      "id": "72",
+      "question": "How should a solution handle the case where the model is confident and wrong?",
+      "options": [
+        "Design so that consequential outputs are verified against something independent of the model",
+        "Trust the confidence signal",
+        "Ask the model to double-check",
+        "Use two models and take the agreement"
+      ],
+      "answers": "A",
+      "topic": "Governance, Safety & Risk Management",
+      "explanation": "Independence is what catches confident error. Confidence (B) is not evidence, self-checking (C) is not independent, and two models can agree and both be wrong (D)",
+      "themes": {
+        "tasks": [
+          "mock-exam-3"
+        ]
+      }
+    },
+    {
+      "id": "73",
+      "question": "An evaluation shows 94% accuracy. What else must be known before this is actionable?",
+      "options": [
+        "The model version only",
+        "The token cost of the evaluation",
+        "What the 6% look like, and what each failure costs",
+        "How long the evaluation took"
+      ],
+      "answers": "C",
+      "topic": "Evaluation, Testing & Optimization",
+      "explanation": "A headline rate is only meaningful alongside the shape and cost of the failures. Version (A), cost (B), and duration (D) do not describe the risk",
+      "themes": {
+        "tasks": [
+          "mock-exam-3"
+        ]
+      }
+    },
+    {
+      "id": "74",
+      "question": "What should happen when a model version is updated beneath a production solution?",
+      "options": [
+        "Nothing, versions are compatible",
+        "Increase monitoring for a week",
+        "Roll back automatically if complaints rise",
+        "Re-run the evaluation suite before the change reaches production traffic"
+      ],
+      "answers": "D",
+      "topic": "Evaluation, Testing & Optimization",
+      "explanation": "A change to the thing that determines behavior invalidates prior measurement. Assuming compatibility (A) is unsafe, and monitoring (B) or reacting to complaints (C) detects after users are affected",
+      "themes": {
+        "tasks": [
+          "mock-exam-3"
+        ]
+      }
+    },
+    {
+      "id": "75",
+      "question": "A stakeholder asks why the solution cannot simply be fully automated. What is the most useful answer?",
+      "options": [
+        "That the technology is not ready",
+        "That automation is always risky",
+        "Which specific decisions carry accountability or are unverifiable, and what automating them would risk",
+        "That the budget does not allow it"
+      ],
+      "answers": "C",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "explanation": "A specific, reasoned boundary is actionable and can be revisited. Generic claims about readiness (A) or risk (B) are not, and budget (D) is not the reason",
+      "themes": {
+        "tasks": [
+          "mock-exam-3"
+        ]
+      }
+    },
+    {
+      "id": "76",
+      "question": "What should be handed over with a solution so it survives its first year?",
+      "options": [
+        "The source code",
+        "The evaluation suite, the criteria, the owner, and the routine for re-checking",
+        "A recorded demonstration",
+        "A list of prompts used"
+      ],
+      "answers": "B",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "explanation": "Continuity depends on being able to measure and maintain, with someone responsible. Code (A), a demonstration (C), and prompts (D) are artefacts without the means to verify them",
+      "themes": {
+        "tasks": [
+          "mock-exam-3"
+        ]
+      }
+    },
+    {
+      "id": "77",
+      "question": "A team reports the solution has become worse, but nothing was deployed. What is the most likely explanation?",
+      "options": [
+        "The inputs or the surrounding usage changed",
+        "The model degraded on its own",
+        "The prompts wore out",
+        "The evaluation was wrong originally"
+      ],
+      "answers": "A",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "explanation": "Behavior changes with what is fed to it, and distribution drift is the usual cause. Models do not degrade unprompted (B), prompts do not wear out (C), and the original evaluation is not the first suspect (D)",
+      "themes": {
+        "tasks": [
+          "mock-exam-3"
+        ]
+      }
+    },
+    {
+      "id": "78",
+      "question": "How should prompts that determine production behavior be managed?",
+      "options": [
+        "Versioned, owned, reviewed, and evaluated on change, like code",
+        "Edited in place when someone notices a problem",
+        "Kept in a shared document for easy editing",
+        "Frozen after launch"
+      ],
+      "answers": "A",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "explanation": "Anything that determines production behavior needs the lifecycle of code. Ad hoc edits (B) and open documents (C) invite unreviewed change, and freezing (D) blocks improvement",
+      "themes": {
+        "tasks": [
+          "mock-exam-3"
+        ]
+      }
+    },
+    {
+      "id": "79",
+      "question": "An organization asks how to measure whether Claude Code is worth the license cost. What should be measured?",
+      "options": [
+        "Number of tool invocations",
+        "Change in the delivery outcomes the tooling was adopted to improve",
+        "Number of users onboarded",
+        "Hours spent in the tool"
+      ],
+      "answers": "B",
+      "topic": "Developer Productivity & Operational Enablement",
+      "explanation": "Value is the outcome moved, not the activity generated. Invocations (A), onboarding (C), and time in tool (D) measure usage rather than benefit",
+      "themes": {
+        "tasks": [
+          "mock-exam-3"
+        ]
+      }
+    },
+    {
+      "id": "80",
+      "question": "What most often blocks a team from getting good results from Claude Code on an existing codebase?",
+      "options": [
+        "The size of the repository",
+        "The programming language",
+        "The absence of committed context describing the conventions and structure",
+        "The number of contributors"
+      ],
+      "answers": "C",
+      "topic": "Developer Productivity & Operational Enablement",
+      "explanation": "Missing project context is the usual cause, and it is the one the team can fix. Size (A), language (B), and contributor count (D) do not by themselves prevent good results",
+      "themes": {
+        "tasks": [
+          "mock-exam-3"
+        ]
+      }
+    }
+  ]
+}

@@ -83,5 +83,28 @@
       }
     },
     "questionCount": 80
+  },
+  {
+    "file": "CCAR-P questions.json",
+    "exam": {
+      "name": "Claude Certified Architect - Professional",
+      "code": "CCAR-P",
+      "totalQuestions": 63,
+      "timeLimitMinutes": 120,
+      "passingScore": {
+        "passingScore": 720,
+        "scale": 1000
+      },
+      "weights": {
+        "Solution Design & Architecture": 17,
+        "Claude Models, Prompting & Context Engineering": 13,
+        "Integration": 19,
+        "Evaluation, Testing & Optimization": 16,
+        "Governance, Safety & Risk Management": 14,
+        "Stakeholder Communication & Lifecycle Management": 14,
+        "Developer Productivity & Operational Enablement": 7
+      }
+    },
+    "questionCount": 80
   }
 ]
