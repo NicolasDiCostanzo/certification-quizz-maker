@@ -191,6 +191,9 @@ export function useAccount() {
     const user = await auth.restoreSession()
     if (!user) {
       if (account.accountMode === 'account') {
+        const guest = account.takeGuestSnapshot()
+        progressStore.replaceAll(guest.progress?.byExamCode ?? {})
+        historyStore.replaceAll(guest.history?.entries ?? [])
         account.accountMode = null
         account.user = null
       }
