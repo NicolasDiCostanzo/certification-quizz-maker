@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
@@ -32,6 +32,7 @@ const router = createRouter({
   history: createMemoryHistory(),
   routes: [
     { path: '/', name: 'cert-selector', component: { template: '<div/>' } },
+    { path: '/certs/:certCode', name: 'quiz-dashboard', component: { template: '<div/>' } },
     { path: '/certs/:certCode/quiz/review', name: 'quiz-review', component: QuizReviewView },
   ],
 })
@@ -180,7 +181,7 @@ describe('QuizReviewView', () => {
     expect(progressStore.isFlagged('TEST', 'q1')).toBe(true)
   })
 
-  it('navigates to home when the CTA is clicked', async () => {
+  it('navigates to the cert dashboard and clears the session when the CTA is clicked', async () => {
     store.startSession('TEST', { certCode: 'TEST', mode: 'preparation', includeMatchMode: 'or', replayMode: 'all', count: 'all' }, makeQuestions(), undefined)
     store.answerQuestion('q1', ['B'])
     store.finishSession({ percentCorrect: 100, passed: true, timesCorrect: 1, totalAnswered: 1 })
@@ -188,6 +189,10 @@ describe('QuizReviewView', () => {
     await router.push('/certs/TEST/quiz/review')
     const wrapper = mount(QuizReviewView, { global: { plugins: [pinia, router] } })
     await wrapper.find('.btn--primary').trigger('click')
+    await flushPromises()
+
     expect(store.hasSession).toBe(false)
+    expect(router.currentRoute.value.name).toBe('quiz-dashboard')
+    expect(router.currentRoute.value.params.certCode).toBe('TEST')
   })
 })

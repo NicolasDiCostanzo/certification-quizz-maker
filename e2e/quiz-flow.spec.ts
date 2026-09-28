@@ -17,7 +17,7 @@ import {
   expectFlaggedReviewEnabled,
   expectSingleHistoryEntry,
   goBackToDashboard,
-  goBackToHome,
+  goBackToCertDashboard,
   openCertDashboardCard,
   openFlaggedReviewOnly,
   signOut,
@@ -183,8 +183,7 @@ test.describe.serial('quiz journey on the DVA-C02 certification', () => {
   })
 
   test('shows the all-time score and quiz history entry on the dashboard', async ({ sharedPage: page }) => {
-    await goBackToHome(page)
-    await openCertDashboardCard(page, certExamName)
+    await goBackToCertDashboard(page)
     await expect(page).toHaveURL(new RegExp(`#/certs/${certCode}$`))
 
     await expectDashboardStat(page, texts.quizzesTaken, '1')
