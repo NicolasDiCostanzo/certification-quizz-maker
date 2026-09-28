@@ -22,6 +22,12 @@ vi.mock('../services/auth', () => ({
   confirmPasswordReset: vi.fn(),
   signIn: vi.fn(),
   signOut: vi.fn(),
+  restoreSession: vi.fn(),
+}))
+
+let syncConfigured = true
+vi.mock('../config', () => ({
+  isSyncConfigured: () => syncConfigured,
 }))
 
 const adapter = { pull: vi.fn(), push: vi.fn() }
@@ -96,8 +102,10 @@ beforeEach(async () => {
   createApp({ render: () => null }).use(pinia)
   setActivePinia(pinia)
   vi.clearAllMocks()
+  syncConfigured = true
   pushRoute.mockResolvedValue(undefined)
   auth = await import('../services/auth')
+  vi.mocked(auth.restoreSession).mockResolvedValue(null)
   ;({ useAccount } = await import('./useAccount'))
 })
 
@@ -882,5 +890,88 @@ describe('useAccount pushLocalDataDebounced', () => {
 
     await expect(signOut()).resolves.toBeUndefined()
     expect(auth.signOut).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('useAccount session restore on load', () => {
+  it('signs the user in and pulls the account data when a persisted session is restored', async () => {
+    seedDeviceData()
+    vi.mocked(auth.restoreSession).mockResolvedValue(USER)
+    adapter.pull.mockResolvedValue(makePayload())
+
+    await expect(useAccount().restoreAccountSession()).resolves.toBe(true)
+
+    const account = useUserAccountStore()
+    expect(account.user).toEqual(USER)
+    expect(account.accountMode).toBe('account')
+    expect(adapter.pull).toHaveBeenCalledOnce()
+
+    // The account's data replaces the device's, exactly as at sign-in.
+    const progressStore = useUserProgressStore()
+    expect(progressStore.byExamCode['DVA-C02']?.q1?.attempts).toBe(1)
+    expect(progressStore.byExamCode['DVA-C02']?.qDev).toBeUndefined()
+  })
+
+  it('does not re-stash the guest snapshot, so sign-out still restores the pre-sign-in data', async () => {
+    seedDeviceData()
+    const account = useUserAccountStore()
+    account.stashGuest(
+      { format: 'quiz-progress', version: 1, exportedAt: '', byExamCode: {} },
+      { format: 'quiz-history', version: 1, exportedAt: '', entries: [] },
+    )
+    vi.mocked(auth.restoreSession).mockResolvedValue(USER)
+    adapter.pull.mockResolvedValue(makePayload())
+
+    await useAccount().restoreAccountSession()
+
+    expect(account.guestProgress).not.toBeNull()
+    expect(account.guestHistory?.entries.map((e) => e.id)).toEqual([])
+  })
+
+  it('clears a stale persisted account mode when no session can be restored', async () => {
+    const account = useUserAccountStore()
+    account.accountMode = 'account'
+    account.user = USER
+    vi.mocked(auth.restoreSession).mockResolvedValue(null)
+
+    await expect(useAccount().restoreAccountSession()).resolves.toBe(false)
+
+    expect(account.accountMode).toBeNull()
+    expect(account.user).toBeNull()
+    expect(adapter.pull).not.toHaveBeenCalled()
+  })
+
+  it('leaves a local-only user alone', async () => {
+    const account = useUserAccountStore()
+    account.accountMode = 'local'
+    vi.mocked(auth.restoreSession).mockResolvedValue(null)
+
+    await expect(useAccount().restoreAccountSession()).resolves.toBe(false)
+
+    expect(account.accountMode).toBe('local')
+  })
+
+  it('never pulls when no sync backend is configured, so local data is not blanked by the no-op adapter', async () => {
+    seedDeviceData()
+    syncConfigured = false
+    vi.mocked(auth.restoreSession).mockResolvedValue(USER)
+
+    await expect(useAccount().restoreAccountSession()).resolves.toBe(true)
+
+    expect(useUserAccountStore().accountMode).toBe('account')
+    expect(adapter.pull).not.toHaveBeenCalled()
+    expect(useUserProgressStore().byExamCode['DVA-C02']?.qDev).toBeDefined()
+  })
+
+  it('keeps push disabled when the pull fails, so blanked local state cannot overwrite the remote document', async () => {
+    seedDeviceData()
+    vi.mocked(auth.restoreSession).mockResolvedValue(USER)
+    adapter.pull.mockRejectedValue(new Error('offline'))
+
+    const { restoreAccountSession, pushLocalData } = useAccount()
+    await restoreAccountSession()
+    await pushLocalData()
+
+    expect(adapter.push).not.toHaveBeenCalled()
   })
 })

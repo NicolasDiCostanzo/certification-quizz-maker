@@ -50,6 +50,16 @@ export async function configureAuth(userPoolId: string, userPoolClientId: string
   }
 }
 
+export async function restoreSession(): Promise<AuthUser | null> {
+  try {
+    const { userId } = await getCurrentUser()
+    const attributes = await fetchUserAttributes()
+    return { userId, email: attributes.email ?? null }
+  } catch {
+    return null
+  }
+}
+
 export async function signOut(): Promise<void> {
   const { signOut: amplifySignOut } = await import('aws-amplify/auth')
   await amplifySignOut()

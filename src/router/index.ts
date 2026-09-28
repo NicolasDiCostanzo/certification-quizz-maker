@@ -53,6 +53,11 @@ router.beforeEach((to) => {
 })
 
 router.beforeEach((to) => {
+  if (to.name !== 'welcome') return
+  if (useUserAccountStore().accountMode === 'account') return { name: 'cert-selector' }
+})
+
+router.beforeEach((to) => {
   if (to.name !== 'quiz-session' && to.name !== 'quiz-review') return
   const session = useQuizSessionStore()
   if (!session.hasSession || session.currentSession?.certCode !== to.params.certCode) {

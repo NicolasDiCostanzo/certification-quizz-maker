@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { configureAuth, confirmPasswordReset, confirmSignUp, requestPasswordReset, resendSignUpCode, signIn, signOut, signUp } from './auth.fake'
+import { configureAuth, confirmPasswordReset, confirmSignUp, FAKE_AUTH_SESSION_KEY, requestPasswordReset, resendSignUpCode, restoreSession, signIn, signOut, signUp } from './auth.fake'
 
 beforeEach(() => {
   localStorage.clear()
@@ -94,6 +94,34 @@ describe('auth.fake', () => {
 
   it('sign-out resolves without throwing', async () => {
     await expect(signOut()).resolves.toBeUndefined()
+  })
+
+  it('restores the signed-in user on a later visit, as a persisted Amplify session would', async () => {
+    await signUp('dev@example.com', 'Passw0rd!')
+    await confirmSignUp('dev@example.com', '123456')
+    const signedIn = await signIn('dev@example.com', 'Passw0rd!')
+
+    await expect(restoreSession()).resolves.toEqual(signedIn)
+  })
+
+  it('restores nothing before any sign-in', async () => {
+    await expect(restoreSession()).resolves.toBeNull()
+  })
+
+  it('restores nothing after signing out', async () => {
+    await signUp('dev@example.com', 'Passw0rd!')
+    await confirmSignUp('dev@example.com', '123456')
+    await signIn('dev@example.com', 'Passw0rd!')
+    await signOut()
+
+    await expect(restoreSession()).resolves.toBeNull()
+  })
+
+  it('drops a session whose user record no longer exists, rather than trusting the stored email', async () => {
+    localStorage.setItem(FAKE_AUTH_SESSION_KEY, JSON.stringify({ userId: 'stale', email: 'gone@example.com' }))
+
+    await expect(restoreSession()).resolves.toBeNull()
+    expect(localStorage.getItem(FAKE_AUTH_SESSION_KEY)).toBeNull()
   })
 
   it('configureAuth resolves true without needing real pool credentials', async () => {

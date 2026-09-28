@@ -2,6 +2,7 @@ import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { createApp } from 'vue'
 import App from './App.vue'
+import { useAccount } from './composables/useAccount'
 import { awsConfig, setAuthRuntimeAvailable } from './config'
 import { router } from './router'
 import { configureAuth } from './services/auth'
@@ -20,7 +21,15 @@ async function bootstrap() {
     }
   }
 
-  createApp(App).use(pinia).use(router).mount('#app')
+  const app = createApp(App)
+  app.use(pinia)
+  app.use(router)
+
+  if (userPoolId && userPoolClientId) {
+    await useAccount().restoreAccountSession()
+  }
+
+  app.mount('#app')
 }
 
 void bootstrap()

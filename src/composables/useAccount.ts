@@ -1,4 +1,5 @@
 import { useRouter } from 'vue-router'
+import { isSyncConfigured } from '../config'
 import * as auth from '../services/auth'
 import type { RemoteSyncPayload } from '../services/remoteSync'
 import { getSyncAdapter, InvalidPullPayload } from '../services/remoteSync'
@@ -189,6 +190,36 @@ export function useAccount() {
     await router.push({ name: 'cert-selector' })
   }
 
+  async function restoreAccountSession(): Promise<boolean> {
+    const user = await auth.restoreSession()
+    if (!user) {
+      if (account.accountMode === 'account') {
+        account.accountMode = null
+        account.user = null
+      }
+      return false
+    }
+    const attempt = ++authAttempt
+    activeAttemptAbort?.abort()
+    const controller = new AbortController()
+    activeAttemptAbort = controller
+    syncSession = null
+    account.user = user
+    account.accountMode = 'account'
+
+    if (!isSyncConfigured()) {
+      syncError.value = null
+      accountDataLoadFailed = false
+      return true
+    }
+
+    const ok = await loadAccountData(controller.signal)
+    if (authAttempt !== attempt) return true
+    syncSession = ok ? Symbol() : null
+    accountDataLoadFailed = !ok
+    return true
+  }
+
   async function signUp(email: string, password: string): Promise<boolean> {
     return auth.signUp(email, password)
   }
@@ -296,6 +327,7 @@ export function useAccount() {
     signIn,
     signOut,
     continueLocal,
+    restoreAccountSession,
     pushLocalData,
     pushLocalDataDebounced,
     syncError,
