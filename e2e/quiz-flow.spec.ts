@@ -13,7 +13,6 @@ import {
 } from './fixtures/deploymentQuiz'
 import { seedConfirmedUser, signIn } from './helpers/authFlow'
 import { freezeTimeAt } from './helpers/clock'
-import { newTestUserCredentials } from './helpers/testUser'
 import {
   expectFlaggedReviewEnabled,
   expectSingleHistoryEntry,
@@ -48,7 +47,12 @@ import {
   expectTopicBreakdownRow,
   openQuestionDetail,
 } from './helpers/review'
+import certManifestJson from '../src/assets/cert-manifest.json' with { type: 'json' }
+import type { CertManifestEntry } from '../src/types'
 import { expect, test } from './helpers/sharedPageFixture'
+import { newTestUserCredentials } from './helpers/testUser'
+
+const certManifest = certManifestJson as unknown as CertManifestEntry[]
 
 const { email, password } = newTestUserCredentials()
 
@@ -72,9 +76,11 @@ test.describe.serial('quiz journey on the DVA-C02 certification', () => {
 
   test('lists every declared certification as a card', async ({ sharedPage: page }) => {
     await page.goto('/#/cert')
-    await expect(page.locator('.cert-card')).toHaveCount(2)
-    await expect(page.getByRole('heading', { name: certExamName })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'AWS Certified Cloud Practitioner' })).toBeVisible()
+
+    await expect(page.locator('.cert-card')).toHaveCount(certManifest.length)
+    for (const entry of certManifest) {
+      await expect(page.getByRole('heading', { name: entry.exam.name })).toBeVisible()
+    }
   })
 
   test('shows a blank dashboard before any quiz is taken', async ({ sharedPage: page }) => {
