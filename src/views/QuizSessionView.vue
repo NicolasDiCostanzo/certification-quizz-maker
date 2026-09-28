@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import QuestionCard from '../components/quiz/QuestionCard.vue'
+import TimerBar from '../components/quiz/TimerBar.vue'
 import Badge from '../components/ui/BaseBadge.vue'
 import PrimaryButton from '../components/ui/PrimaryButton.vue'
-import QuestionCard from '../components/quiz/QuestionCard.vue'
 import SecondaryButton from '../components/ui/SecondaryButton.vue'
-import TimerBar from '../components/quiz/TimerBar.vue'
 import { useAccount } from '../composables/useAccount'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { useQuizHistoryStore } from '../stores/quizHistory'
