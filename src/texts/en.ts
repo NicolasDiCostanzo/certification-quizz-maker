@@ -1,5 +1,6 @@
 export const texts = {
   appTitle: 'Home',
+  headerBrand: 'cert quiz',
   selectCertification: 'Choose your certification',
   emptyStateBefore: 'No certification bundles loaded. Valid bundles placed in',
   emptyStateHighlight: 'src/assets/',

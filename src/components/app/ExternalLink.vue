@@ -40,6 +40,25 @@ withDefaults(defineProps<{ href: string; label: string; iconOnly?: boolean }>(),
 }
 
 .external-link--icon {
+  flex-direction: row;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   color: var(--text);
+  flex-shrink: 0;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.external-link--icon :deep(svg) {
+  width: 17px;
+  height: 17px;
+}
+
+.external-link--icon:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-bg);
 }
 </style>
