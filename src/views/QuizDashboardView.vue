@@ -8,10 +8,10 @@ import { texts } from '../texts/en'
 import { passingScorePercent } from '../utils/examDisplay'
 import { breakdownByThemeAllTime, breakdownByTopicAllTime } from '../utils/scoreBreakdown'
 
-import ConfirmModal from '../components/ui/ConfirmModal.vue'
-import PrimaryButton from '../components/ui/PrimaryButton.vue'
 import QuizHistoryList from '../components/history/QuizHistoryList.vue'
 import ReviewBreakdown from '../components/review/ReviewBreakdown.vue'
+import ConfirmModal from '../components/ui/ConfirmModal.vue'
+import PrimaryButton from '../components/ui/PrimaryButton.vue'
 import SecondaryButton from '../components/ui/SecondaryButton.vue'
 import { useAccount } from '../composables/useAccount'
 
@@ -98,7 +98,7 @@ function reviewFlagged() {
   <div v-if="cert" class="dashboard">
     <header class="dashboard__header">
       <div class="header-buttons">
-        <PrimaryButton size="sm" @click="goHome">{{ texts.backToHomeCta }}</PrimaryButton>
+        <PrimaryButton size="sm" @click="goHome">{{ texts.toCertsList }}</PrimaryButton>
         <PrimaryButton size="sm" @click="startQuiz">{{ texts.startQuizCta }}</PrimaryButton>
       </div>
       <h1>{{ cert.exam.name }}</h1>

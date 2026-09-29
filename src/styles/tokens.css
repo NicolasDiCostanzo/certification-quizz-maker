@@ -1,20 +1,25 @@
 :root {
+  --brand-base: #0f6f7e;
+  --brand-tint: 12%;
+
+  --brand: var(--brand-base);
+  --brand-bg: color-mix(in srgb, var(--brand) var(--brand-tint), transparent);
+  --accent: var(--brand);
+  --accent-bg: var(--brand-bg);
+  --accent-border: color-mix(in srgb, var(--brand) 50%, transparent);
+
   --text: #593e2e;
   --text-h: #3e2a1f;
   --bg: #f2e6d8;
   --surface: #f8f0e6;
   --border: #bf9b7a;
   --code-bg: rgba(191, 155, 122, 0.18);
-  --accent: #555934;
-  --accent-bg: rgba(85, 89, 52, 0.12);
-  --accent-border: rgba(85, 89, 52, 0.5);
-  --brand: #8f5210;
-  --brand-bg: rgba(143, 82, 16, 0.12);
+  --text-inverse: #fff;
   --shadow:
-    rgba(89, 62, 46, 0.15) 0 10px 15px -3px, rgba(89, 62, 46, 0.08) 0 4px 6px -2px;
+    rgba(89, 62, 46, 0.15) 0 10px 15px -3px,
+    rgba(89, 62, 46, 0.08) 0 4px 6px -2px;
   --green: #2e5b26;
   --red: #b02e26;
-  --text-inverse: #fff;
   --overlay: rgba(0, 0, 0, 0.5);
 
   --radius-none: 0px;
@@ -32,18 +37,21 @@
 }
 
 :root[data-theme='dark'] {
+  --brand-tint: 15%;
+
+  --brand: oklch(
+    from var(--brand-base) calc(l + 0.3) min(max(c * 1.7, 0.08), 0.105) h
+  );
+
   --text: rgba(242, 230, 216, 0.85);
   --text-h: #f2e6d8;
   --bg: #16171d;
   --surface: #1f2028;
   --border: rgba(242, 230, 216, 0.2);
   --code-bg: rgba(0, 0, 0, 0.3);
-  --accent: #bf9b7a;
-  --accent-bg: rgba(191, 155, 122, 0.15);
-  --accent-border: rgba(191, 155, 122, 0.5);
-  --brand: #e0a94d;
-  --brand-bg: rgba(224, 169, 77, 0.15);
+  --text-inverse: #16171d;
   --shadow:
     rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  --overlay: rgba(0, 0, 0, 0.5);
+  --green: #79c98f;
+  --red: #e07a6a;
 }

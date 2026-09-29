@@ -6,7 +6,7 @@ export async function openCertDashboardCard(page: Page, examName: string): Promi
 }
 
 export async function goBackToCertDashboard(page: Page): Promise<void> {
-  await page.getByRole('button', { name: texts.backToDashboardCta, exact: true }).click()
+  await page.getByRole('button', { name: texts.goBackToDashboard, exact: true }).click()
 }
 
 export async function goBackToDashboard(page: Page): Promise<void> {
