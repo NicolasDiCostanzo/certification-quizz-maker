@@ -1,4 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["src/lambda/pull/index.ts", "src/lambda/push/index.ts"]
+  "entry": ["src/lambda/pull/index.ts", "src/lambda/push/index.ts"],
+  "ignoreBinaries": ["sam"]
 }
