@@ -115,8 +115,6 @@ describe('WelcomeView', () => {
     expect(wrapper.text()).toContain(texts.welcomeNewAccountCta)
     expect(wrapper.text()).toContain(texts.welcomeNewAccountDescNoSync)
     expect(wrapper.text()).toContain(texts.welcomeExistingAccountDescNoSync)
-    expect(wrapper.text()).not.toContain(texts.welcomeNewAccountDesc)
-    expect(wrapper.text()).not.toContain(texts.welcomeExistingAccountDesc)
     expect(wrapper.text()).not.toContain(texts.welcomeNoAccountDesc)
     expect(wrapper.text()).not.toContain(texts.welcomeUploadDataCta)
   })

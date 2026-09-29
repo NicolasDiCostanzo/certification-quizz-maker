@@ -1,11 +1,13 @@
 <script setup lang="ts">
   import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import AvailableExams from '../components/app/AvailableExams.vue';
 import ExternalLink from '../components/app/ExternalLink.vue';
 import WelcomeCard from '../components/app/WelcomeCard.vue';
 import IconCoffee from '../components/icons/IconCoffee.vue';
 import IconGithub from '../components/icons/IconGithub.vue';
 import { useAccount } from '../composables/useAccount';
+import { useQuizLoader } from '../composables/useQuizLoader';
 import { isAuthAvailable, isSyncConfigured, links } from '../config';
 import { useQuizHistoryStore } from '../stores/quizHistory';
 import { useUserProgressStore } from '../stores/userProgress';
@@ -16,6 +18,7 @@ import { texts } from '../texts/en';
   const authAvailable = isAuthAvailable()
   const syncAvailable = isSyncConfigured()
   const canSyncLater = authAvailable && syncAvailable
+  const { availableCerts } = useQuizLoader()
   const historyStore = useQuizHistoryStore();
   const progressStore = useUserProgressStore();
   const hasLocalData = computed(
@@ -40,14 +43,15 @@ import { texts } from '../texts/en';
     <div class="welcome__intro">
       <h1>{{ texts.welcomeIntroTitle }}</h1>
       <p>{{ texts.welcomeIntro }}</p>
+      <AvailableExams :certs="availableCerts" />
     </div>
     <div class="welcome__options">
       <template v-if="authAvailable">
         <WelcomeCard :title="texts.welcomeExistingAccount"
-          :description="syncAvailable ? texts.welcomeExistingAccountDesc : texts.welcomeExistingAccountDescNoSync"
+          :description="syncAvailable ? '' : texts.welcomeExistingAccountDescNoSync"
           :cta-label="texts.welcomeExistingAccountCta" @select="openSignIn" />
         <WelcomeCard :title="texts.welcomeNewAccount"
-          :description="syncAvailable ? texts.welcomeNewAccountDesc : texts.welcomeNewAccountDescNoSync"
+          :description="syncAvailable ? '' : texts.welcomeNewAccountDescNoSync"
           :cta-label="texts.welcomeNewAccountCta" @select="openSignUp" />
       </template>
       <WelcomeCard variant="warning" :title="texts.welcomeNoAccount"
