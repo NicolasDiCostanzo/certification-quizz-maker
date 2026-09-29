@@ -98,7 +98,7 @@ function reviewFlagged() {
   <div v-if="cert" class="dashboard">
     <header class="dashboard__header">
       <div class="header-buttons">
-        <PrimaryButton size="sm" @click="goHome">{{ texts.toDashboard }}</PrimaryButton>
+        <PrimaryButton size="sm" @click="goHome">{{ texts.toCertsList }}</PrimaryButton>
         <PrimaryButton size="sm" @click="startQuiz">{{ texts.startQuizCta }}</PrimaryButton>
       </div>
       <h1>{{ cert.exam.name }}</h1>

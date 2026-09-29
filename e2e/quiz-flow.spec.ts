@@ -182,7 +182,7 @@ test.describe.serial('quiz journey on the DVA-C02 certification', () => {
     await expectSummaryCard(page, 4, { correct: false, flagged: true })
   })
 
-  test('shows the all-time score and quiz history entry on the dashboard', async ({ sharedPage: page }) => {
+  test('shows this quizz score on the dashboard', async ({ sharedPage: page }) => {
     await goBackToCertDashboard(page)
     await expect(page).toHaveURL(new RegExp(`#/certs/${certCode}$`))
 

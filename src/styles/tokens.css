@@ -1,16 +1,3 @@
-/*
- * PALETTE — single source of truth for the BRAND: --brand-base.
- * To rebrand, change --brand-base only. The brand family is computed from it:
- * `oklch(from …)` keeps the brand hue while `calc()` moves lightness and
- * chroma, and `color-mix()` makes the translucent tints. Requires relative
- * color syntax (Chrome 119+, Safari 16.4+, Firefox 128+).
- *
- * Everything else is deliberately NOT derived: the warm neutrals (--text,
- * --text-h, --bg, --surface, --border, --code-bg) are a fixed warm/tan palette
- * that must not shift when the brand changes, and --green / --red are semantic
- * so "correct" never reads as a link.
- */
-
 :root {
   --brand-base: #0f6f7e;
   --brand-tint: 12%;
