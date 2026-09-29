@@ -11,6 +11,11 @@ defineProps<{ topic: string; weight: number }>()
 </template>
 
 <style scoped>
+.weight-pill {
+  overflow: hidden;
+  min-width: 0;
+}
+
 .weight-pill strong {
   color: var(--accent);
 }

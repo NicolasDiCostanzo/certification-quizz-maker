@@ -23,7 +23,6 @@ withDefaults(defineProps<{
   white-space: nowrap;
   font-weight: 600;
   gap: 4px;
-  overflow: scroll
 }
 
 .badge--sm { font-size: 12px; }
