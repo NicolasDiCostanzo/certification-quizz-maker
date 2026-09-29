@@ -222,11 +222,12 @@ test.describe.serial('quiz journey on the DVA-C02 certification', () => {
     await expectFlaggedReviewEnabled(page, false)
   })
 
-  test('signing out returns to the welcome page with all 3 account options', async ({ sharedPage: page }) => {
+  test('signing out returns to the welcome page with practice first and sync buttons', async ({ sharedPage: page }) => {
     await signOut(page)
 
+    await expect(page.getByRole('button', { name: texts.welcomeNoAccountCta })).toBeVisible()
+    await expect(page.getByText(texts.welcomeSyncTitle)).toBeVisible()
     await expect(page.getByRole('button', { name: texts.welcomeExistingAccountCta })).toBeVisible()
     await expect(page.getByRole('button', { name: texts.welcomeNewAccountCta })).toBeVisible()
-    await expect(page.getByRole('button', { name: texts.welcomeNoAccountCta })).toBeVisible()
   })
 })

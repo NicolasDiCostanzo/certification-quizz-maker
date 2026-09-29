@@ -6,7 +6,7 @@ withDefaults(defineProps<{
   title: string
   description: string
   ctaLabel: string
-  variant?: 'default' | 'primary'
+  variant?: 'default' | 'primary' | 'secondary'
 }>(), {
   variant: 'default',
 })
@@ -42,6 +42,11 @@ defineEmits<{ select: [] }>()
 
 .welcome-card--primary.card {
   background: var(--accent-bg);
+}
+
+.welcome-card--secondary.card {
+  background: var(--surface);
+  border-color: var(--border);
 }
 
 .welcome-card--primary.card.card--border-top {

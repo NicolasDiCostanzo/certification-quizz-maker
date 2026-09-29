@@ -49,11 +49,13 @@ beforeEach(() => {
 
 describe('WelcomeView', () => {
   it.each([
-    ['existing account', 0, 'signin'],
-    ['new account', 1, 'signup'],
-  ])('the %s card opens the auth form in %s mode', async (_name, index, mode) => {
+    ['existing account', 'signin', 'welcomeExistingAccountCta' as const],
+    ['new account', 'signup', 'welcomeNewAccountCta' as const],
+  ])('the %s button opens the auth form in %s mode', async (_name, mode, ctaKey) => {
     const wrapper = mountWelcome()
-    await wrapper.findAll('.btn--primary')[index].trigger('click')
+    const target = wrapper.findAll('.welcome-sync__btn').find((btn) => btn.text() === texts[ctaKey])
+    expect(target?.exists()).toBe(true)
+    await target?.trigger('click')
     await flushPromises()
 
     expect(router.currentRoute.value.name).toBe('auth')
@@ -62,11 +64,19 @@ describe('WelcomeView', () => {
 
   it('continuing locally goes straight to the cert selector without any auth step', async () => {
     const wrapper = mountWelcome()
-    await wrapper.findAll('.btn--primary')[2].trigger('click')
+    await wrapper.get('.welcome__start .btn--primary').trigger('click')
     await flushPromises()
 
     expect(useUserAccountStore().accountMode).toBe('local')
     expect(router.currentRoute.value.name).toBe('cert-selector')
+  })
+
+  it('shows the sync card with real buttons when authentication is configured', () => {
+    const wrapper = mountWelcome()
+
+    expect(wrapper.find('.welcome-sync').exists()).toBe(true)
+    expect(wrapper.find('.welcome__start .welcome-card--primary').exists()).toBe(true)
+    expect(wrapper.text()).toContain(texts.welcomeSyncTitle)
   })
 
   it('offers only the local option when authentication is not configured', () => {
@@ -78,7 +88,7 @@ describe('WelcomeView', () => {
 
     expect(wrapper.findAll('.btn--primary')).toHaveLength(1)
     expect(wrapper.text()).toContain(texts.welcomeNoAccount)
-    expect(wrapper.text()).not.toContain(texts.welcomeNewAccountCta)
+    expect(wrapper.text()).not.toContain(texts.welcomeSyncTitle)
     expect(wrapper.text()).not.toContain(texts.welcomeUploadDataCta)
     expect(wrapper.text()).not.toContain(texts.welcomeNoAccountDesc)
   })
@@ -92,7 +102,7 @@ describe('WelcomeView', () => {
     expect(wrapper.text()).toContain(texts.welcomeUploadDataCta)
     expect(wrapper.text()).toContain(texts.welcomeNoAccountDesc)
 
-    await wrapper.findAll('.btn--primary')[3].trigger('click')
+    await wrapper.find('.welcome-card--secondary .btn--primary').trigger('click')
     await flushPromises()
 
     expect(router.currentRoute.value.name).toBe('auth')
@@ -105,17 +115,26 @@ describe('WelcomeView', () => {
     expect(wrapper.text()).not.toContain(texts.welcomeUploadDataCta)
   })
 
-  it('does not promise cross-device sync or offer the upload option when auth is configured but sync is not', () => {
+  it('shows the auth buttons and the no-sync local message when auth is configured but sync is not', () => {
     syncConfigured = false
     useUserProgressStore().byExamCode['DVA-C02'] = {
       q1: { questionId: 'q1', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 },
     }
     const wrapper = mountWelcome()
 
+    expect(wrapper.find('.welcome-sync').exists()).toBe(true)
     expect(wrapper.text()).toContain(texts.welcomeNewAccountCta)
-    expect(wrapper.text()).toContain(texts.welcomeNewAccountDescNoSync)
-    expect(wrapper.text()).toContain(texts.welcomeExistingAccountDescNoSync)
+    expect(wrapper.text()).toContain(texts.welcomeExistingAccountCta)
+    expect(wrapper.text()).toContain(texts.welcomeNoAccountDescNoSync)
     expect(wrapper.text()).not.toContain(texts.welcomeNoAccountDesc)
     expect(wrapper.text()).not.toContain(texts.welcomeUploadDataCta)
+  })
+
+  it('presents practice first: primary start card, visible cert list, and how it works', () => {
+    const wrapper = mountWelcome()
+
+    expect(wrapper.find('.welcome__start .welcome-card--primary').exists()).toBe(true)
+    expect(wrapper.find('.available-exams').attributes('open')).not.toBeUndefined()
+    expect(wrapper.text()).toContain(texts.welcomeHowItWorksTitle)
   })
 })
