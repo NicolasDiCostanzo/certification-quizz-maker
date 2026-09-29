@@ -55,7 +55,6 @@ import { texts } from '../texts/en';
         :description="canSyncLater ? texts.welcomeNoAccountDesc : texts.welcomeNoAccountDescNoSync"
         :cta-label="texts.welcomeNoAccountCta" @select="continueLocal" />
     </div>
-    <WelcomeSteps />
     <AvailableExams :certs="availableCerts" />
   </section>
 </template>

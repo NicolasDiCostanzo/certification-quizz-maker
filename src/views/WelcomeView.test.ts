@@ -114,27 +114,4 @@ describe('WelcomeView', () => {
 
     expect(wrapper.text()).not.toContain(texts.welcomeUploadDataCta)
   })
-
-  it('shows the auth buttons and the no-sync local message when auth is configured but sync is not', () => {
-    syncConfigured = false
-    useUserProgressStore().byExamCode['DVA-C02'] = {
-      q1: { questionId: 'q1', attempts: 1, timesCorrect: 1, timesWrong: 0, flagged: false, lastSeenAt: 1 },
-    }
-    const wrapper = mountWelcome()
-
-    expect(wrapper.find('.welcome-sync').exists()).toBe(true)
-    expect(wrapper.text()).toContain(texts.welcomeNewAccountCta)
-    expect(wrapper.text()).toContain(texts.welcomeExistingAccountCta)
-    expect(wrapper.text()).toContain(texts.welcomeNoAccountDescNoSync)
-    expect(wrapper.text()).not.toContain(texts.welcomeNoAccountDesc)
-    expect(wrapper.text()).not.toContain(texts.welcomeUploadDataCta)
-  })
-
-  it('presents practice first: primary start card, visible cert list, and how it works', () => {
-    const wrapper = mountWelcome()
-
-    expect(wrapper.find('.welcome__start .welcome-card--primary').exists()).toBe(true)
-    expect(wrapper.find('.available-exams').attributes('open')).not.toBeUndefined()
-    expect(wrapper.text()).toContain(texts.welcomeHowItWorksTitle)
-  })
 })

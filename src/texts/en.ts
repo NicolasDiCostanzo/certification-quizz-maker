@@ -108,12 +108,6 @@ export const texts = {
   welcomeEyebrowPoints: ['100% free', 'No account required', 'Tailor quizzes to the topics you need to practice'],
   welcomeIntroTitle: 'Practice for certification exams',
   welcomeHowItWorksTitle: 'How it works',
-  welcomeStepChooseTitle: 'Choose your certification',
-  welcomeStepChooseDesc: 'Browse question banks with real-exam timing and passing scores.',
-  welcomeStepPracticeTitle: 'Practice in prep or exam mode',
-  welcomeStepPracticeDesc: 'Get instant explanations, or simulate the timed real thing.',
-  welcomeStepFocusTitle: 'Focus where you are weak',
-  welcomeStepFocusDesc: 'Filter by topic, retry what you got wrong, flag tricky ones.',
   welcomeNoAccount: 'Start practicing now',
   welcomeNoAccountDesc:
     'No account needed. Progress stays in this browser — sign in later to sync it everywhere.',
