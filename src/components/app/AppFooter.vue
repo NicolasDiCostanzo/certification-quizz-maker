@@ -23,7 +23,7 @@ import ExternalLink from './ExternalLink.vue'
   .app-footer {
     display: flex;
     justify-content: center;
-    padding: 16px 24px;
+    padding: 12px 24px calc(12px + env(safe-area-inset-bottom));
     background: var(--surface);
     border-top: 1px solid var(--border);
   }
@@ -37,7 +37,7 @@ import ExternalLink from './ExternalLink.vue'
 
   @media (max-width: 720px) {
     .app-footer {
-      padding: 14px 16px;
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
     }
 
     .app-footer__links {

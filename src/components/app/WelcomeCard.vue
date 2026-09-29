@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import Card from '../ui/BaseCard.vue'
-import PrimaryButton from '../ui/PrimaryButton.vue'
+import Card from '../ui/BaseCard.vue';
+import PrimaryButton from '../ui/PrimaryButton.vue';
 
 withDefaults(defineProps<{
   title: string
@@ -15,7 +15,7 @@ defineEmits<{ select: [] }>()
 </script>
 
 <template>
-  <Card padding="lg" class="welcome-card">
+  <Card padding="md" :borderTop="variant === 'primary'" class="welcome-card" :class="`welcome-card--${variant}`">
     <h2>{{ title }}</h2>
     <p v-if="description">{{ description }}</p>
     <PrimaryButton
@@ -30,11 +30,27 @@ defineEmits<{ select: [] }>()
 </template>
 
 <style scoped>
-.welcome-card {
+.welcome-card.card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   text-align: center;
+  border: 1px solid transparent;
+  background: transparent;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.welcome-card--primary.card {
+  background: var(--accent-bg);
+}
+
+.welcome-card--primary.card.card--border-top {
+  border-top: 3px solid var(--accent);
+}
+
+.welcome-card.card:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
 }
 
 .welcome-card h2 {

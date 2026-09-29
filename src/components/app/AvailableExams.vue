@@ -28,6 +28,8 @@ import Card from '../ui/BaseCard.vue'
 
 <style scoped>
   .available-exams {
+    box-sizing: border-box;
+    width: 100%;
     text-align: left;
   }
 

@@ -82,6 +82,11 @@ import { texts } from '../texts/en';
     color: var(--text);
   }
 
+  .welcome__intro :deep(.available-exams) {
+    align-self: stretch;
+    width: 100%;
+  }
+
   .welcome__options {
     display: flex;
     flex-direction: column;
