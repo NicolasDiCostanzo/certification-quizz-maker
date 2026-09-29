@@ -139,7 +139,35 @@ describe('sampleQuestions', () => {
     expect(result).toHaveLength(4)
   })
 
-  it('matches the DVA-C02 exam ratios for a 65-question preset', () => {
+  it('varies the topic for a single-question quiz instead of always starting from the highest-weight topic', () => {
+    const pool = makePool({ A: 30, B: 30, C: 30, D: 30 })
+    const weights = { A: 32, B: 26, C: 24, D: 18 }
+    const byTopic = new Map<string, number>()
+
+    for (let seed = 1; seed <= 40; seed += 1) {
+      const [first] = sampleQuestions(pool, 1, weights, mulberry32(seed))
+      byTopic.set(first.topic, (byTopic.get(first.topic) ?? 0) + 1)
+    }
+
+    expect([...byTopic.keys()].sort()).toEqual(['A', 'B', 'C', 'D'])
+  })
+
+  it('still honours the exam weights when drawing a single question', () => {
+    const pool = makePool({ A: 30, B: 30, C: 30, D: 30 })
+    const weights = { A: 32, B: 26, C: 24, D: 18 }
+    const byTopic = new Map<string, number>()
+
+    for (let seed = 1; seed <= 2000; seed += 1) {
+      const [first] = sampleQuestions(pool, 1, weights, mulberry32(seed))
+      byTopic.set(first.topic, (byTopic.get(first.topic) ?? 0) + 1)
+    }
+
+    const shareOfA = (byTopic.get('A') ?? 0) / 2000
+    expect(shareOfA).toBeGreaterThan(0.26)
+    expect(shareOfA).toBeLessThan(0.38)
+  })
+
+  it('keeps the exact exam ratios for a full-length quiz', () => {
     const weights = {
       'Development with AWS Services': 32,
       Deployment: 24,

@@ -13,11 +13,38 @@ function shuffle<T>(items: readonly T[], rng: Rng): T[] {
   return result
 }
 
+function pickTopicAtRandom(
+  active: readonly string[],
+  weights: Map<string, number>,
+  capacity: Map<string, number>,
+  quotas: Map<string, number>,
+  rng: Rng,
+): boolean {
+  const eligible = active.filter(
+    (topic) => (quotas.get(topic) ?? 0) < (capacity.get(topic) ?? 0) && (weights.get(topic) ?? 0) > 0,
+  )
+  if (eligible.length === 0) return false
+  const total = eligible.reduce((sum, topic) => sum + (weights.get(topic) ?? 0), 0)
+  if (total <= 0) return false
+  let pick = rng() * total
+  for (const topic of eligible) {
+    pick -= weights.get(topic) ?? 0
+    if (pick <= 0) {
+      quotas.set(topic, (quotas.get(topic) ?? 0) + 1)
+      return true
+    }
+  }
+  const fallback = eligible[eligible.length - 1]
+  quotas.set(fallback, (quotas.get(fallback) ?? 0) + 1)
+  return true
+}
+
 function allocateQuotas(
   topics: string[],
   capacity: Map<string, number>,
   weightOf: (topic: string) => number,
   total: number,
+  rng: Rng,
 ): Map<string, number> {
   const quotas = new Map<string, number>(topics.map((topic) => [topic, 0]))
   const remainingCapacity = (topic: string): number => {
@@ -28,6 +55,17 @@ function allocateQuotas(
 
   let active = topics.filter((topic) => (capacity.get(topic) ?? 0) > 0)
   let remaining = total
+
+  if (total <= active.length) {
+    const weights = new Map(active.map((topic) => [topic, weightOf(topic)]))
+    while (remaining > 0) {
+      const progressed = pickTopicAtRandom(active, weights, capacity, quotas, rng)
+      if (!progressed) break
+      remaining -= 1
+    }
+    if (remaining === 0) return quotas
+    active = active.filter((topic) => remainingCapacity(topic) > 0)
+  }
 
   while (remaining > 0 && active.length > 0) {
     const totalWeight = active.reduce((sum, topic) => sum + weightOf(topic), 0)
@@ -102,7 +140,7 @@ export function sampleQuestions(
   const totalWeight = topics.reduce((sum, topic) => sum + weightOf(topic), 0)
   if (totalWeight <= 0) return shuffled.slice(0, limit)
 
-  const quotas = allocateQuotas(topics, capacity, weightOf, limit)
+  const quotas = allocateQuotas(topics, capacity, weightOf, limit, rng)
   const picked: Question[] = []
   for (const topic of topics) {
     picked.push(...(byTopic.get(topic) ?? []).slice(0, quotas.get(topic) ?? 0))
