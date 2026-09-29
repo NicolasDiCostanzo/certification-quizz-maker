@@ -1,25 +1,26 @@
 <script setup lang="ts">
-import Card from '../ui/BaseCard.vue'
-import PrimaryButton from '../ui/PrimaryButton.vue'
+import Card from '../ui/BaseCard.vue';
+import PrimaryButton from '../ui/PrimaryButton.vue';
 
-defineProps<{
+withDefaults(defineProps<{
   title: string
   description: string
   ctaLabel: string
-  variant?: 'default' | 'warning'
-}>()
+  variant?: 'default' | 'primary'
+}>(), {
+  variant: 'default',
+})
 
 defineEmits<{ select: [] }>()
 </script>
 
 <template>
-  <Card padding="lg" class="welcome-card" :class="{ 'welcome-card--warning': variant === 'warning' }">
+  <Card padding="md" :borderTop="variant === 'primary'" class="welcome-card" :class="`welcome-card--${variant}`">
     <h2>{{ title }}</h2>
-    <p>{{ description }}</p>
+    <p v-if="description">{{ description }}</p>
     <PrimaryButton
       pill
-      ghost
-      :danger="variant === 'warning'"
+      :ghost="variant !== 'primary'"
       class="welcome-card__cta"
       @click="$emit('select')"
     >
@@ -29,15 +30,27 @@ defineEmits<{ select: [] }>()
 </template>
 
 <style scoped>
-.welcome-card {
+.welcome-card.card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   text-align: center;
+  border: 1px solid transparent;
+  background: transparent;
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-.welcome-card--warning.card {
-  border-color: var(--red);
+.welcome-card--primary.card {
+  background: var(--accent-bg);
+}
+
+.welcome-card--primary.card.card--border-top {
+  border-top: 3px solid var(--accent);
+}
+
+.welcome-card.card:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
 }
 
 .welcome-card h2 {

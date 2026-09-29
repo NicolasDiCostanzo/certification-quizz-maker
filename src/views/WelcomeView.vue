@@ -1,8 +1,11 @@
 <script setup lang="ts">
   import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import AvailableExams from '../components/app/AvailableExams.vue';
 import WelcomeCard from '../components/app/WelcomeCard.vue';
+import WelcomeEyebrow from '../components/ui/WelcomeEyebrow.vue';
 import { useAccount } from '../composables/useAccount';
+import { useQuizLoader } from '../composables/useQuizLoader';
 import { isAuthAvailable, isSyncConfigured } from '../config';
 import { useQuizHistoryStore } from '../stores/quizHistory';
 import { useUserProgressStore } from '../stores/userProgress';
@@ -12,6 +15,8 @@ import { texts } from '../texts/en';
   const { continueLocal } = useAccount()
   const authAvailable = isAuthAvailable()
   const syncAvailable = isSyncConfigured()
+  const canSyncLater = authAvailable && syncAvailable
+  const { availableCerts } = useQuizLoader()
   const historyStore = useQuizHistoryStore();
   const progressStore = useUserProgressStore();
   const hasLocalData = computed(
@@ -33,17 +38,23 @@ import { texts } from '../texts/en';
 
 <template>
   <section id="center" class="welcome">
-    <h1>{{ texts.appTitle }}</h1>
+    <div class="welcome__intro">
+      <WelcomeEyebrow :text="texts.welcomeEyebrow" />
+      <h1>{{ texts.welcomeIntroTitle }}</h1>
+      <p>{{ texts.welcomeIntro }}</p>
+      <AvailableExams :certs="availableCerts" />
+    </div>
     <div class="welcome__options">
       <template v-if="authAvailable">
-        <WelcomeCard :title="texts.welcomeExistingAccount"
-          :description="syncAvailable ? texts.welcomeExistingAccountDesc : texts.welcomeExistingAccountDescNoSync"
+        <WelcomeCard variant="primary" :title="texts.welcomeExistingAccount"
+          :description="syncAvailable ? '' : texts.welcomeExistingAccountDescNoSync"
           :cta-label="texts.welcomeExistingAccountCta" @select="openSignIn" />
-        <WelcomeCard :title="texts.welcomeNewAccount"
-          :description="syncAvailable ? texts.welcomeNewAccountDesc : texts.welcomeNewAccountDescNoSync"
+        <WelcomeCard variant="primary" :title="texts.welcomeNewAccount"
+          :description="syncAvailable ? '' : texts.welcomeNewAccountDescNoSync"
           :cta-label="texts.welcomeNewAccountCta" @select="openSignUp" />
       </template>
-      <WelcomeCard variant="warning" :title="texts.welcomeNoAccount" :description="texts.welcomeNoAccountDesc"
+      <WelcomeCard :title="texts.welcomeNoAccount"
+        :description="canSyncLater ? texts.welcomeNoAccountDesc : texts.welcomeNoAccountDescNoSync"
         :cta-label="texts.welcomeNoAccountCta" @select="continueLocal" />
       <WelcomeCard v-if="authAvailable && syncAvailable && hasLocalData" :title="texts.welcomeUploadData"
         :description="texts.welcomeUploadDataDesc" :cta-label="texts.welcomeUploadDataCta" @select="openUpload" />
@@ -52,6 +63,30 @@ import { texts } from '../texts/en';
 </template>
 
 <style scoped>
+  .welcome__intro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    max-width: 600px;
+  }
+
+  .welcome__intro h1 {
+    margin: 0;
+    font-size: 40px;
+    letter-spacing: -1.2px;
+    line-height: 118%;
+  }
+
+  .welcome__intro p {
+    color: var(--text);
+  }
+
+  .welcome__intro :deep(.available-exams) {
+    align-self: stretch;
+    width: 100%;
+  }
+
   .welcome__options {
     display: flex;
     flex-direction: column;
@@ -60,6 +95,15 @@ import { texts } from '../texts/en';
   }
 
   @media (max-width: 1024px) {
+    .welcome__intro {
+      max-width: 100%;
+    }
+
+    .welcome__intro h1 {
+      font-size: 28px;
+      letter-spacing: -0.6px;
+    }
+
     .welcome__options {
       max-width: 100%;
     }

@@ -31,7 +31,7 @@ withDefaults(defineProps<{
   cursor: pointer;
   border: 1px solid transparent;
   border-radius: var(--radius-lg);
-  background: var(--accent);
+  background: var(--brand);
   color: var(--bg);
   transition: opacity 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
@@ -86,7 +86,8 @@ withDefaults(defineProps<{
 }
 
 .btn--danger:hover:not(:disabled) {
-  border-color: var(--accent);
+  border-color: var(--red);
+  background: color-mix(in srgb, var(--red) 12%, transparent);
   opacity: 1;
 }
 </style>
