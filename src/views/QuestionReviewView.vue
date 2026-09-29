@@ -80,7 +80,7 @@ function goBack() {
 <template>
   <div v-if="questions.length > 0" class="review">
     <header class="review__header">
-    <PrimaryButton size="lg" @click="goBack">{{ backLabel ?? texts.backToDashboardCta }}</PrimaryButton>
+    <PrimaryButton size="lg" @click="goBack">{{ backLabel ?? texts.toDashboard }}</PrimaryButton>
       <h1>{{ title }}</h1>
     </header>
 
@@ -118,7 +118,7 @@ function goBack() {
     </header>
     <p class="review__message">{{ texts.noQuestionsFoundMessage }}</p>
     <footer class="review__footer">
-      <PrimaryButton size="lg" @click="goBack">{{ backLabel ?? texts.backToDashboardCta }}</PrimaryButton>
+      <PrimaryButton size="lg" @click="goBack">{{ backLabel ?? texts.toDashboard }}</PrimaryButton>
     </footer>
   </div>
 </template>
