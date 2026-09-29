@@ -42,7 +42,7 @@ import ExternalLink from './ExternalLink.vue'
   <header class="app-header">
     <RouterLink :to="titleTarget" class="app-title" :title="texts.appTitle">
       <span class="app-title__mark"><IconHome class="app-title__icon" /></span>
-      <span class="app-title__name" />
+      <span class="app-title__name">{{ texts.headerBrand }}</span>
     </RouterLink>
     <div class="app-header__actions">
       <div class="app-header__links">
