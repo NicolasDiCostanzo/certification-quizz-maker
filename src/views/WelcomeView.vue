@@ -3,6 +3,7 @@
 import { useRouter } from 'vue-router';
 import AvailableExams from '../components/app/AvailableExams.vue';
 import WelcomeCard from '../components/app/WelcomeCard.vue';
+import WelcomeEyebrow from '../components/ui/WelcomeEyebrow.vue';
 import { useAccount } from '../composables/useAccount';
 import { useQuizLoader } from '../composables/useQuizLoader';
 import { isAuthAvailable, isSyncConfigured } from '../config';
@@ -38,6 +39,7 @@ import { texts } from '../texts/en';
 <template>
   <section id="center" class="welcome">
     <div class="welcome__intro">
+      <WelcomeEyebrow :text="texts.welcomeEyebrow" />
       <h1>{{ texts.welcomeIntroTitle }}</h1>
       <p>{{ texts.welcomeIntro }}</p>
       <AvailableExams :certs="availableCerts" />
@@ -64,6 +66,7 @@ import { texts } from '../texts/en';
   .welcome__intro {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 10px;
     max-width: 600px;
   }
