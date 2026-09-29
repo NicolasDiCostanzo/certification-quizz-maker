@@ -63,7 +63,8 @@ function allocateQuotas(
       if (!progressed) break
       remaining -= 1
     }
-    return quotas
+    if (remaining === 0) return quotas
+    active = active.filter((topic) => remainingCapacity(topic) > 0)
   }
 
   while (remaining > 0 && active.length > 0) {
