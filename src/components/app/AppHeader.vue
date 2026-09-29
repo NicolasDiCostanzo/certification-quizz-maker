@@ -6,13 +6,13 @@ import { useThemeMode } from '../../composables/useThemeMode'
 import { links } from '../../config'
 import { useUserAccountStore } from '../../stores/userAccount'
 import { texts } from '../../texts/en'
-import ExternalLink from './ExternalLink.vue'
 import IconCoffee from '../icons/IconCoffee.vue'
 import IconGithub from '../icons/IconGithub.vue'
 import IconHome from '../icons/IconHome.vue'
 import IconMoon from '../icons/IconMoon.vue'
 import IconSun from '../icons/IconSun.vue'
 import SecondaryButton from '../ui/SecondaryButton.vue'
+import ExternalLink from './ExternalLink.vue'
 
   const router = useRouter()
   const preferences = useThemeMode()
@@ -42,7 +42,7 @@ import SecondaryButton from '../ui/SecondaryButton.vue'
   <header class="app-header">
     <RouterLink :to="titleTarget" class="app-title" :title="texts.appTitle">
       <span class="app-title__mark"><IconHome class="app-title__icon" /></span>
-      <span class="app-title__name">{{ texts.headerBrand }}</span>
+      <span class="app-title__name" />
     </RouterLink>
     <div class="app-header__actions">
       <div class="app-header__links">

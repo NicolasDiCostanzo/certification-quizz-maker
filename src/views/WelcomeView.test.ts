@@ -80,6 +80,7 @@ describe('WelcomeView', () => {
     expect(wrapper.text()).toContain(texts.welcomeNoAccount)
     expect(wrapper.text()).not.toContain(texts.welcomeNewAccountCta)
     expect(wrapper.text()).not.toContain(texts.welcomeUploadDataCta)
+    expect(wrapper.text()).not.toContain(texts.welcomeNoAccountDesc)
   })
 
   it('offers the upload option only when the device has local data, and routes to auth with the upload flag', async () => {
@@ -89,6 +90,7 @@ describe('WelcomeView', () => {
     const wrapper = mountWelcome()
 
     expect(wrapper.text()).toContain(texts.welcomeUploadDataCta)
+    expect(wrapper.text()).toContain(texts.welcomeNoAccountDesc)
 
     await wrapper.findAll('.btn--primary')[3].trigger('click')
     await flushPromises()
@@ -115,6 +117,7 @@ describe('WelcomeView', () => {
     expect(wrapper.text()).toContain(texts.welcomeExistingAccountDescNoSync)
     expect(wrapper.text()).not.toContain(texts.welcomeNewAccountDesc)
     expect(wrapper.text()).not.toContain(texts.welcomeExistingAccountDesc)
+    expect(wrapper.text()).not.toContain(texts.welcomeNoAccountDesc)
     expect(wrapper.text()).not.toContain(texts.welcomeUploadDataCta)
   })
 })

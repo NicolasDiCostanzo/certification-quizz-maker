@@ -15,6 +15,7 @@ import { texts } from '../texts/en';
   const { continueLocal } = useAccount()
   const authAvailable = isAuthAvailable()
   const syncAvailable = isSyncConfigured()
+  const canSyncLater = authAvailable && syncAvailable
   const historyStore = useQuizHistoryStore();
   const progressStore = useUserProgressStore();
   const hasLocalData = computed(
@@ -36,6 +37,10 @@ import { texts } from '../texts/en';
 
 <template>
   <section id="center" class="welcome">
+    <div class="welcome__intro">
+      <h1>{{ texts.welcomeIntroTitle }}</h1>
+      <p>{{ texts.welcomeIntro }}</p>
+    </div>
     <div class="welcome__options">
       <template v-if="authAvailable">
         <WelcomeCard :title="texts.welcomeExistingAccount"
@@ -45,7 +50,8 @@ import { texts } from '../texts/en';
           :description="syncAvailable ? texts.welcomeNewAccountDesc : texts.welcomeNewAccountDescNoSync"
           :cta-label="texts.welcomeNewAccountCta" @select="openSignUp" />
       </template>
-      <WelcomeCard variant="warning" :title="texts.welcomeNoAccount" :description="texts.welcomeNoAccountDesc"
+      <WelcomeCard variant="warning" :title="texts.welcomeNoAccount"
+        :description="canSyncLater ? texts.welcomeNoAccountDesc : texts.welcomeNoAccountDescNoSync"
         :cta-label="texts.welcomeNoAccountCta" @select="continueLocal" />
       <WelcomeCard v-if="authAvailable && syncAvailable && hasLocalData" :title="texts.welcomeUploadData"
         :description="texts.welcomeUploadDataDesc" :cta-label="texts.welcomeUploadDataCta" @select="openUpload" />
@@ -62,6 +68,24 @@ import { texts } from '../texts/en';
 </template>
 
 <style scoped>
+  .welcome__intro {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 600px;
+  }
+
+  .welcome__intro h1 {
+    margin: 0;
+    font-size: 40px;
+    letter-spacing: -1.2px;
+    line-height: 118%;
+  }
+
+  .welcome__intro p {
+    color: var(--text);
+  }
+
   .welcome__options {
     display: flex;
     flex-direction: column;
@@ -78,6 +102,15 @@ import { texts } from '../texts/en';
   }
 
   @media (max-width: 1024px) {
+    .welcome__intro {
+      max-width: 100%;
+    }
+
+    .welcome__intro h1 {
+      font-size: 28px;
+      letter-spacing: -0.6px;
+    }
+
     .welcome__options {
       max-width: 100%;
     }
