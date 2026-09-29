@@ -1,21 +1,31 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { texts } from '../../texts/en'
 import type { CertBundleMeta } from '../../types'
 import CertCodeBadge from '../cert/CertCodeBadge.vue'
+import Badge from '../ui/BaseBadge.vue'
 import Card from '../ui/BaseCard.vue'
 
-defineProps<{ certs: CertBundleMeta[] }>()
+const props = defineProps<{ certs: CertBundleMeta[] }>()
+
+const totalQuestions = computed(() =>
+  props.certs.reduce((total, cert) => total + cert.questionCount, 0),
+)
 </script>
 
 <template>
   <Card tag="details" padding="lg" class="available-exams">
-    <summary class="available-exams__summary">{{ texts.examsIncluded(certs.length) }}</summary>
+    <summary class="available-exams__summary">
+      <span class="available-exams__chevron" aria-hidden="true">▼</span>
+      <span>{{ texts.examsIncluded(certs.length) }}</span>
+      <span class="available-exams__total">{{ texts.questionBankTotal(totalQuestions) }}</span>
+    </summary>
     <ul class="available-exams__list">
       <li v-for="cert in certs" :key="cert.exam.code" class="available-exams__item">
         <span class="available-exams__name">{{ cert.exam.name }}</span>
         <span class="available-exams__meta">
           <CertCodeBadge :code="cert.exam.code" />
-          <span class="available-exams__count">{{ texts.questionBankValue(cert.questionCount) }}</span>
+          <Badge variant="weight">{{ texts.questionBankValue(cert.questionCount) }}</Badge>
         </span>
       </li>
     </ul>
@@ -39,27 +49,52 @@ defineProps<{ certs: CertBundleMeta[] }>()
   text-transform: uppercase;
   letter-spacing: 1.2px;
   color: var(--text);
+  transition: color 0.15s ease;
+}
+
+.available-exams__summary:hover {
+  color: var(--text-h);
 }
 
 .available-exams__summary::-webkit-details-marker {
   display: none;
 }
 
-.available-exams__summary::before {
-  content: '+';
-  font-size: 16px;
+.available-exams__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0;
   color: var(--accent);
+  transition: transform 0.2s ease;
 }
 
-.available-exams[open] .available-exams__summary::before {
-  content: '−';
+.available-exams[open] .available-exams__chevron {
+  transform: rotate(180deg);
+}
+
+.available-exams__total {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-bg);
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  text-transform: none;
+  white-space: nowrap;
 }
 
 .available-exams__list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin: 14px 0 0;
+  margin: 8px 0 0;
   padding: 0;
   list-style: none;
 }
@@ -70,6 +105,11 @@ defineProps<{ certs: CertBundleMeta[] }>()
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 6px 12px;
+  padding: 10px 0;
+}
+
+.available-exams__item + .available-exams__item {
+  border-top: 1px solid var(--border);
 }
 
 .available-exams__name {
@@ -83,9 +123,4 @@ defineProps<{ certs: CertBundleMeta[] }>()
   gap: 8px;
 }
 
-.available-exams__count {
-  font-size: 13px;
-  color: var(--text);
-  white-space: nowrap;
-}
 </style>

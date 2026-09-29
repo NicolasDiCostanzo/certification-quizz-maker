@@ -104,6 +104,7 @@ export const texts = {
   flaggedQuestions: 'Questions you have flagged for review',
   goBackToDashboard: '← Go back to dashboard',
   questionBankValue: (n: number) => `${n} questions`,
+  questionBankTotal: (n: number) => `${n.toLocaleString('en-US')} questions`,
   examsIncluded: (n: number) => `${n} certifications available`,
   welcomeIntroTitle: '100% FREE - Practice certification exams',
   welcomeIntro: 'Answer exam-style questions, filter by topic, replay what you got wrong, and sit timed mock exams. Creating an account is NOT required.',

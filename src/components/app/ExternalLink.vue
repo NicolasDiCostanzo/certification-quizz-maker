@@ -23,14 +23,16 @@ withDefaults(defineProps<{ href: string; label: string; iconOnly?: boolean }>(),
   align-items: center;
   flex-direction: column;
   gap: 6px;
-  color: var(--text);
+  color: var(--text-h);
   font-size: 15px;
   text-decoration: none;
   transition: color 0.15s ease;
 }
 
 .external-link:hover {
-  color: var(--text-h);
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .external-link :deep(svg) {

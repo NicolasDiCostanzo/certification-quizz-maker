@@ -47,14 +47,14 @@ import { texts } from '../texts/en';
     </div>
     <div class="welcome__options">
       <template v-if="authAvailable">
-        <WelcomeCard :title="texts.welcomeExistingAccount"
+        <WelcomeCard variant="primary" :title="texts.welcomeExistingAccount"
           :description="syncAvailable ? '' : texts.welcomeExistingAccountDescNoSync"
           :cta-label="texts.welcomeExistingAccountCta" @select="openSignIn" />
-        <WelcomeCard :title="texts.welcomeNewAccount"
+        <WelcomeCard variant="primary" :title="texts.welcomeNewAccount"
           :description="syncAvailable ? '' : texts.welcomeNewAccountDescNoSync"
           :cta-label="texts.welcomeNewAccountCta" @select="openSignUp" />
       </template>
-      <WelcomeCard variant="warning" :title="texts.welcomeNoAccount"
+      <WelcomeCard :title="texts.welcomeNoAccount"
         :description="canSyncLater ? texts.welcomeNoAccountDesc : texts.welcomeNoAccountDescNoSync"
         :cta-label="texts.welcomeNoAccountCta" @select="continueLocal" />
       <WelcomeCard v-if="authAvailable && syncAvailable && hasLocalData" :title="texts.welcomeUploadData"
@@ -100,9 +100,12 @@ import { texts } from '../texts/en';
   .welcome__links {
     display: flex;
     align-items: center;
+    justify-content: center;
+    align-self: stretch;
     gap: 3rem;
     margin-top: auto;
     padding-top: 25px;
+    border-top: 1px solid var(--border);
   }
 
   @media (max-width: 1024px) {

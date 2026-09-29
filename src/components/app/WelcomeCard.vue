@@ -2,24 +2,25 @@
 import Card from '../ui/BaseCard.vue'
 import PrimaryButton from '../ui/PrimaryButton.vue'
 
-defineProps<{
+withDefaults(defineProps<{
   title: string
   description: string
   ctaLabel: string
-  variant?: 'default' | 'warning'
-}>()
+  variant?: 'default' | 'primary'
+}>(), {
+  variant: 'default',
+})
 
 defineEmits<{ select: [] }>()
 </script>
 
 <template>
-  <Card padding="lg" class="welcome-card" :class="{ 'welcome-card--warning': variant === 'warning' }">
+  <Card padding="lg" class="welcome-card">
     <h2>{{ title }}</h2>
-    <p>{{ description }}</p>
+    <p v-if="description">{{ description }}</p>
     <PrimaryButton
       pill
-      ghost
-      :danger="variant === 'warning'"
+      :ghost="variant !== 'primary'"
       class="welcome-card__cta"
       @click="$emit('select')"
     >
@@ -34,10 +35,6 @@ defineEmits<{ select: [] }>()
   flex-direction: column;
   gap: 8px;
   text-align: center;
-}
-
-.welcome-card--warning.card {
-  border-color: var(--red);
 }
 
 .welcome-card h2 {

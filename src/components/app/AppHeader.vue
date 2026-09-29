@@ -100,10 +100,6 @@ import ExternalLink from './ExternalLink.vue'
     transition: color 0.15s ease;
   }
 
-  .app-title:hover {
-    color: var(--accent);
-  }
-
   .app-title__mark {
     display: inline-flex;
     align-items: center;
@@ -111,15 +107,15 @@ import ExternalLink from './ExternalLink.vue'
     width: 32px;
     height: 32px;
     border-radius: var(--radius-md);
-    background: var(--accent-bg);
-    color: var(--accent);
+    background: var(--brand-bg);
+    color: var(--brand);
     flex-shrink: 0;
     transition: background 0.15s ease;
   }
 
   .app-title:hover .app-title__mark {
-    background: var(--accent);
-    color: var(--surface);
+    background: var(--brand);
+    color: var(--bg);
   }
 
   .app-title__icon {
@@ -132,6 +128,7 @@ import ExternalLink from './ExternalLink.vue'
     font-size: 17px;
     font-weight: 600;
     letter-spacing: -0.2px;
+    color: var(--brand);
   }
 
   .app-header__actions {
