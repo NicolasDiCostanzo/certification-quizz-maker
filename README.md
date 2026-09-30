@@ -8,7 +8,7 @@ Built with **Vue 3 + TypeScript + Vite**. Fully static, hostable anywhere, local
 
 - **Cert-agnostic by design** — all exam-specific data (questions, themes, weights, passing score, time limit) lives in interchangeable JSON files. The app adapts its UI to whatever certification is loaded.
 - **DVA-C02 included** — 555 real exam questions, tagged by topic, services, concepts, and question types.
-- **Want another certification?** — open a GitHub issue to request it. A maintainer or contributor converts the exam using `SKILL.md` and ships it as a new built-in bundle.
+- **Want another certification?** — open a GitHub issue to request it. A maintainer or contributor converts the exam using `docs/certifications/adding-a-certification.md` and ships it as a new built-in bundle.
 - **Local-first progress** — quiz history, wrong answers, and flagged questions are stored in your browser. Export/import as a JSON file for backup. No account needed.
 - **Dark / light mode** — dark by default with a manual sun/moon switch, remembered across visits.
 - **Replay modes** — practice only what you got wrong, only flagged questions, only unattempted ones, or sample by the real exam's domain weights. Questions are always shuffled. Two modes: **Preparation** (no timer, immediate feedback) and **Exam** (timed, deferred feedback, real-exam simulation preset).
@@ -18,9 +18,8 @@ Built with **Vue 3 + TypeScript + Vite**. Fully static, hostable anywhere, local
 | Document | Contents |
 |---|---|
 | [`AGENTS.md`](./AGENTS.md) | Context file for any AI coding agent (tool-agnostic): stack, commands, architecture rules, conventions |
-| [`SKILL.md`](./SKILL.md) | AI-facing spec for maintainers/contributors: how to convert a raw exam dump into the app's JSON format when a new cert is requested |
-| [`docs/DATA-MODEL.md`](./docs/DATA-MODEL.md) | Cert-bundle JSON schema + user-progress schema |
-| [`docs/FEATURES.md`](./docs/FEATURES.md) | Full feature matrix, Phase 1 implementation checklist, deliberate non-features |
+| [`docs/certifications/adding-a-certification.md`](./docs/certifications/adding-a-certification.md) | How to convert a raw exam dump into a cert-bundle JSON + its manifest entry, with a strict "never guess" rule |
+| [`docs/certifications/schema-reference.md`](./docs/certifications/schema-reference.md) | Cert-bundle JSON schema + user-progress schema |
 
 ## Getting started
 
@@ -42,16 +41,21 @@ npm run preview  # serves the production build locally
 
 There is no in-app upload. To add a certification:
 
-1. Open a GitHub issue requesting it. If you already have the questions formatted as JSON per `docs/DATA-MODEL.md`, attach it — that's enough for a maintainer to add it directly.
-2. Otherwise, if you have the raw questions (e.g. an ExamTopics dump as a `.txt` file), you can convert them yourself: give `SKILL.md` to any LLM of your choice together with your questions, and it returns the formatted JSON. Attach that to the issue, or open a PR adding it as `src/assets/<CODE> questions.json` together with an entry in `src/assets/cert-manifest.json` directly.
+1. Open a GitHub issue requesting it. If you already have the questions formatted per [`docs/certifications/schema-reference.md`](./docs/certifications/schema-reference.md), attach it — that's enough for a maintainer to add it directly.
+2. Otherwise, if you have the raw questions (e.g. an ExamTopics dump as a `.txt` file), you can convert them yourself: give [`docs/certifications/adding-a-certification.md`](./docs/certifications/adding-a-certification.md) to any LLM of your choice together with your questions, and it returns the formatted JSON. Attach that to the issue, or open a PR adding it as `src/assets/<CODE> questions.json` together with an entry in `src/assets/cert-manifest.json` directly.
 3. A maintainer validates the JSON and merges it. Since built-in certs are auto-discovered at build time, it's picked up automatically on the next deploy — no other code changes needed.
+
+Run `npm run test:certs` after any bundle or manifest edit. It checks that the manifest matches each bundle, and that themes are internally consistent — every tag a question uses is declared, every declared value is used, every question is tagged, and sibling certs use identically-named groups. Schema validation alone won't catch a bad theme: an undeclared tag is only a warning there, and it surfaces as an empty filter result in the UI.
 
 ## Project layout
 
 ```
 .
-├── SKILL.md                  # AI authoring spec for converting a requested exam into a cert-bundle JSON
+├── AGENTS.md                 # Context file for any AI coding agent
 ├── docs/                     # Human-facing technical documentation
+│   └── certifications/
+│       ├── adding-a-certification.md  # How to add a new certification
+│       └── schema-reference.md        # Cert-bundle + user-progress schema
 ├── index.html                # Vite entry
 ├── vite.config.ts
 └── src/                      # The Vue app

@@ -28,6 +28,7 @@ npm run lint         # eslint .
 npm run lint:fix     # eslint . --fix
 npm run test         # vitest run (single pass)
 npm run test:watch   # vitest watch
+npm run test:certs   # cert-bundle gate: manifest + theme integrity (fast; run after any bundle edit)
 ```
 
 CI (`.github/workflows/ci.yml`, Node 22) runs **lint, typecheck, test, build, and `npm audit --audit-level=high`** on every PR — run `npm run lint && npm run typecheck && npm run test` locally before considering work done.
@@ -46,22 +47,23 @@ src/
   composables/useQuizLoader.ts  Lazy per-cert bundle loading (import.meta.glob + cert-manifest.json) + validation
   utils/schemaValidator.ts  Pure cert-bundle validator (+ isQuestionAnswerable); has tests
   utils/markdownImage.ts    Per-option inline image rendering helper
-  assets/                   Built-in cert bundles: "<CODE> questions.json" + cert-manifest.json (DVA-C02 today)
+  assets/                   Built-in cert bundles: "<CODE> questions.json" + cert-manifest.json
 docs/
-  DATA-MODEL.md             Full cert-bundle + user-progress schema spec
-  FEATURES.md               Feature matrix / Phase 1 checklist / deliberate non-features
-SKILL.md                    AI spec for converting a raw exam dump into a cert-bundle JSON
+  certifications/
+    adding-a-certification.md  Step-by-step: convert a raw exam dump into a cert-bundle JSON + its manifest entry
+    schema-reference.md        Cert-bundle + user-progress schema spec (every field, scoring rules)
 ```
 
 ## Core architecture rules (don't break these)
 
-1. **Cert bundles enter the app one way only**: a JSON file matching `/src/assets/*questions.json` **plus a matching entry in `src/assets/cert-manifest.json`** (file name, exam metadata, question count), discovered at **build time** via `import.meta.glob` in `useQuizLoader.ts`. The manifest (tiny, statically bundled) drives the cert selector; each cert's question bank is loaded **lazily as its own chunk on first navigation** (the router guard calls `ensureCertLoaded`). There is **no runtime upload and no client-side storage of bundles** — this was a deliberate design decision (see "Deliberate non-features" in `docs/FEATURES.md`); don't re-propose it.
-2. **Everything exam-specific lives in the JSON bundle** (questions, themes, topics, weights, passing score, time limit). App mechanics are generic. Never hardcode a certification's data (theme group names like `services`/`concepts`/`questionTypes` are data, not code).
-3. **A bundle failing validation is excluded and logged**, never auto-fixed. The validator reports errors; it does not silently patch them (`docs/FEATURES.md`, non-features).
+1. **Cert bundles enter the app one way only**: a JSON file matching `/src/assets/*questions.json` **plus a matching entry in `src/assets/cert-manifest.json`** (file name, exam metadata, question count), discovered at **build time** via `import.meta.glob` in `useQuizLoader.ts`. The manifest (tiny, statically bundled) drives the cert selector; each cert's question bank is loaded **lazily as its own chunk on first navigation** (the router guard calls `ensureCertLoaded`). The manifest is the *sole* entry point — the glob only resolves files the manifest already names, so a bundle with no manifest entry is silently invisible. There is **no runtime upload and no client-side storage of bundles** — this was a deliberate design decision; don't re-propose it.
+2. **Everything exam-specific lives in the JSON bundle** (questions, themes, topics, weights, passing score, time limit). App mechanics are generic. Never hardcode a certification's data (theme group names like `services`/`concepts`/`questionTypes` or `tasks`/`tools`/`questionTypes` are data, not code).
+3. **A bundle failing validation is excluded and logged**, never auto-fixed. The validator reports errors; it does not silently patch them — a maintainer fixes the data, not the tool.
 4. **Progress is keyed by `exam.code`** (`byExamCode` in the Pinia store), so multiple certs coexist without mixing. Export format is versioned (`format: 'quiz-progress'`, `version: 1`); import merges per-question, newest `lastSeenAt` wins.
-5. **Two quiz modes**: `preparation` (no timer, immediate feedback) and `exam` (countdown from `exam.timeLimitMinutes`, deferred feedback). Unanswered questions always count as incorrect in both modes. Scoring rules, including the scaled-score linear-projection disclaimer requirement, are specified in `docs/DATA-MODEL.md` — follow them exactly when touching scoring/UI.
+5. **Two quiz modes**: `preparation` (no timer, immediate feedback) and `exam` (countdown from `exam.timeLimitMinutes`, deferred feedback). Unanswered questions always count as incorrect in both modes. Scoring rules, including the scaled-score linear-projection disclaimer requirement, are specified in `docs/certifications/schema-reference.md` — follow them exactly when touching scoring/UI.
 6. **Questions are always shuffled**; there is no user setting for order.
-7. **Deliberate non-features** are recorded in `docs/FEATURES.md` (no mandatory accounts, no runtime cert upload, no auto-fixing invalid JSON, no force-fitting drag-and-drop/matching questions, no server-side AI formatting). Revisit the reasoning before proposing any of them.
+7. **Deliberate non-features** — the app refuses these on purpose, so revisit this reasoning before proposing any of them: no mandatory accounts, no runtime cert upload, no client-side storage of bundles, no auto-fixing invalid JSON, no force-fitting drag-and-drop/matching questions, no server-side AI formatting.
+8. **`npm run test:certs` is the gate for any bundle or manifest edit.** The manifest must match each bundle, and themes must be internally consistent: every tag a question uses is declared, every declared value is used by some question, every question is tagged, and certs sharing question types use identically-named groups. This matters because `validateCertBundle` treats an unknown theme value as a **warning**, so an undeclared or misnamed tag passes schema validation and only surfaces later as an empty filter result in the UI.
 
 ## Testing philosophy
 
@@ -84,7 +86,7 @@ If a test would break only by changing copy (not behavior), it's too trivial. Te
 
 ## Adding a certification
 
-There is no in-app upload. A new cert = a new `src/assets/<CODE> questions.json` bundle **and a matching entry in `src/assets/cert-manifest.json`** (file name, exam metadata, question count — the selector renders the manifest, the questions load lazily on first visit). Raw exam dumps are converted by an LLM using the root **`SKILL.md`** (a maintainer/contributor spec with a strict stop-and-ask rule: never guess, never force-fit, never silently drop data). If your task is "convert these questions" or "add cert X", read `SKILL.md` first and follow it; the resulting JSON must pass `src/utils/schemaValidator.ts` (validate via `npm run test`, which covers the validator).
+There is no in-app upload. A new cert = a new `src/assets/<CODE> questions.json` bundle **and a matching entry in `src/assets/cert-manifest.json`** (file name, exam metadata, question count — the selector renders the manifest, the questions load lazily on first visit). Raw exam dumps are converted by an LLM using **`docs/certifications/adding-a-certification.md`** (a maintainer/contributor spec with a strict stop-and-ask rule: never guess, never force-fit, never silently drop data). If your task is "convert these questions" or "add cert X", read it first and follow it; the resulting JSON must pass `src/utils/schemaValidator.ts` (validate via `npm run test`, which covers the validator).
 
 Known quirk: questions with no non-empty `options` are kept in the bundle but excluded from the active quiz pool by `isQuestionAnswerable` (the loader's `activePool()` filters them out, and the validator emits a warning). The DVA-C02 bank currently has zero such questions — but if you see the warning for a newly added bundle, it's expected behavior, not a bug: author the missing options rather than deleting the questions.
 
@@ -111,16 +113,16 @@ Explain changes briefly and clearly. The user will ask for more detail if needed
 - TypeScript strict; shared types live in `src/types.ts` — extend them there rather than redefining interfaces locally.
 - Tests are colocated with the code (e.g. `src/stores/userProgress.test.ts`, `src/router/index.test.ts`) using Vitest; add/adjust tests for behavior changes.
 - `src/assets/**` is ESLint-ignored (the question banks are data, not code).
-- Source files are kept **comment-free**: design rationale lives in `AGENTS.md`, `docs/`, and `SKILL.md` — don't add explanatory comments to code, put new rationale in the docs instead.
+- Source files are kept **comment-free**: design rationale lives in `AGENTS.md` and `docs/` — don't add explanatory comments to code, put new rationale in the docs instead.
 - Branch naming follows `feat/…` style; commits go through Husky hooks.
 
 ## First session
 
-After reading this file, read `docs/FEATURES.md` for the current project state and Phase 1 checklist. Then follow the routing table below for the task at hand.
+This file is the entry point — it carries the stack, commands, architecture rules, testing philosophy, and conventions. Read it, then follow the routing table below for the task at hand.
 
 ## Where to look first
 
-- Schema questions (any JSON field, scoring rules) → `docs/DATA-MODEL.md`
-- What a feature should do / status → `docs/FEATURES.md`
-- Converting an exam dump → `SKILL.md`
+- Schema questions (any JSON field, scoring rules) → `docs/certifications/schema-reference.md`
+- Converting an exam dump, or adding a new certification → `docs/certifications/adding-a-certification.md`
 - Bundle validation rules → `src/utils/schemaValidator.ts` + its tests
+- What a feature should do / whether it's deliberate → the "Core architecture rules" section above
