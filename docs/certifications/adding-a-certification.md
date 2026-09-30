@@ -1,8 +1,46 @@
-# SKILL.md — Converting an exam dump into a cert-bundle JSON
+# Adding a certification — converting an exam dump into a cert-bundle JSON
 
 You are converting a raw certification exam question dump (plain text, e.g. an
 ExamTopics export) into the JSON format this app consumes. Read this whole
 document before producing any output.
+
+## Which document is which
+
+You need **this one**. It is the complete authoring recipe: every field, the
+stop-and-ask rule, the manifest entry, the theme rules, and a worked example
+from a raw dump to finished JSON. Nothing here is optional reading.
+
+Its companion, **`schema-reference.md`** (same directory), is the *normative*
+schema — the field tables the validator implements, plus how a session's score
+is computed and displayed. Read it when:
+
+- you need the **exact** contract for a field this document summarizes, or
+- you are changing **scoring or the score UI** rather than adding a cert.
+
+Two things live only in `schema-reference.md` and are worth knowing even when
+just authoring, because they change what you should write in `exam`:
+
+1. **How `passingScore.scale` is used at runtime.** Setting `scale` makes the app
+   display a *projected* scaled score (a linear projection, e.g. 75% → "750 /
+   1000") with a mandatory disclaimer that it does not reproduce the real
+   exam's scoring. Omit `scale` and the app treats `passingScore` as a plain
+   percentage. So `scale` is not cosmetic: setting it wrongly makes the app
+   display a number the real certification would never produce.
+2. **User-progress structure** (`byExamCode`, replay modes, export format) —
+   not authored by you, but useful context for what `exam.code` keys.
+
+**Your draft is verified by a command, not by re-reading these docs.** When the
+bundle and manifest are written, run:
+
+```bash
+npm run test:certs
+```
+
+It fails loudly on a malformed bundle, a missing or mismatched manifest entry, a
+question count that disagrees with the file, and undeclared, unused, or missing
+theme tags. Use it as the source of truth for "is this valid" rather than
+trusting your own review — it is faster and stricter than re-reading a table.
+`npm run test` is the full suite; run it before handing the work off.
 
 ## Rule #1 — stop and ask
 
@@ -26,9 +64,26 @@ This overrides every other instruction here.
 When in doubt, produce a shorter, correct, partial answer and ask, rather than
 a complete but guessed one.
 
+## Two deliverables, not one
+
+Adding a certification takes **two** edits:
+
+1. **The bundle** — `src/assets/<CODE> questions.json`, shaped like this:
+2. **The manifest entry** — one object appended to `src/assets/cert-manifest.json`
+   (see "Step 2" below).
+
+Skipping the manifest entry yields a bundle that validates perfectly and then
+**never appears in the app**. The manifest is the only thing that makes a cert
+discoverable: `useQuizLoader.ts` iterates `cert-manifest.json`, and its
+`import.meta.glob('/src/assets/*questions.json')` is used only to *load the
+files the manifest already names* — it never discovers certs on its own. With
+no entry, `ensureCertLoaded` finds no match and returns `false`, so the cert is
+silently absent from the selector with no error logged anywhere. A green
+validator run does not catch this.
+
 ## Output format
 
-Produce **one JSON file** shaped like this:
+The bundle file:
 
 ```jsonc
 {
@@ -48,7 +103,7 @@ Produce **one JSON file** shaped like this:
 | `totalQuestions` | number | yes | Question count on the **real** exam — not the size of the question bank you're converting. Ask the user; don't infer this from the dump's question count. |
 | `timeLimitMinutes` | number | yes | Real exam duration in minutes. Ask the user if not stated anywhere in the source material. |
 | `passingScore.passingScore` | number | yes | The passing score. A plain percentage (0-100) if the cert has no scaled score, or a scaled value (e.g. `720`) if it does. |
-| `passingScore.scale` | number | no | Max of the scale (e.g. `1000`). Omit entirely for percentage-based certs. |
+| `passingScore.scale` | number | no | Max of the scale (e.g. `1000`). Omit entirely for percentage-based certs. **Setting this changes the UI**: the app then shows a *projected* scaled score (a linear projection, e.g. 75% → "750 / 1000") with a disclaimer that it does not reproduce the real exam's scoring. Omitting it means `passingScore` is read as a plain percentage. Only set it when the certification genuinely uses a scaled score — never to "normalize" a number. |
 | `weights` | `Record<string, number>` | no | Maps each topic name (must exactly match the `topic` values you assign to questions) to a percentage; values must sum to 100. Omit the whole field if the cert has no published domain weights — do not invent weights. |
 | `instructions` | string | no | Free-text instructions shown to the user. |
 
@@ -72,6 +127,49 @@ A dictionary of theme-group name → list of allowed values, e.g.:
   put on a question should exist here. If you're not confident a tag is
   meaningful or consistent across questions, ask rather than inventing
   one-off tags.
+
+#### Non-AWS example — the Claude certifications
+
+The `services` / `concepts` / `questionTypes` trio above is AWS-specific and is
+**not** the shape to copy for other domains. The four Claude bundles
+(`CCA-F`, `CCAO-F`, `CCAR-P`, `CCDV-F`) use a different, deliberately
+non-AWS taxonomy — the same free-form-key rule applied honestly:
+
+```jsonc
+"themes": {
+  "tasks":         ["task-decomposition", "tool-interface-design", "workflow-enforcement"],
+  "tools":         ["claude-code", "agent-sdk", "mcp", "tool-use"],
+  "questionTypes": ["architecture-decision", "feature-selection", "most-cost-effective"]
+}
+```
+
+Note what changed: `services` (AWS product names) became `tools` (Claude
+product names), and `concepts` (generic architectural ideas) became `tasks`
+(concrete agent capabilities). `questionTypes` survives because "pick the most
+secure / most cost-effective option" is a property of the *question*, not of
+the vendor — that group is reusable across domains, the other two are not.
+
+A question from `CCA-F` shows the shape end to end:
+
+```jsonc
+{
+  "id": "1",
+  "question": "Production data shows that in 12% of cases, your agent skips `get_customer` entirely and calls `lookup_order` using only the customer's stated name...",
+  "options": ["...", "...", "...", "..."],
+  "answers": "A",
+  "topic": "Agentic Architecture & Orchestration",
+  "themes": {
+    "tasks":         ["workflow-enforcement"],
+    "tools":         ["tool-use"],
+    "questionTypes": ["feature-selection"]
+  }
+}
+```
+
+The guiding test: if a tag would still make sense on a question from a
+*different* vendor's exam in the same domain, it belongs in
+`questionTypes`. If it names a product or a capability specific to this
+ecosystem, it belongs in that cert's own groups.
 
 ### `questions[]` (Question)
 
@@ -202,7 +300,79 @@ for a different certification.
 
 **Exam weights**: Development with AWS Services 32%, Deployment 24%, Security 26%, Troubleshooting and Optimization 18%
 
+## Step 2 — register the cert in the manifest
+
+Now add one object to the array in `src/assets/cert-manifest.json`. This step
+is **not optional** and is easy to forget, because nothing warns you that you
+skipped it.
+
+```jsonc
+[
+  {
+    "file": "CCA-F questions.json",      // exact file name, must match the bundle on disk
+    "exam": {                            // must EQUAL the bundle's exam object, field for field
+      "name": "Claude Certified Architect - Foundations",
+      "code": "CCA-F",
+      "totalQuestions": 60,
+      "timeLimitMinutes": 120,
+      "passingScore": { "passingScore": 720, "scale": 1000 },
+      "weights": {
+        "Agentic Architecture & Orchestration": 27
+        // ...every topic you assigned, summing to 100
+      }
+    },
+    "questionCount": 157                 // must equal questions.length exactly
+  }
+]
+```
+
+| Field | Rule |
+|---|---|
+| `file` | The bundle's file name including the `.json` extension and the space: `"<CODE> questions.json"`. A mismatch throws at registry build time. |
+| `exam` | Copy the bundle's `exam` object **verbatim**. `certManifest.test.ts` asserts `bundle.exam` deep-equals `entry.exam`, so a single drifting field — a changed `passingScore`, a dropped `instructions` — fails the test suite. |
+| `questionCount` | `questions.length` in the bundle. Asserted with `toHaveLength`, so an off-by-one after deleting a question fails CI. |
+
+`src/assets/certManifest.test.ts` enforces all three, plus the reverse
+direction: every `*questions.json` file on disk must have exactly one entry, and
+every entry must pass `validateCertBundle`. Run `npm run test:certs` to confirm
+both files agree — it is the fast gate to run after every bundle edit, and it
+also enforces the theme rules below. Run the full `npm run test` before handing
+the work off.
+
+## Step 3 — compute the themes
+
+Themes are the part of this schema most easily got wrong, and the most expensive
+to get wrong quietly: an undeclared tag still passes schema validation, because
+`validateCertBundle` treats an unknown theme value as a **warning**, not an
+error. Nothing fails until a user picks a filter and gets no questions back.
+
+So compute the registry **from the questions you already tagged**, never
+beforehand. Then let `npm run test:certs` prove the two directions agree:
+
+| Rule | Caught by | Typical cause |
+|---|---|---|
+| Every tag a question uses is declared in `themes` | `certThemes.test.ts` | tagging as you go and forgetting to register |
+| Every declared value is used by some question | `certThemes.test.ts` | copying a sibling cert's registry wholesale |
+| Every question carries at least one tag | `certThemes.test.ts` | skipping tagging on "obvious" questions |
+| Sibling certs name their groups identically | `certThemes.test.ts` | renaming a group in one cert only |
+
+The fourth rule matters most when adding a cert that has siblings (a second
+`CCA-*` alongside `CCA-F`): reuse the **exact** group names already in use for
+that family. A cert that invents its own group names yields a filter UI that
+reads inconsistently across the selector, and no schema error will tell you.
+
+Family membership is an explicit list, `CERT_FAMILY` in `src/assets/certThemes.test.ts`
+(`aws`, `claude`). **Add your code to it when you add a cert** — the test fails on
+an unmapped code, so you can't add a bundle silently. Membership is deliberately
+*not* inferred from the data: `questionTypes` values such as `most-secure` are
+reusable across vendors, so overlapping question types say nothing about whether
+two certs should share a taxonomy.
+
+After tagging, `npm run test:certs` must be green before you move on.
+
 ## Before you return the JSON — checklist
+
+Bundle (`src/assets/<CODE> questions.json`):
 
 - [ ] Top level has exactly `version` (`2`), `exam`, `themes`, `questions`.
 - [ ] Every `options` array has 2-5 entries, none with an `A. `/`B. ` prefix.
@@ -212,3 +382,15 @@ for a different certification.
 - [ ] Every value under a question's `themes` exists in the top-level `themes` registry.
 - [ ] No drag-and-drop / matching / simulation question was force-fit — those were flagged and skipped instead.
 - [ ] Anything you were unsure about was raised with the user, not guessed.
+
+Manifest (`src/assets/cert-manifest.json`) — **the step that silently breaks
+the cert if skipped**:
+
+- [ ] An entry was added for this cert, with `file` matching the bundle's name exactly.
+- [ ] `exam` is copied verbatim from the bundle (deep-equal, not a retyped approximation).
+- [ ] `questionCount` equals `questions.length` in the bundle.
+- [ ] `npm run test:certs` is green. It is the authority on validity: it fails on
+      a malformed bundle, a missing/mismatched manifest entry, a `questionCount`
+      that disagrees with the file, a tag a question uses but the registry does
+      not declare, a declared value no question uses, an untagged question, and
+      sibling certs whose theme groups are named differently.
