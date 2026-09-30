@@ -10,7 +10,7 @@ This file gives any LLM / coding agent (Claude Code, Codex, Cursor, Cline, Gemin
 
 - **Vue 3** (Composition API, `<script setup lang="ts">`) + **TypeScript** (strict) + **Vite**
 - **Pinia** for state, with `pinia-plugin-persistedstate` for localStorage persistence
-- **Vue Router 5** with **hash history** (`createWebHashHistory`) — deliberate: the app is static files with no backend, so deep links must work on any host without SPA-fallback rewrites. Don't switch to HTML5 history mode.
+- **Vue Router 5** with **HTML5 history** (`createWebHistory`) — clean URLs (`/`, `/cert`, `/certs/:certCode/quiz`). The app is static with no backend, so the host **must** rewrite unknown paths to `index.html`; the project's own CloudFront distribution does this via `CustomErrorResponses` (403/404 → `/index.html`), and Vite's dev/preview servers fall back to `index.html` by default. Self-hosting elsewhere requires an equivalent rewrite rule (e.g. Netlify `_redirects`, `404.html` on GitHub Pages) or deep links will 404.
 - **Vitest** (jsdom environment) + `@vue/test-utils` for tests
 - **ESLint** (flat config, `eslint-plugin-vue` + `@vue/eslint-config-typescript`)
 - **Husky** pre-commit hooks

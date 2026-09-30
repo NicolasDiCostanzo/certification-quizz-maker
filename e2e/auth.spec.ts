@@ -33,14 +33,14 @@ test('sign-in rejects a wrong password and an unknown email, then succeeds with 
   await page.locator('input[type="password"]').fill(password)
   await page.getByRole('button', { name: texts.authSignInCta }).click()
 
-  await expect(page).toHaveURL(/#\/cert$/)
+  await expect(page).toHaveURL(/\/cert$/)
   await expect(page.locator('.account-chip__email')).toHaveText(email)
 
   await page.reload()
   await expect(page.locator('.account-chip__email')).toHaveText(email)
 
   await page.getByRole('button', { name: texts.signOut }).click()
-  await expect(page).toHaveURL(/\/#\/$/)
+  await expect(page).toHaveURL(/\/$/)
 })
 
 test('resending the confirmation code then confirming signs the user in', async ({ page }) => {
@@ -79,6 +79,6 @@ test('an account left unconfirmed is verified later from the sign-in form, then 
   await page.locator('input[type="password"]').fill(password)
   await page.getByRole('button', { name: texts.authSignInCta }).click()
 
-  await expect(page).toHaveURL(/#\/cert$/)
+  await expect(page).toHaveURL(/\/cert$/)
   await expect(page.locator('.account-chip__email')).toHaveText(email)
 })

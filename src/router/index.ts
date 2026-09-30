@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { isAuthAvailable } from '../config'
 import { useQuizSessionStore } from '../stores/quizSession'
@@ -14,7 +14,7 @@ import QuizSessionView from '../views/QuizSessionView.vue'
 import WelcomeView from '../views/WelcomeView.vue'
 
 export const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/cert', name: 'cert-selector', component: CertSelectorView },
     { path: '/', name: 'welcome', component: WelcomeView },
