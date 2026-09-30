@@ -90,7 +90,6 @@ Then run `npm run test:certs` — the authoritative validity check. It fails on 
 |---|---|
 | [`docs/certifications/adding-a-certification.md`](./docs/certifications/adding-a-certification.md) | How to convert a raw exam dump into a cert-bundle JSON + its manifest entry, with a strict "never guess" rule |
 | [`docs/certifications/schema-reference.md`](./docs/certifications/schema-reference.md) | Normative cert-bundle + user-progress schema (every field, scoring rules) |
-| [`docs/presentation/PROJECT-OVERVIEW.md`](./docs/presentation/PROJECT-OVERVIEW.md) | Architecture and design-decision overview |
 | [`AGENTS.md`](./AGENTS.md) | Context file for any AI coding agent: stack, commands, architecture rules, testing philosophy, conventions |
 
 ## Project layout
