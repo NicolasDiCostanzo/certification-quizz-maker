@@ -4,6 +4,44 @@ You are converting a raw certification exam question dump (plain text, e.g. an
 ExamTopics export) into the JSON format this app consumes. Read this whole
 document before producing any output.
 
+## Which document is which
+
+You need **this one**. It is the complete authoring recipe: every field, the
+stop-and-ask rule, the manifest entry, the theme rules, and a worked example
+from a raw dump to finished JSON. Nothing here is optional reading.
+
+Its companion, **`schema-reference.md`** (same directory), is the *normative*
+schema — the field tables the validator implements, plus how a session's score
+is computed and displayed. Read it when:
+
+- you need the **exact** contract for a field this document summarizes, or
+- you are changing **scoring or the score UI** rather than adding a cert.
+
+Two things live only in `schema-reference.md` and are worth knowing even when
+just authoring, because they change what you should write in `exam`:
+
+1. **How `passingScore.scale` is used at runtime.** Setting `scale` makes the app
+   display a *projected* scaled score (a linear projection, e.g. 75% → "750 /
+   1000") with a mandatory disclaimer that it does not reproduce the real
+   exam's scoring. Omit `scale` and the app treats `passingScore` as a plain
+   percentage. So `scale` is not cosmetic: setting it wrongly makes the app
+   display a number the real certification would never produce.
+2. **User-progress structure** (`byExamCode`, replay modes, export format) —
+   not authored by you, but useful context for what `exam.code` keys.
+
+**Your draft is verified by a command, not by re-reading these docs.** When the
+bundle and manifest are written, run:
+
+```bash
+npm run test:certs
+```
+
+It fails loudly on a malformed bundle, a missing or mismatched manifest entry, a
+question count that disagrees with the file, and undeclared, unused, or missing
+theme tags. Use it as the source of truth for "is this valid" rather than
+trusting your own review — it is faster and stricter than re-reading a table.
+`npm run test` is the full suite; run it before handing the work off.
+
 ## Rule #1 — stop and ask
 
 This overrides every other instruction here.
@@ -65,7 +103,7 @@ The bundle file:
 | `totalQuestions` | number | yes | Question count on the **real** exam — not the size of the question bank you're converting. Ask the user; don't infer this from the dump's question count. |
 | `timeLimitMinutes` | number | yes | Real exam duration in minutes. Ask the user if not stated anywhere in the source material. |
 | `passingScore.passingScore` | number | yes | The passing score. A plain percentage (0-100) if the cert has no scaled score, or a scaled value (e.g. `720`) if it does. |
-| `passingScore.scale` | number | no | Max of the scale (e.g. `1000`). Omit entirely for percentage-based certs. |
+| `passingScore.scale` | number | no | Max of the scale (e.g. `1000`). Omit entirely for percentage-based certs. **Setting this changes the UI**: the app then shows a *projected* scaled score (a linear projection, e.g. 75% → "750 / 1000") with a disclaimer that it does not reproduce the real exam's scoring. Omitting it means `passingScore` is read as a plain percentage. Only set it when the certification genuinely uses a scaled score — never to "normalize" a number. |
 | `weights` | `Record<string, number>` | no | Maps each topic name (must exactly match the `topic` values you assign to questions) to a percentage; values must sum to 100. Omit the whole field if the cert has no published domain weights — do not invent weights. |
 | `instructions` | string | no | Free-text instructions shown to the user. |
 
@@ -344,6 +382,8 @@ the cert if skipped**:
 - [ ] An entry was added for this cert, with `file` matching the bundle's name exactly.
 - [ ] `exam` is copied verbatim from the bundle (deep-equal, not a retyped approximation).
 - [ ] `questionCount` equals `questions.length` in the bundle.
-- [ ] `npm run test:certs` is green — it covers the manifest, plus the theme
-      rules: every tag used is declared, every declared value is used, every
-      question is tagged, and sibling certs share one taxonomy.
+- [ ] `npm run test:certs` is green. It is the authority on validity: it fails on
+      a malformed bundle, a missing/mismatched manifest entry, a `questionCount`
+      that disagrees with the file, a tag a question uses but the registry does
+      not declare, a declared value no question uses, an untagged question, and
+      sibling certs whose theme groups are named differently.
