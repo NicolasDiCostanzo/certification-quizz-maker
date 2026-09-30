@@ -4,6 +4,15 @@ import type { CertBundle } from '../types'
 
 const modules = import.meta.glob<{ default: unknown }>('./*questions.json', { eager: true })
 
+const CERT_FAMILY: Record<string, string> = {
+  'DVA-C02': 'aws',
+  'CLF-C02': 'aws',
+  'CCA-F': 'claude',
+  'CCAO-F': 'claude',
+  'CCAR-P': 'claude',
+  'CCDV-F': 'claude',
+}
+
 function loadBundle(path: string, mod: { default: unknown }): CertBundle {
   const result = validateCertBundle(mod.default)
   expect(result.valid, `${path}: ${result.errors.join('; ')}`).toBe(true)
@@ -69,29 +78,36 @@ describe('cert theme integrity', () => {
     }
   })
 
-  it('uses one taxonomy shape across certs that share question types', () => {
+  it('uses one taxonomy shape across certs in the same family', () => {
     const bundles = Object.values(modules).map((mod) => loadBundle('bundle', mod))
-    const questionTypes = new Map(
-      bundles.map((bundle) => [bundle.exam.code, new Set(bundle.themes.questionTypes ?? [])]),
-    )
-    const shape = new Map(
-      bundles.map((bundle) => [bundle.exam.code, Object.keys(bundle.themes).sort().join(', ')]),
-    )
-    const drifting: string[] = []
-    for (const [a, typesA] of questionTypes) {
-      for (const [b, typesB] of questionTypes) {
-        if (a >= b) continue
-        const shared = [...typesA].filter((value) => typesB.has(value))
-        if (shared.length === 0) continue
-        const overlap = shared.length / new Set([...typesA, ...typesB]).size
-        if (overlap >= 0.7 && shape.get(a) !== shape.get(b)) {
-          drifting.push(`${a} "${shape.get(a)}" vs ${b} "${shape.get(b)}" (${shared.length} shared question types)`)
-        }
-      }
-    }
+    const unknown = bundles
+      .map((bundle) => bundle.exam.code)
+      .filter((code) => !CERT_FAMILY[code])
     expect(
-      drifting,
-      `Certs sharing most of their question types are one family and must name their theme groups identically, so a filter means the same thing everywhere: ${drifting.join(' | ')}`,
+      unknown,
+      `Add these codes to CERT_FAMILY so their taxonomy is checked: ${unknown.join(', ')}`,
     ).toEqual([])
+
+    const shapeByFamily = new Map<string, { shape: string; codes: string[] }>()
+    for (const bundle of bundles) {
+      const family = CERT_FAMILY[bundle.exam.code]
+      const shape = Object.keys(bundle.themes).sort().join(', ')
+      const entry = shapeByFamily.get(family)
+      if (entry) entry.codes.push(bundle.exam.code)
+      else shapeByFamily.set(family, { shape, codes: [bundle.exam.code] })
+    }
+
+    const drifting = [...shapeByFamily.values()].filter((entry) => entry.codes.length > 1)
+    for (const entry of drifting) {
+      const shapes = new Set(
+        bundles
+          .filter((bundle) => entry.codes.includes(bundle.exam.code))
+          .map((bundle) => Object.keys(bundle.themes).sort().join(', ')),
+      )
+      expect(
+        [...shapes],
+        `Certs in one family must name their theme groups identically, so a filter means the same thing across the selector: ${entry.codes.join(', ')} disagree. Rename the group in the newer cert to match its siblings.`,
+      ).toHaveLength(1)
+    }
   })
 })

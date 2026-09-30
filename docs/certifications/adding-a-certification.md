@@ -361,6 +361,13 @@ The fourth rule matters most when adding a cert that has siblings (a second
 that family. A cert that invents its own group names yields a filter UI that
 reads inconsistently across the selector, and no schema error will tell you.
 
+Family membership is an explicit list, `CERT_FAMILY` in `src/assets/certThemes.test.ts`
+(`aws`, `claude`). **Add your code to it when you add a cert** — the test fails on
+an unmapped code, so you can't add a bundle silently. Membership is deliberately
+*not* inferred from the data: `questionTypes` values such as `most-secure` are
+reusable across vendors, so overlapping question types say nothing about whether
+two certs should share a taxonomy.
+
 After tagging, `npm run test:certs` must be green before you move on.
 
 ## Before you return the JSON — checklist
