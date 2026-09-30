@@ -31,7 +31,7 @@ Metadata about the certification itself. Displayed on the home screen and used f
     "totalQuestions": 65,
     "timeLimitMinutes": 130,
     "passingScore": {
-      "passingScore": 700,
+      "passingScore": 720,
       "scale": 1000
     },
     "weights": {
