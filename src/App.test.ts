@@ -49,21 +49,21 @@ describe('app title link', () => {
     useUserAccountStore().accountMode = 'account'
     wrapper = mount(App, { global: { plugins: [router] } })
 
-    expect(wrapper.find('.app-title').attributes('href')).toBe('#/cert')
+    expect(wrapper.find('.app-title').attributes('href')).toBe('/cert')
   })
 
   it('points to the cert selector in local mode too', () => {
     useUserAccountStore().accountMode = 'local'
     wrapper = mount(App, { global: { plugins: [router] } })
 
-    expect(wrapper.find('.app-title').attributes('href')).toBe('#/')
+    expect(wrapper.find('.app-title').attributes('href')).toBe('/')
   })
 
   it('points to the welcome page when no session is active', () => {
     useUserAccountStore().accountMode = null
     wrapper = mount(App, { global: { plugins: [router] } })
 
-    expect(wrapper.find('.app-title').attributes('href')).toBe('#/')
+    expect(wrapper.find('.app-title').attributes('href')).toBe('/')
   })
 
   it('offers a way back to the welcome page in local mode', async () => {

@@ -120,11 +120,44 @@ A dictionary mapping **theme groups** to their possible **values**. Each key is 
 | `question` | string | ✅ | Full prompt. Unicode preserved. |
 | `options` | string[] | ✅ | 2–5 entries. No `A. ` prefixes — the app renders letters. Inline images inside an option are markdown (`![...](...)`). |
 | `answers` | string \| string[] | ✅ | Single letter (`"C"`) for single-select; array (`["B","D"]`) for multi-select. Every letter must be within the `options` range. |
-| `topic` | string | ✅ | One primary topic. If `exam.weights` exists, must be one of its keys. |
+| `topic` | string | ✅ | **Exactly one** topic name — see the rule below. Never an array, and never several topics joined by commas or slashes. If `exam.weights` exists, must be exactly one of its keys. |
 | `explanation` | string | optional | Rationale for the correct answer. Shown as immediate feedback in preparation mode and on the end-of-quiz review screen in both modes. |
 | `url` | string | optional | Source/discussion link. Omit the field entirely if unavailable (never `null` or `""`). |
 | `promptImages` | string[] | optional | Images referenced **by the question prompt** (diagrams, screenshots). URLs or data URIs. Per-option images do **not** go here — they are inline markdown in `options`. |
 | `themes` | object | optional | Nested object keyed by this cert's theme-group names (the keys of the top-level `themes` registry above — `services`/`concepts`/`questionTypes` for DVA-C02, something else for another cert). Each value is an array of strings drawn from that group's registry. Omit a sub-array entirely when it doesn't apply to this question (never `[]`); omit the whole `themes` object when the question has no tags at all. Unknown values are a validator warning, not an error (see below). |
+
+#### The `topic` rule — exactly one, always
+
+`topic` is a **single string holding exactly one topic name**, and it is
+mandatory on every question. There is no "no topic" case and no "multiple
+topics" case:
+
+- **Exactly one.** Not an array, not `"Security, Deployment"`, not
+  `"Security/Deployment"`. If a question genuinely spans two domains, pick the
+  one it primarily tests and say so in `explanation`.
+- **Never omitted or blank.** A missing or empty `topic` is a validation error,
+  and it breaks exam-ratio sampling, which has nothing to count.
+- **Must be an exact key of `exam.weights`** when that field is present. The
+  comparison is exact string equality, so `"Billing, Pricing, and Support"`
+  matches only that key — a comma inside a topic *name* is fine, commas
+  separating *topics* are not.
+
+> A topic name may legitimately contain punctuation, which is why you will see
+> values like `Billing, Pricing, and Support` and `Governance, Safety & Risk
+> Management`. Those are single topic names copied verbatim from
+> `exam.weights`, not a list of topics.
+
+The validator enforces the exact-key rule as a **hard error**, not a warning, so
+a mistyped or multi-valued topic fails the build rather than silently skewing
+sampling:
+
+```
+questions[0] (id 1).topic "Evaluation, Testing & Optimization, Integration" is not one of exam.weights' keys.
+```
+
+When `exam.weights` is absent (a cert with no published domain breakdown), any
+non-empty topic string is accepted and the app samples the bank uniformly.
+
 
 ### DVA-C02 canonical themes (reference)
 

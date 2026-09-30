@@ -1,10 +1,11 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import { useQuizLoader } from '../composables/useQuizLoader'
 import { isAuthAvailable } from '../config'
 import { useQuizSessionStore } from '../stores/quizSession'
 import { useUserAccountStore } from '../stores/userAccount'
 import AuthView from '../views/AuthView.vue'
 import CertSelectorView from '../views/CertSelectorView.vue'
+import NotFoundView from '../views/NotFoundView.vue'
 import QuestionBankReviewView from '../views/QuestionBankReviewView.vue'
 import QuizConfigureView from '../views/QuizConfigureView.vue'
 import QuizDashboardView from '../views/QuizDashboardView.vue'
@@ -14,7 +15,7 @@ import QuizSessionView from '../views/QuizSessionView.vue'
 import WelcomeView from '../views/WelcomeView.vue'
 
 export const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/cert', name: 'cert-selector', component: CertSelectorView },
     { path: '/', name: 'welcome', component: WelcomeView },
@@ -27,6 +28,7 @@ export const router = createRouter({
     { path: '/certs/:certCode/topic/:topic', name: 'topic-review', component: QuestionBankReviewView, props: true },
     { path: '/certs/:certCode/theme/:themeGroup/:themeValue', name: 'theme-review', component: QuestionBankReviewView, props: true },
     { path: '/certs/:certCode/flagged', name: 'flagged-review', component: QuestionBankReviewView, props: true },
+    { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },
   ],
 })
 

@@ -63,7 +63,7 @@ npm run knip        # unused code/dependency check
 
 ### Self-hosting
 
-The frontend is fully static — `npm run build` emits a `dist/` directory you can serve from any static host, with no server-side runtime. Routes use hash-based URLs precisely so deep links work on hosts without SPA rewrites.
+The frontend is fully static — `npm run build` emits a `dist/` directory you can serve from any static host, with no server-side runtime. Routes use clean paths (`/`, `/cert`, `/certs/<CODE>/quiz`), so **the host must rewrite unknown paths to `index.html`** or deep links will 404. The project's own S3 + CloudFront setup already does this via `CustomErrorResponses`; on another host add the equivalent rule (Netlify `_redirects`, a `404.html` on GitHub Pages, an nginx `try_files $uri /index.html`).
 
 To deploy to the project's own S3 + CloudFront setup:
 

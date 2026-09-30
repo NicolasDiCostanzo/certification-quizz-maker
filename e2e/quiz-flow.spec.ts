@@ -75,7 +75,7 @@ test.describe.serial('quiz journey on the DVA-C02 certification', () => {
   })
 
   test('lists every declared certification as a card', async ({ sharedPage: page }) => {
-    await page.goto('/#/cert')
+    await page.goto('/cert')
 
     await expect(page.locator('.cert-card')).toHaveCount(certManifest.length)
     for (const entry of certManifest) {
@@ -85,7 +85,7 @@ test.describe.serial('quiz journey on the DVA-C02 certification', () => {
 
   test('shows a blank dashboard before any quiz is taken', async ({ sharedPage: page }) => {
     await openCertDashboardCard(page, certExamName)
-    await expect(page).toHaveURL(new RegExp(`#/certs/${certCode}$`))
+    await expect(page).toHaveURL(new RegExp(`/certs/${certCode}$`))
 
     await expectDashboardStat(page, texts.quizzesTaken, '0')
     await expectDashboardStat(page, texts.overallAccuracy, '0%')
@@ -130,7 +130,7 @@ test.describe.serial('quiz journey on the DVA-C02 certification', () => {
     await freezeTimeAt(page, quizFinishedAt)
     await finishQuiz(page)
 
-    await expect(page).toHaveURL(new RegExp(`#/certs/${certCode}/quiz/review$`))
+    await expect(page).toHaveURL(new RegExp(`/certs/${certCode}/quiz/review$`))
   })
 
   test('shows the pass/fail banner and score card', async ({ sharedPage: page }) => {
@@ -184,7 +184,7 @@ test.describe.serial('quiz journey on the DVA-C02 certification', () => {
 
   test('shows this quizz score on the dashboard', async ({ sharedPage: page }) => {
     await goBackToCertDashboard(page)
-    await expect(page).toHaveURL(new RegExp(`#/certs/${certCode}$`))
+    await expect(page).toHaveURL(new RegExp(`/certs/${certCode}$`))
 
     await expectDashboardStat(page, texts.quizzesTaken, '1')
     await expectDashboardStat(page, texts.overallAccuracy, `${expectedResult.percent}%`)
@@ -218,7 +218,7 @@ test.describe.serial('quiz journey on the DVA-C02 certification', () => {
     await expect(page.getByText(texts.noQuestionsFoundMessage)).toBeVisible()
 
     await goBackToDashboard(page)
-    await expect(page).toHaveURL(new RegExp(`#/certs/${certCode}$`))
+    await expect(page).toHaveURL(new RegExp(`/certs/${certCode}$`))
     await expectFlaggedReviewEnabled(page, false)
   })
 

@@ -22,7 +22,7 @@ export async function signIn(page: Page, { email, password }: TestUser): Promise
   await page.locator('input[type="email"]').fill(email)
   await page.locator('input[type="password"]').fill(password)
   await page.getByRole('button', { name: texts.authSignInCta }).click()
-  await expect(page).toHaveURL(/#\/cert$/)
+  await expect(page).toHaveURL(/\/cert$/)
 }
 
 export async function resetPassword(page: Page, { email }: TestUser, newPassword: string): Promise<void> {
@@ -41,11 +41,11 @@ export async function resetPassword(page: Page, { email }: TestUser, newPassword
   await page.locator('input[autocomplete="new-password"]').fill(newPassword)
   await page.getByRole('button', { name: texts.authResetConfirmCta }).click()
 
-  await expect(page).toHaveURL(/#\/cert$/)
+  await expect(page).toHaveURL(/\/cert$/)
   await expect(page.locator('.account-chip__email')).toHaveText(email)
 
   await page.getByRole('button', { name: texts.signOut }).click()
-  await expect(page).toHaveURL(/\/#\/$/)
+  await expect(page).toHaveURL(/\/$/)
 
   await signIn(page, { email, password: newPassword })
 }
@@ -65,7 +65,7 @@ export async function resendConfirmationCode(page: Page, { email, password }: Te
   await page.locator('input[autocomplete="one-time-code"]').fill('000000')
   await page.getByRole('button', { name: texts.authConfirmCta }).click()
 
-  await expect(page).toHaveURL(/#\/cert$/)
+  await expect(page).toHaveURL(/\/cert$/)
   await expect(page.locator('.account-chip__email')).toHaveText(email)
 }
 
@@ -82,5 +82,5 @@ export async function signUpAndConfirm(page: Page, { email, password }: TestUser
   await page.locator('input[autocomplete="one-time-code"]').fill('000000')
   await page.getByRole('button', { name: texts.authConfirmCta }).click()
 
-  await expect(page).toHaveURL(/#\/cert$/)
+  await expect(page).toHaveURL(/\/cert$/)
 }
