@@ -139,6 +139,16 @@ describe('router', () => {
     expect(router.currentRoute.value.params.certCode).toBe('DVA-C02')
   })
 
+  it('sends an unknown path to the not-found screen', async () => {
+    await router.push('/totally/unknown')
+    expect(router.currentRoute.value.name).toBe('not-found')
+  })
+
+  it('does not let the not-found catch-all shadow the real routes', async () => {
+    await router.push('/cert')
+    expect(router.currentRoute.value.name).toBe('cert-selector')
+  })
+
   it('redirects quiz-review to quiz-session when the active session has not finished yet', async () => {
     const session = useQuizSessionStore()
     session.startSession(

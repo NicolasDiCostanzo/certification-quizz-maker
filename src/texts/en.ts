@@ -158,6 +158,12 @@ export const texts = {
   authConfirmError: 'Verification failed. Check the code and try again.',
   authConfirmCompleted: 'Your account is verified. Sign in with your password.',
   signOut: 'Sign out',
+  notFoundTitle: 'Page not found',
+  notFoundDescription:
+    'This page does not exist. The link may be broken, or the address may have a typo.',
+  notFoundPathLabel: 'Requested path',
+  notFoundHomeCta: '← Back to home',
+  notFoundCertsCta: 'Browse certifications →',
   syncFailed: 'Synchronization failed. Your local data is safe; try again later.',
   dismiss: 'Dismiss',
 }

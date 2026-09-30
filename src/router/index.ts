@@ -5,6 +5,7 @@ import { useQuizSessionStore } from '../stores/quizSession'
 import { useUserAccountStore } from '../stores/userAccount'
 import AuthView from '../views/AuthView.vue'
 import CertSelectorView from '../views/CertSelectorView.vue'
+import NotFoundView from '../views/NotFoundView.vue'
 import QuestionBankReviewView from '../views/QuestionBankReviewView.vue'
 import QuizConfigureView from '../views/QuizConfigureView.vue'
 import QuizDashboardView from '../views/QuizDashboardView.vue'
@@ -27,6 +28,7 @@ export const router = createRouter({
     { path: '/certs/:certCode/topic/:topic', name: 'topic-review', component: QuestionBankReviewView, props: true },
     { path: '/certs/:certCode/theme/:themeGroup/:themeValue', name: 'theme-review', component: QuestionBankReviewView, props: true },
     { path: '/certs/:certCode/flagged', name: 'flagged-review', component: QuestionBankReviewView, props: true },
+    { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },
   ],
 })
 
