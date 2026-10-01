@@ -126,6 +126,30 @@ A dictionary mapping **theme groups** to their possible **values**. Each key is 
 | `promptImages` | string[] | optional | Images referenced **by the question prompt** (diagrams, screenshots). URLs or data URIs. Per-option images do **not** go here — they are inline markdown in `options`. |
 | `themes` | object | optional | Nested object keyed by this cert's theme-group names (the keys of the top-level `themes` registry above — `services`/`concepts`/`questionTypes` for DVA-C02, something else for another cert). Each value is an array of strings drawn from that group's registry. Omit a sub-array entirely when it doesn't apply to this question (never `[]`); omit the whole `themes` object when the question has no tags at all. Unknown values are a validator warning, not an error (see below). |
 
+#### The `id` rule — continue the bundle's own sequence
+
+`id` is a string that must be unique within the file and stable for the life of
+that question: it is the key that `userProgress` stores per-question stats
+against, so a question whose id changes silently loses its whole history.
+
+**Number from the bundle, not from the source dump.** When you append questions
+to an existing bundle, continue its numbering:
+
+- Find the highest existing id and start after it.
+- If the bundle's ids are plain integers (`"1"` … `"80"`), the next ids are
+  `"81"`, `"82"`, … — even when the source dump numbers its questions `"1.1"`,
+  `"2.1"`, or by topic.
+- Only preserve a source's own numbering when it is already a clean sequence
+  with no collisions.
+
+Don't renumber existing questions when adding to a bundle. Leave gaps where
+questions were deleted rather than closing them up, so every id a user may
+already have stored progress against keeps pointing at the same question.
+
+The source's numbering is still useful for your own bookkeeping while
+converting — it is how you map a dumped question back to its discussion thread
+— but it does not become the id.
+
 #### The `topic` rule — exactly one, always
 
 `topic` is a **single string holding exactly one topic name**, and it is

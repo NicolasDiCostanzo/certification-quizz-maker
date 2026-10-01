@@ -17,7 +17,7 @@
         "Troubleshooting and Optimization": 18
       }
     },
-    "questionCount": 555
+    "questionCount": 547
   },
   {
     "file": "CLF-C02 questions.json",
@@ -58,7 +58,7 @@
         "Context Management & Reliability": 15
       }
     },
-    "questionCount": 157
+    "questionCount": 357
   },
   {
     "file": "CCAO-F questions.json",
@@ -81,7 +81,7 @@
         "Troubleshooting and Optimization": 10
       }
     },
-    "questionCount": 80
+    "questionCount": 140
   },
   {
     "file": "CCAR-P questions.json",
@@ -104,7 +104,7 @@
         "Developer Productivity & Operational Enablement": 7
       }
     },
-    "questionCount": 80
+    "questionCount": 143
   },
   {
     "file": "CCDV-F questions.json",
@@ -128,6 +128,6 @@
         "Tools and MCPs": 10
       }
     },
-    "questionCount": 80
+    "questionCount": 193
   }
 ]

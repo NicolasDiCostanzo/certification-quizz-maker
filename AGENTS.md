@@ -4,7 +4,7 @@ This file gives any LLM / coding agent (Claude Code, Codex, Cursor, Cline, Gemin
 
 ## What this project is
 
-**certification-quizz-maker** — a cert-agnostic quiz web app for exam preparation. Fully static (no backend, no accounts), local-first: progress lives in the browser's localStorage. Ships with the AWS Certified Developer – Associate (DVA-C02) question bank (555 questions) built in; other certifications are added as new built-in JSON bundles (see "Adding a certification" below).
+**certification-quizz-maker** — a cert-agnostic quiz web app for exam preparation. Fully static (no backend, no accounts), local-first: progress lives in the browser's localStorage.
 
 ## Tech stack
 
@@ -88,7 +88,7 @@ If a test would break only by changing copy (not behavior), it's too trivial. Te
 
 There is no in-app upload. A new cert = a new `src/assets/<CODE> questions.json` bundle **and a matching entry in `src/assets/cert-manifest.json`** (file name, exam metadata, question count — the selector renders the manifest, the questions load lazily on first visit). Raw exam dumps are converted by an LLM using **`docs/certifications/adding-a-certification.md`** (a maintainer/contributor spec with a strict stop-and-ask rule: never guess, never force-fit, never silently drop data). If your task is "convert these questions" or "add cert X", read it first and follow it; the resulting JSON must pass `src/utils/schemaValidator.ts` (validate via `npm run test`, which covers the validator).
 
-Known quirk: questions with no non-empty `options` are kept in the bundle but excluded from the active quiz pool by `isQuestionAnswerable` (the loader's `activePool()` filters them out, and the validator emits a warning). The DVA-C02 bank currently has zero such questions — but if you see the warning for a newly added bundle, it's expected behavior, not a bug: author the missing options rather than deleting the questions.
+Known quirk: questions with no non-empty `options` are kept in the bundle but excluded from the active quiz pool by `isQuestionAnswerable` (the loader's `activePool()` filters them out, and the validator emits a warning). If you see the warning for a newly added bundle, it's expected behavior, not a bug: author the missing options rather than deleting the questions.
 
 ## What the agent should do
 

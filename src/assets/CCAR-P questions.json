@@ -1891,6 +1891,1518 @@
           "troubleshooting"
         ]
       }
+    },
+    {
+      "id": "81",
+      "question": "You are designing an agent that can modify customer records. Where do approval gates and audit trails belong?",
+      "options": [
+        "In the system prompt, with instructions to confirm before writing and to summarize every action at the end of each run",
+        "In the observability stack, with traces sampled at 10% and reviewed in a weekly governance meeting",
+        "In a post-launch hardening phase, once task completion is stable enough to show which code paths actually matter",
+        "In the tool layer from the start, with a log per tool call and an approval gate on every irreversible write"
+      ],
+      "answers": "D",
+      "explanation": "Gates and logging enforced in the tool layer cover every path the model can take, and they are cheapest to design in at the start. Prompt instructions to confirm are advisory and can be skipped under pressure; sampled traces miss most actions; governance bolted on afterwards misses paths.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "regulatory-compliance"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "tracing"
+        ]
+      }
+    },
+    {
+      "id": "82",
+      "question": "How do you decide which tools an autonomous agent may call without a person?",
+      "options": [
+        "Classify each action by blast radius: read-only and reversible calls run freely, irreversible or external ones need approval",
+        "Allow every tool inside the agent's own sandbox and require approval only for calls that cross a network boundary",
+        "Let the model rate the risk of each call itself and request approval whenever its stated confidence falls below a configured threshold",
+        "Gate every tool at launch and remove the gate from whichever tools users approve most often during the first month"
+      ],
+      "answers": "A",
+      "explanation": "Classify actions by what happens if they are wrong: reversibility and reach decide the gate. A network boundary is the wrong proxy, since a local delete is just as irreversible as a remote one, and approval frequency measures convenience rather than risk.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "regulatory-compliance"
+        ],
+        "questionTypes": [
+          "most-secure"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "83",
+      "question": "A client engagement involves personal data. What must the architecture cover beyond the model calls?",
+      "options": [
+        "Encryption at rest and in transit for every store the agent touches, with keys held in the client's own key management service",
+        "A data processing agreement with the model provider plus a zero-retention setting on the API organization",
+        "Retention limits, PII redaction where possible, isolation from other clients' data, and access control on the logs",
+        "An anonymized eval set so that test runs and CI pipelines contain no real customer records or identifiers"
+      ],
+      "answers": "C",
+      "explanation": "Data handling is part of the system: retention, minimization, isolation, and who can read the logs. Encryption is necessary but says nothing about how long data is kept or who can read it, and a provider agreement covers the provider's side, not your own logs and stores.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "data-retention-and-privacy"
+        ],
+        "questionTypes": [
+          "most-secure"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "84",
+      "question": "An executive asks whether to fund the agent system. What framing lands?",
+      "options": [
+        "The eval harness design, benchmark scores against the previous model, and the token budget per task",
+        "Cost per completed task, measured reliability, the known failure modes, how each is caught, and what fixing them takes",
+        "The architecture diagram, the tool inventory, and the prompt techniques that produced the accuracy gains",
+        "A live demo of the happy path with a projection of headcount savings once the agent reaches full autonomy"
+      ],
+      "answers": "B",
+      "explanation": "Executives fund outcomes and risks they can reason about: cost, reliability, failure modes, and recovery. A happy-path demo with a savings projection hides exactly the failure and recovery information that decides whether the investment is sound.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "tradeoff-communication"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "85",
+      "question": "A new model version is available. What is the responsible upgrade path for a production agent?",
+      "options": [
+        "Run the golden eval set on the new model, compare against the current baseline, then roll out gradually with monitoring",
+        "Pin the current model until the provider's deprecation date, then switch in one release with a rollback tag ready",
+        "Point staging at the new model on release day and promote to production after a week with no complaints from the engineers using it",
+        "Run the new model in shadow mode on live traffic for a quarter and adopt it only if no user reports a regression"
+      ],
+      "answers": "A",
+      "explanation": "Upgrades are lifecycle events: evaluate, compare, canary, monitor. A quarter of shadow traffic is slow and relies on user reports rather than measurement; a week of informal staging use has no baseline to compare against.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "tradeoff-communication"
+        ],
+        "questionTypes": [
+          "troubleshooting"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "86",
+      "question": "Which metrics tell you a production agent is drifting?",
+      "options": [
+        "Token volume per day, API error codes, and the number of prompt versions shipped in the quarter",
+        "Uptime of the agent service, p99 latency of the model endpoint, and the provider's status page history",
+        "Ticket volume from users, time to first response from the team, and the count of open bugs tagged to the agent",
+        "Tool error rate, cost per completed task, latency, and eval scores tracked over time"
+      ],
+      "answers": "D",
+      "explanation": "Operational signals tracked over time show drift before users complain. Uptime and endpoint latency describe availability, not quality, and user ticket volume is a lagging signal that arrives after the drift has done damage.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "tradeoff-communication"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "87",
+      "question": "A multi-agent system fails in cascades when one worker misbehaves. What architectural controls apply?",
+      "options": [
+        "Redundant workers per task with majority voting, so a single misbehaving worker is outvoted by the others",
+        "A larger context window for the coordinator so it can hold every worker transcript and spot problems itself",
+        "Timeouts, bounded retries, circuit breakers per worker, and a coordinator that can stop the run",
+        "Stricter output schemas and a shorter system prompt per worker, reducing the chance that any worker misbehaves"
+      ],
+      "answers": "C",
+      "explanation": "Limits and a coordinator that can halt the run are what contain cascading failures. Voting adds workers and cost without a way to stop a run that is going wrong, and prevention through stricter schemas does not contain the failures that still occur.",
+      "topic": "Solution Design & Architecture",
+      "themes": {
+        "tasks": [
+          "business-problem-translation"
+        ],
+        "questionTypes": [
+          "troubleshooting"
+        ],
+        "tools": [
+          "rag"
+        ]
+      }
+    },
+    {
+      "id": "88",
+      "question": "Prompts are edited by several engineers and quality varies release to release. What fixes the process?",
+      "options": [
+        "Assign one owner per prompt who approves edits by hand and keeps a changelog in the team wiki",
+        "Version prompts in source control with review, and run the eval set in CI on every change",
+        "Freeze the prompts for a quarter at a time and batch all edits into a single tested release",
+        "Move the variable parts of each prompt into a config service so engineers edit settings rather than prose"
+      ],
+      "answers": "B",
+      "explanation": "Treat prompts like code: versioned, reviewed, and tested automatically. A single human approver adds a bottleneck without measurement, and a config service changes where edits happen without testing their effect.",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "themes": {
+        "tasks": [
+          "prompt-reuse-and-caching"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "89",
+      "question": "When should a deployed agent system be retired?",
+      "options": [
+        "When the model it was built on is deprecated, since a migration costs about as much as a rebuild",
+        "When its eval scores fall below the launch baseline for two consecutive review periods",
+        "When the original sponsor leaves and no team is willing to take over on-call for it",
+        "When its measured value no longer covers cost and upkeep, and a simpler alternative covers the need"
+      ],
+      "answers": "D",
+      "explanation": "Lifecycle management includes the end: measure value against cost and decommission on evidence. Falling eval scores call for a fix or a rollback, not retirement, and a model deprecation is a migration event rather than a reason to stop delivering value.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "tradeoff-communication"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "90",
+      "question": "A stakeholder wants \"an agent for everything\". What do you establish before building?",
+      "options": [
+        "Success metrics, the tasks in scope, and which decisions stay with people",
+        "The full tool inventory the agent would need and the MCP servers that expose each system",
+        "A pilot with the widest possible scope so that real usage reveals which tasks are worth keeping",
+        "The model tier, the token budget per task, and the evaluation harness for the first release"
+      ],
+      "answers": "A",
+      "explanation": "Scope and metrics first. Without them there is nothing to evaluate against and no way to say no. A wide pilot defers the scoping decision to usage data that nobody has defined how to judge, and tool inventories follow from scope rather than preceding it.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "tradeoff-communication"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "91",
+      "question": "A multi-agent system has a planner, three workers, and a verifier. The verifier rejects 40% of worker output. Where do you look first?",
+      "options": [
+        "The verifier's rubric, since a strict rubric applied to reasonable output is the more common cause of a high rejection rate in practice",
+        "The worker model tier, since a stronger model usually cuts the rejection rate faster than editing prompts does",
+        "The worker briefs and acceptance criteria, since a high rejection rate usually means the task or the criteria are unclear",
+        "The planner's decomposition, adding a second verifier pass so borderline output gets a tie-breaking judgment"
+      ],
+      "answers": "C",
+      "explanation": "High rejection usually points to unclear briefs or criteria, so read those before changing anything else. Loosening the verifier or adding a tie-breaker treats the symptom, and a bigger worker model spends money before the task is even well defined.",
+      "topic": "Solution Design & Architecture",
+      "themes": {
+        "tasks": [
+          "architecture-pattern-selection"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "92",
+      "question": "Your agent's tool surface has grown to 60 tools and accuracy is falling. Best structural fix?",
+      "options": [
+        "Rewrite all 60 descriptions with examples and add a tool-selection few-shot block to the system prompt",
+        "Move to a larger model tier, since tool selection accuracy scales with capability at this tool count",
+        "Order the tool list by call frequency so the most used tools appear first in the model's context",
+        "Group tools behind fewer well-scoped interfaces or route to specialist subagents with small tool sets"
+      ],
+      "answers": "D",
+      "explanation": "Large flat tool sets degrade selection, so partition them. Better descriptions help at the margin but leave 60 candidates competing for every call, and ordering by frequency does nothing for the rare tools that cause most of the errors.",
+      "topic": "Integration",
+      "themes": {
+        "tasks": [
+          "protocol-selection"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "93",
+      "question": "A long-running agent must survive process restarts. What is required?",
+      "options": [
+        "Durable state: the plan, progress, and pending tool results persisted outside the process",
+        "Idempotent tools, so that re-running the task from the first turn after a restart produces the same result",
+        "A supervisor that restarts the process and re-sends the original request with a note to continue where it left off",
+        "A larger context window so the full history fits when the process reloads the last transcript"
+      ],
+      "answers": "A",
+      "explanation": "Durability lives outside the process: persist the plan, progress, and pending results so a restart resumes rather than restarts. Idempotent tools make a full re-run safe but still throw away all the work, and a note to continue gives the new process nothing to continue from.",
+      "topic": "Solution Design & Architecture",
+      "themes": {
+        "tasks": [
+          "architecture-pattern-selection"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "messages-api"
+        ]
+      }
+    },
+    {
+      "id": "94",
+      "question": "Which design keeps a coordinator's context from growing without bound over hundreds of subtasks?",
+      "options": [
+        "Restart the coordinator on a fixed cadence and hand the new instance the last user message plus the task list",
+        "Subagents return compact results; the coordinator keeps a structured ledger and compacts periodically",
+        "Each subagent appends its full transcript so the coordinator can re-check work without re-running it",
+        "Stream subagent output straight to the user and keep the coordinator stateless between subtasks"
+      ],
+      "answers": "B",
+      "explanation": "Compact returns plus a ledger keep the coordinator's context proportional to the work that matters. Scheduled restarts lose progress each time, and a stateless coordinator cannot sequence or reconcile hundreds of dependent subtasks.",
+      "topic": "Solution Design & Architecture",
+      "themes": {
+        "tasks": [
+          "rag-pipeline-design"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "messages-api"
+        ]
+      }
+    },
+    {
+      "id": "95",
+      "question": "You need a prompt that behaves the same across model upgrades. What practice helps most?",
+      "options": [
+        "A detailed persona and tone section, since style stability is what users notice most across model versions",
+        "Explicit, testable instructions plus a golden eval set that runs on every model change",
+        "Pin the model version in config and treat any upgrade as a new project with a freshly written prompt",
+        "Few-shot examples drawn from the previous model's best outputs so the new model imitates them"
+      ],
+      "answers": "B",
+      "explanation": "Specificity plus evals: explicit instructions transfer, and the eval set tells you where they did not. Examples from the old model anchor the new one to old behavior including its mistakes, and rewriting from scratch per upgrade guarantees drift.",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "themes": {
+        "tasks": [
+          "model-selection-tradeoffs"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "96",
+      "question": "An MCP server exposes tools with side effects to several agents. What must the server enforce itself?",
+      "options": [
+        "Authorization per caller and idempotency on side-effecting operations",
+        "Structured logging of every call with the caller's agent id so misuse can be traced after the fact",
+        "Rate limits per client and a global concurrency cap so no single agent can exhaust the backend",
+        "Tool descriptions that state the side effects clearly so calling agents gate them appropriately"
+      ],
+      "answers": "A",
+      "explanation": "Servers cannot rely on callers: authorization and idempotency have to be enforced where the side effect happens. Logging and rate limits are worth having but detect or throttle misuse rather than prevent it, and descriptions only work if every caller honors them.",
+      "topic": "Integration",
+      "themes": {
+        "tasks": [
+          "protocol-selection"
+        ],
+        "questionTypes": [
+          "behavior-identification"
+        ],
+        "tools": [
+          "tracing"
+        ]
+      }
+    },
+    {
+      "id": "97",
+      "question": "Which caching strategy suits a system with a large stable policy document and per-user variable content?",
+      "options": [
+        "Cache each user's full conversation as its own prefix so that repeat visits hit the cache",
+        "Place the user content first so the model sees it before the policy, then cache the policy block",
+        "Skip caching, since per-user variation means most requests miss and the cache write premium is wasted",
+        "Cache the policy document as the prefix and put per-user content after the breakpoint"
+      ],
+      "answers": "D",
+      "explanation": "Stable prefix cached, variable suffix uncached. Putting user content first breaks the shared prefix for every request, and per-user caches only pay off for the rare user who returns within the cache lifetime.",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "themes": {
+        "tasks": [
+          "prompt-reuse-and-caching"
+        ],
+        "questionTypes": [
+          "feature-selection"
+        ],
+        "tools": [
+          "prompt-caching"
+        ]
+      }
+    },
+    {
+      "id": "98",
+      "question": "An agent's plan step produces good plans but execution drifts. What is the architectural response?",
+      "options": [
+        "Drop the separate planning step and let a single stronger model plan and execute in one pass",
+        "Increase the planning depth so the plan covers more of the edge cases the executor might wander into during long runs",
+        "Make the plan an explicit artifact that execution checks against, with a review step when it deviates",
+        "Add a retry at the end of execution that reruns the task when the output fails validation"
+      ],
+      "answers": "C",
+      "explanation": "Plans are useful when execution is held to them, so make the plan a checked artifact. A deeper plan does not stop the executor from ignoring it, and an end-of-run retry discovers the drift only after all the cost has been spent.",
+      "topic": "Solution Design & Architecture",
+      "themes": {
+        "tasks": [
+          "architecture-pattern-selection"
+        ],
+        "questionTypes": [
+          "troubleshooting"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "99",
+      "question": "Which of these is the right place for a hard spending limit on an agent?",
+      "options": [
+        "The system prompt, as a stated token budget the model tracks and stops at on its own",
+        "The tool descriptions, with a cost annotation so the model prefers cheaper calls",
+        "The runtime: a budget enforced by the loop or a hook that stops the run",
+        "The billing dashboard, with an alert to the on-call engineer at 80% of budget"
+      ],
+      "answers": "C",
+      "explanation": "Enforce budgets in code, where they cannot be forgotten or reasoned around. A budget in the prompt is a request the model may not honor, and a dashboard alert arrives after the money is spent.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "human-in-the-loop"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "100",
+      "question": "A system uses one prompt for five customer segments and quality varies by segment. Approach?",
+      "options": [
+        "Route by segment to specialized prompts and evaluate each route separately",
+        "Expand the single prompt with a section per segment so the model applies the right guidance",
+        "Add few-shot examples from the weakest segment until its scores match the others",
+        "Raise the model tier for all segments, since the variance reflects a capability limit"
+      ],
+      "answers": "A",
+      "explanation": "Routing plus per-route evals lets each segment be tuned and measured on its own. Segment sections in one prompt still compete for attention and are evaluated as a blend, and examples from the weakest segment can shift quality on the others.",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "themes": {
+        "tasks": [
+          "prompt-reuse-and-caching"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "101",
+      "question": "What is the main risk of letting subagents spawn their own subagents without limits?",
+      "options": [
+        "Duplicate work, since sibling subagents cannot see each other's results without a shared store",
+        "Loss of detail, since each level summarizes upward and precision degrades with depth",
+        "Rate limit exhaustion at the API layer, which the provider handles with backoff in any case",
+        "Unbounded cost and untraceable behavior, so depth and fan-out need caps"
+      ],
+      "answers": "D",
+      "explanation": "Cap recursion and fan-out: without limits, cost and behavior both become impossible to bound or trace. Duplicate work and summarization loss are real but bounded problems; unbounded spawning has no ceiling at all.",
+      "topic": "Solution Design & Architecture",
+      "themes": {
+        "tasks": [
+          "architecture-pattern-selection"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "messages-api"
+        ]
+      }
+    },
+    {
+      "id": "102",
+      "question": "A retrieval-augmented agent returns confident answers from stale documents. Fix?",
+      "options": [
+        "A larger retrieval window so that newer documents are more likely to appear among the results",
+        "Freshness metadata in the index, ranking or filtering by recency, and surfacing dates in the answer",
+        "A reranker tuned on relevance so the most on-topic chunk wins regardless of its age",
+        "A system prompt instruction telling the model to hedge when it is unsure whether a source is current"
+      ],
+      "answers": "B",
+      "explanation": "Freshness is a retrieval property: index the dates, rank on them, and show them. A relevance reranker will happily pick an on-topic but outdated chunk, and a hedging instruction cannot tell the model which sources are stale.",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "themes": {
+        "tasks": [
+          "prompt-reuse-and-caching"
+        ],
+        "questionTypes": [
+          "troubleshooting"
+        ],
+        "tools": [
+          "rag"
+        ]
+      }
+    },
+    {
+      "id": "103",
+      "question": "Which is the strongest reason to keep tool results out of the system prompt?",
+      "options": [
+        "The system prompt is for instructions; data belongs in turns so it stays data and can be managed",
+        "Prompt caching only applies to the system prompt, so adding data there invalidates the cache",
+        "System prompts have a hard length cap that tool results would exceed on most real tasks",
+        "Tool results in the system prompt are billed at a higher rate than the same tokens in messages"
+      ],
+      "answers": "A",
+      "explanation": "Instructions and data stay separate: data in turns can be truncated, compacted, and treated as untrusted. Caching applies to any stable prefix, not only the system prompt, and there is no separate billing rate or special cap for system prompt tokens.",
+      "topic": "Integration",
+      "themes": {
+        "tasks": [
+          "protocol-selection"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "prompt-caching"
+        ]
+      }
+    },
+    {
+      "id": "104",
+      "question": "When should an architect prefer a deterministic function over a model call inside a workflow?",
+      "options": [
+        "Only when latency matters, since a model call on a small tier is comparable in cost",
+        "Whenever the logic is fully specifiable; code is cheaper, faster, and testable",
+        "Only for arithmetic and date math, where model error rates are known to be high",
+        "When the step is on the critical path, keeping model calls for background work"
+      ],
+      "answers": "B",
+      "explanation": "Do not spend a model on what code can do: anything fully specifiable belongs in code regardless of where it sits in the workflow. Restricting this to math or to the critical path leaves plenty of deterministic logic paying model cost and variance.",
+      "topic": "Developer Productivity & Operational Enablement",
+      "themes": {
+        "tasks": [
+          "workflow-enablement"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "tracing"
+        ]
+      }
+    },
+    {
+      "id": "105",
+      "question": "A Claude Code deployment across a 200-engineer org needs consistent behavior. Which lever scales?",
+      "options": [
+        "A central prompt-engineering team that reviews a sample of each engineer's session transcripts weekly",
+        "An internal wiki with recommended prompts and a Slack channel for questions",
+        "Each engineer's user-level settings and memory, tuned during an onboarding workshop",
+        "Checked-in CLAUDE.md, shared skills, hooks, and project-scoped MCP config"
+      ],
+      "answers": "D",
+      "explanation": "Configuration in the repo scales: every engineer gets the same instructions, skills, hooks, and MCP servers on checkout. Wikis and workshops depend on people remembering, and per-user settings drift the moment someone edits theirs.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "tradeoff-communication"
+        ],
+        "questionTypes": [
+          "configuration"
+        ],
+        "tools": [
+          "claude-code"
+        ]
+      }
+    },
+    {
+      "id": "106",
+      "question": "What should an evaluator in an evaluator-optimizer loop output?",
+      "options": [
+        "A corrected version of the output, so the loop converges in one step instead of several",
+        "A single numeric score, keeping the evaluator cheap and its output easy to threshold",
+        "A structured verdict against explicit criteria with specific feedback the generator can act on",
+        "A pass or fail flag plus the full reasoning trace so that humans can audit the decision later without re-running it"
+      ],
+      "answers": "C",
+      "explanation": "Actionable, structured feedback is what lets the generator improve. A bare score gives it nothing to act on, and a rewritten output turns the evaluator into a second generator with no independent check.",
+      "topic": "Evaluation, Testing & Optimization",
+      "themes": {
+        "tasks": [
+          "evaluation-frameworks"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "107",
+      "question": "Which context strategy suits an agent that reads thousands of tickets a day?",
+      "options": [
+        "Load the full day's tickets into one long-context call so the model can spot cross-ticket patterns",
+        "One agent per ticket with no shared state, relying on the ticket system for any aggregation",
+        "Process in batches with per-batch summaries and a rolling state document",
+        "Embed all tickets and let the agent retrieve as needed with no persistent working state"
+      ],
+      "answers": "C",
+      "explanation": "Batch, summarize, roll state: bounded context per call plus a carried summary. One giant call is expensive and degrades with length, and per-ticket agents with no shared state cannot see patterns across tickets at all.",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "themes": {
+        "tasks": [
+          "context-window-optimization"
+        ],
+        "questionTypes": [
+          "feature-selection"
+        ],
+        "tools": [
+          "rag"
+        ]
+      }
+    },
+    {
+      "id": "108",
+      "question": "A team asks whether to expose a tool as one call with many options or several narrow tools. Guidance?",
+      "options": [
+        "Prefer narrow, clearly described tools; combine only when the model routinely needs them together",
+        "Prefer one tool with an options schema, since fewer tools keep the definitions block small",
+        "Prefer many tools in every case, since each extra tool adds a few tokens and selection is cheap",
+        "Mirror the backend REST endpoints one to one so that the mapping between each tool and its API call is obvious to maintainers"
+      ],
+      "answers": "A",
+      "explanation": "Narrow tools select better and are easier to describe and test. One tool with many modes hides the choice inside a schema the model fills in less reliably, and mirroring REST endpoints optimizes for the API's shape rather than the model's.",
+      "topic": "Integration",
+      "themes": {
+        "tasks": [
+          "protocol-selection"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "109",
+      "question": "Which artifact should exist before an agent is allowed to act on production systems?",
+      "options": [
+        "A passing eval run above the launch threshold on the current golden set",
+        "A risk register listing each action, its blast radius, its gate, and its rollback",
+        "A signed change request from the system owner covering the agent's service account",
+        "A load test showing the agent stays within the production API's rate limits"
+      ],
+      "answers": "B",
+      "explanation": "Risks, gates, rollbacks: the register is what makes every production action deliberate. A passing eval says the agent is usually right, not what happens when it is wrong, and a signed change request records approval without defining the controls.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "regulatory-compliance"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "110",
+      "question": "An audit asks why the agent took a specific action last month. What lets you answer?",
+      "options": [
+        "The prompt version deployed that month and the eval results attached to its release",
+        "The agent's memory store, which records the facts it had learned by that date",
+        "A replay of the request on today's system with the same inputs to reproduce the decision",
+        "Per-call logs of inputs, tool calls, results, and decisions, retained per policy"
+      ],
+      "answers": "D",
+      "explanation": "Auditability is logging plus retention: the record of what actually happened. A replay on today's system produces today's decision, not last month's, and the prompt version explains the rules rather than the specific action.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "regulatory-compliance"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "111",
+      "question": "What is a kill switch in an agent system?",
+      "options": [
+        "An operator control that halts the system immediately, independent of the model",
+        "A tool the model calls when it detects it is outside policy, ending the run",
+        "A per-run timeout that stops any task exceeding its expected duration",
+        "A feature flag that routes new requests to a fallback and lets in-flight runs finish"
+      ],
+      "answers": "A",
+      "explanation": "Operator-controlled and model-independent: it has to work when the model is the thing misbehaving. A tool the model calls depends on the model noticing, and a flag that lets in-flight runs finish is exactly what a kill switch must not do.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "regulatory-compliance"
+        ],
+        "questionTypes": [
+          "configuration"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "112",
+      "question": "A client wants the agent to use customer data from another client's engagement to improve results. Response?",
+      "options": [
+        "Agree if the other client's contract permits data reuse for service improvement",
+        "Anonymize the records and proceed, since de-identified data is no longer client data",
+        "Refuse; client data isolation is a governance boundary, not an optimization trade-off",
+        "Use the other client's data only to build the eval set, not in production prompts"
+      ],
+      "answers": "C",
+      "explanation": "Isolation is a boundary, not a dial. Anonymization is the strongest distractor, but de-identified records still originate from the other client's engagement and re-identification risk remains; using them for evals crosses the same line.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "data-retention-and-privacy"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "113",
+      "question": "How should personal data be handled in prompts where possible?",
+      "options": [
+        "Included in full so the model has context, with zero data retention configured on the API",
+        "Minimized or redacted, with only what the task needs",
+        "Encrypted inside the prompt text so the model processes it without seeing plaintext",
+        "Duplicated in the system prompt and the user turn so that retrieval cannot miss a field"
+      ],
+      "answers": "B",
+      "explanation": "Minimize what enters the prompt: redact or omit anything the task does not need. Zero retention limits what the provider keeps but not what your own logs and traces capture, and a model cannot reason over ciphertext.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "data-retention-and-privacy"
+        ],
+        "questionTypes": [
+          "most-secure"
+        ],
+        "tools": [
+          "rag"
+        ]
+      }
+    },
+    {
+      "id": "114",
+      "question": "Which change to an agent requires a fresh risk review?",
+      "options": [
+        "Changing the model tier used for a read-only summarization step",
+        "Rewriting a tool description to improve selection accuracy",
+        "Raising the retry count on a read-only search tool from two to three",
+        "Adding a tool that can send, delete, or pay"
+      ],
+      "answers": "D",
+      "explanation": "New capabilities with side effects change the risk profile. A model tier change on a read-only step is worth an eval run, but it does not add any action the agent could not already take.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "regulatory-compliance"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "115",
+      "question": "What is the purpose of a staged rollout for an agent change?",
+      "options": [
+        "Limiting blast radius while monitoring real behavior before full exposure",
+        "Reducing eval cost by testing on live traffic instead of maintaining a golden set",
+        "Meeting the launch date while the remaining tests continue to run in parallel",
+        "Collecting user feedback on the interface before committing to the design"
+      ],
+      "answers": "A",
+      "explanation": "Contain and observe: a stage limits who is affected while you watch real behavior. Stages complement evals rather than replace them, and using a rollout to skip tests puts real users in the role of the test set.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "regulatory-compliance"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "116",
+      "question": "A CFO asks 'what does this agent cost us per month and what happens if it breaks?' The right answer includes:",
+      "options": [
+        "Model names, token counts per task, and the prompt caching rate that keeps the monthly bill down",
+        "Cost per task and per month, failure modes, how they are detected, and time to recover",
+        "A live demo plus a commitment to SLA-backed uptime from the model provider",
+        "Total tokens per month and the provider's published availability figures"
+      ],
+      "answers": "B",
+      "explanation": "Cost, failure, recovery, in the CFO's units. Token counts and caching rates are inputs to cost rather than the cost, and the provider's uptime says nothing about what your agent does when it fails.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "tradeoff-communication"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "prompt-caching"
+        ]
+      }
+    },
+    {
+      "id": "117",
+      "question": "Which metric set belongs on an agent's monthly review?",
+      "options": [
+        "Prompt versions shipped, eval pass rate, and model release notes reviewed",
+        "Token volume, cache hit rate, and API error rate by endpoint",
+        "Completion rate, quality score, cost per task, incidents, and time to recover",
+        "User count, sessions per user, and feature requests logged"
+      ],
+      "answers": "C",
+      "explanation": "Operational outcomes are what a monthly review should track. Token volume and cache hit rate are engineering diagnostics, useful for tuning but not for judging whether the agent is doing its job.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "tradeoff-communication"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "prompt-caching"
+        ]
+      }
+    },
+    {
+      "id": "118",
+      "question": "A stakeholder wants a feature that the evals show is unreliable. Your move?",
+      "options": [
+        "Ship it behind a feature flag so that it can be turned off quickly if users begin to complain about it",
+        "Decline the request and escalate to the sponsor with the eval numbers attached",
+        "Raise the eval threshold and ship once a stronger model tier clears it",
+        "Show the eval results, state the risk, and propose a gated rollout or scope reduction"
+      ],
+      "answers": "D",
+      "explanation": "Evidence plus options keeps the decision with the stakeholder and the risk visible. A feature flag makes users the detectors of a failure you already know about, and escalating without options turns a design conversation into a standoff.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "tradeoff-communication"
+        ],
+        "questionTypes": [
+          "configuration"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "119",
+      "question": "How should prompt changes be communicated to stakeholders of a production system?",
+      "options": [
+        "As versioned releases with eval results and a rollback plan",
+        "In the monthly review, summarized as the number of prompt edits made",
+        "Only when the change alters user-visible behavior, via the release notes",
+        "Through the change ticket that the engineer files when editing the prompt"
+      ],
+      "answers": "A",
+      "explanation": "Treat prompts as releases: version, evidence, rollback. Release notes only for visible changes miss the prompt edits that quietly shift quality, and an engineer's ticket is a record rather than a communication.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "tradeoff-communication"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "120",
+      "question": "Which event should trigger a lifecycle review of an agent system?",
+      "options": [
+        "A quarter end, so that reviews line up with the budget cycle",
+        "A change in the on-call rotation or the team that owns the agent",
+        "A model upgrade, a change in tool capabilities, or a shift in the task's inputs",
+        "A new release of the agent framework or SDK that the runtime uses, since dependencies change behavior"
+      ],
+      "answers": "C",
+      "explanation": "Change in model, tools, or inputs is what changes how the agent behaves, so that is what should trigger the review. Calendar reviews are fine as a floor, and an SDK release matters only if it changes one of those three.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "lifecycle-and-maintenance"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "121",
+      "question": "A production agent's accuracy dropped after a tool provider changed its response format. What should have caught it?",
+      "options": [
+        "Pinning the provider's API version in the client so that format changes could not reach production",
+        "Contract tests on tool responses plus a scheduled eval that alerts on drift",
+        "A larger eval set run before each of your own releases, covering more of the tool paths",
+        "Schema validation in the tool wrapper that coerces unexpected fields to safe defaults"
+      ],
+      "answers": "B",
+      "explanation": "External dependencies change on their own schedule; contract tests and scheduled evals detect it before users do. Pre-release evals only run when you ship, so a change on the provider's side slips through, and silent coercion hides the break instead of surfacing it.",
+      "topic": "Integration",
+      "themes": {
+        "tasks": [
+          "protocol-selection"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "122",
+      "question": "Which design keeps a multi-tenant agent from leaking one customer's context into another's?",
+      "options": [
+        "Per-tenant context, memory, and tool credentials, with tenant id enforced in every tool call",
+        "A system prompt instruction that names the current tenant and forbids any reference to others",
+        "Random session ids per conversation so that contexts cannot be guessed across tenants",
+        "A shared memory store partitioned by a tenant tag that the model includes in each query"
+      ],
+      "answers": "A",
+      "explanation": "Isolation is enforced in the runtime and tools, not requested in prose. A tenant tag the model supplies is the strongest distractor, but it relies on the model getting the tag right on every query, which is exactly the failure you are guarding against.",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "themes": {
+        "tasks": [
+          "context-window-optimization"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "123",
+      "question": "A coordinator agent spends most of its tokens re-reading subagent transcripts. Fix?",
+      "options": [
+        "A larger context window on the coordinator so that full transcripts fit without truncation or summarization",
+        "Fewer, larger subagents so there are fewer transcripts for the coordinator to read",
+        "Prompt caching on each transcript so that repeated reads cost less per token",
+        "Subagents return structured summaries; the coordinator keeps a ledger instead of transcripts"
+      ],
+      "answers": "D",
+      "explanation": "Structured returns keep the coordinator lean and its decisions grounded in what matters. Caching lowers the price of re-reading but not the context consumed, and fewer subagents just concentrates the same transcript volume.",
+      "topic": "Solution Design & Architecture",
+      "themes": {
+        "tasks": [
+          "architecture-pattern-selection"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "prompt-caching"
+        ]
+      }
+    },
+    {
+      "id": "124",
+      "question": "How should an architect decide between extended thinking and a second verification call?",
+      "options": [
+        "Extended thinking by default, since it keeps the workflow to one call and one bill",
+        "A verification call by default, since a second independent pass catches more errors",
+        "By measuring: run both on the eval set and compare accuracy, cost, and latency for that task",
+        "By task type: extended thinking for reasoning-heavy tasks, verification for extraction and formatting work"
+      ],
+      "answers": "C",
+      "explanation": "Empirical comparison on the task decides; both techniques have cases where they win. Rules of thumb by task type are a starting hypothesis, not a decision, and either default leaves the cheaper or more accurate option untested.",
+      "topic": "Evaluation, Testing & Optimization",
+      "themes": {
+        "tasks": [
+          "evaluation-frameworks"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "125",
+      "question": "Which practice makes a prompt library maintainable across a large team?",
+      "options": [
+        "A shared document where any engineer can edit, with a weekly review of the accumulated diff",
+        "Ownership per prompt, versioning, an eval per prompt, and a change process",
+        "A single senior owner for the whole library who personally approves every change",
+        "A freeze on all prompts outside a monthly release window, with edits batched"
+      ],
+      "answers": "B",
+      "explanation": "Prompts are production assets; manage them as such, with an owner, history, and a test per prompt. A single approver becomes the bottleneck and still has no eval to check against, and a freeze slows change without making it safer.",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "themes": {
+        "tasks": [
+          "prompt-reuse-and-caching"
+        ],
+        "questionTypes": [
+          "feature-selection"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "126",
+      "question": "What is the failure mode of caching aggressively in an agent with per-user personalization?",
+      "options": [
+        "Personal content placed before the breakpoint defeats the cache, or a shared prefix built wrong leaks user data",
+        "Cached prefixes go stale, so users keep seeing policy text from before the last deployment",
+        "Cache writes cost more than reads, so low-repeat traffic pays a premium for no benefit",
+        "The cache lifetime expires in the middle of a conversation, forcing a full uncached re-read of the prefix on the very next turn"
+      ],
+      "answers": "A",
+      "explanation": "Cache boundaries must respect data ownership and stability: personal data before the breakpoint kills the hit rate, and a shared prefix assembled from user data can leak across users. A cache expiring mid-conversation costs money but exposes nothing.",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "themes": {
+        "tasks": [
+          "prompt-reuse-and-caching"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "prompt-caching"
+        ]
+      }
+    },
+    {
+      "id": "127",
+      "question": "A client wants the agent to remember everything forever. Your design answer?",
+      "options": [
+        "Append every transcript to a vector index and retrieve the top matches into each prompt",
+        "Keep full transcripts in the prompt and rely on a long-context model tier to hold them",
+        "Store durable facts and decisions in a memory store with retention rules; load what a task needs",
+        "Decline memory entirely and require the user to restate context at the start of each session"
+      ],
+      "answers": "C",
+      "explanation": "Selective, governed memory beats hoarding: facts and decisions with retention rules, loaded on demand. Indexing every transcript keeps everything forever with no governance, which is the request restated rather than a design.",
+      "topic": "Claude Models, Prompting & Context Engineering",
+      "themes": {
+        "tasks": [
+          "prompt-reuse-and-caching"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "rag"
+        ]
+      }
+    },
+    {
+      "id": "128",
+      "question": "An MCP server is shared by several teams' agents and performance degrades under load. First architectural move?",
+      "options": [
+        "Switch transports from HTTP to stdio so that each agent gets its own dedicated server process",
+        "Add a second server instance and split the teams by name across the two",
+        "Reduce the number of tools exposed so each call carries less schema overhead",
+        "Rate limits and per-client quotas on the server, plus caching of read-heavy resources"
+      ],
+      "answers": "D",
+      "explanation": "Shared services need quotas and caching so one heavy client cannot degrade the rest. A second instance doubles capacity once without addressing the fairness problem, and a per-agent stdio process shifts the load onto whatever backend the server calls.",
+      "topic": "Integration",
+      "themes": {
+        "tasks": [
+          "protocol-selection"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "prompt-caching"
+        ]
+      }
+    },
+    {
+      "id": "129",
+      "question": "Which signal tells you a workflow step should become a model call rather than code?",
+      "options": [
+        "Its inputs are unstructured or ambiguous and rules keep failing on edge cases",
+        "It runs on every request, so a model call's consistency matters more than its cost",
+        "It is slow in code, and a small model tier would return an answer faster",
+        "It is the step users complain about most, regardless of what the complaints say"
+      ],
+      "answers": "A",
+      "explanation": "Ambiguity is where models earn their cost. A step that runs on every request is the last place to add model latency and variance, and user complaints about a deterministic step usually mean a bug rather than a need for judgment.",
+      "topic": "Developer Productivity & Operational Enablement",
+      "themes": {
+        "tasks": [
+          "workflow-enablement"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "130",
+      "question": "How do you keep a 60-tool integration surface manageable for an agent?",
+      "options": [
+        "Give the model all 60 with a routing table in the system prompt that maps each user intent to the right tool",
+        "Partition tools by task into specialist subagents or dynamic tool loading, each with a small relevant set",
+        "Merge related tools into a few generic ones with a mode parameter that selects the behavior",
+        "Sort the tool list by usage and drop the bottom 40, since rarely used tools add noise"
+      ],
+      "answers": "B",
+      "explanation": "Small, relevant tool sets per context is what keeps selection accurate. Generic tools with a mode parameter move the choice into an argument the model fills in less reliably, and dropping the rare tools removes capability rather than managing it.",
+      "topic": "Integration",
+      "themes": {
+        "tasks": [
+          "protocol-selection"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "131",
+      "question": "What belongs in the audit record for an agent action that changed a customer's data?",
+      "options": [
+        "The before and after state of the record plus the model version and prompt version that produced the change",
+        "The final state of the record and the user id of the session owner",
+        "The full conversation transcript, stored against the ticket for that customer",
+        "Who or what triggered it, the inputs, the tool call and result, the approval if any, and a timestamp"
+      ],
+      "answers": "D",
+      "explanation": "The record has to make the action reconstructable: trigger, inputs, call, result, approval, time. Before and after states show what changed but not why or who allowed it, and a raw transcript is hard to query and often contains data the audit should not.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "data-retention-and-privacy"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "tracing"
+        ]
+      }
+    },
+    {
+      "id": "132",
+      "question": "A regulator asks how the agent avoids discriminatory outcomes in a decision-support use case. What must exist?",
+      "options": [
+        "A disclaimer in the output stating that the recommendation is advisory only",
+        "A system prompt instructing the model to ignore protected attributes when reasoning",
+        "Documented bias evaluation, human review on decisions, and monitoring with defined thresholds",
+        "Use of the largest available model tier, which carries the strongest fairness training"
+      ],
+      "answers": "C",
+      "explanation": "Evidence, oversight, monitoring: a regulator wants to see measurement and controls, not intent. A prompt instruction is the strongest distractor, but it is unverifiable on its own and proxies for protected attributes pass straight through it.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "human-in-the-loop"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "133",
+      "question": "Which is the right response to discovering the agent logged full credit card numbers?",
+      "options": [
+        "Stop the logging, purge the records, assess exposure, and add redaction with tests",
+        "Restrict log access to the security team and shorten the retention window to seven days",
+        "Encrypt the log store at rest and add the finding to the next quarterly risk review",
+        "Add redaction to the logger and let the existing records age out under the retention policy"
+      ],
+      "answers": "A",
+      "explanation": "Contain, remediate, prevent. Adding redaction going forward is the strongest distractor, but leaving the existing numbers in place until they age out means the exposure continues, and restricting access does not remove the data.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "data-retention-and-privacy"
+        ],
+        "questionTypes": [
+          "most-secure"
+        ],
+        "tools": [
+          "tracing"
+        ]
+      }
+    },
+    {
+      "id": "134",
+      "question": "What is a sensible policy for agent access to production databases?",
+      "options": [
+        "Full read access on the primary with writes blocked at the network layer",
+        "Reads through scoped views by default; writes through audited, gated operations",
+        "A dedicated agent role that mirrors the application's service account so the agent can do what the app does",
+        "No database access; the agent files tickets that a human executes by hand"
+      ],
+      "answers": "B",
+      "explanation": "Scoped reads, gated writes. Full read on the primary exposes every column including the ones the agent has no reason to see, and mirroring the application role grants the agent the app's full write surface without the app's business logic in front of it.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "data-retention-and-privacy"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "tracing"
+        ]
+      }
+    },
+    {
+      "id": "135",
+      "question": "How should an architect treat a model's refusal behavior in a regulated workflow?",
+      "options": [
+        "As the primary control, documented in the compliance file as the enforcement mechanism",
+        "As a signal to tune away with the system prompt so the workflow completes reliably",
+        "As a reason to route the refused requests to a less restrictive model tier",
+        "As one safety layer among several, with policy enforced in code and review regardless"
+      ],
+      "answers": "D",
+      "explanation": "Model refusals are one layer; policy is enforced in code, gates, and human review regardless of what the model does. Treating refusals as the primary control leaves compliance resting on behavior that changes with every model version.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "regulatory-compliance"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "136",
+      "question": "What should a change-management process require before an agent's tool set expands?",
+      "options": [
+        "A code review of the tool wrapper and a passing run of the existing eval set",
+        "Approval from the tool's system owner and an updated tool description",
+        "A risk review of the new capabilities, updated gates, tests, and a staged rollout",
+        "A load test of the new tool and a rate limit configured on the MCP server"
+      ],
+      "answers": "C",
+      "explanation": "Capability changes are risk changes. A code review plus the existing evals is the strongest distractor, but the existing evals were written for the old tool set and say nothing about what the new tool can do wrong.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "regulatory-compliance"
+        ],
+        "questionTypes": [
+          "configuration"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "137",
+      "question": "Which incident-response element is specific to agent systems?",
+      "options": [
+        "An on-call rotation with paging tied to error rate and latency alerts on the agent service",
+        "The ability to halt autonomous actions immediately and replay decisions from logs",
+        "A blameless postmortem held within a fixed window after resolution",
+        "A public status page updated while the incident is in progress"
+      ],
+      "answers": "B",
+      "explanation": "Kill switch plus replay: an agent can keep acting during an incident, and understanding what it decided needs the decision log. Paging, postmortems, and status pages apply to any production system.",
+      "topic": "Governance, Safety & Risk Management",
+      "themes": {
+        "tasks": [
+          "regulatory-compliance"
+        ],
+        "questionTypes": [
+          "troubleshooting"
+        ],
+        "tools": [
+          "tracing"
+        ]
+      }
+    },
+    {
+      "id": "138",
+      "question": "A client asks for a single number: 'how accurate is it?' What do you give them?",
+      "options": [
+        "The eval pass rate as a single percentage, so the client has the number they asked for",
+        "Accuracy on a defined eval set with the date, the failure categories, and what happens on failure",
+        "A range spanning the best and worst eval runs from the past quarter",
+        "A comparison to human accuracy on the same task, drawn from the client's own quality assurance records for the past year"
+      ],
+      "answers": "B",
+      "explanation": "Numbers with definitions and consequences. A bare percentage will be quoted without the eval set it came from, and a human comparison is useful context but does not tell the client what the failures look like or what happens when one occurs.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "tradeoff-communication"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "139",
+      "question": "How do you set expectations for an agent's first month in production?",
+      "options": [
+        "A commitment to the eval accuracy figure as a production SLA from day one",
+        "A soft launch to a friendly team with no metrics until usage has settled down",
+        "Full autonomy on the low-risk tasks from day one and a promise to review the remaining tasks after 30 days",
+        "A staged plan with metrics, human review levels, and the criteria for expanding autonomy"
+      ],
+      "answers": "D",
+      "explanation": "Stages, metrics, criteria: expectations are set by saying what will be measured and what earns more autonomy. Promising the eval figure as an SLA ignores that production inputs differ from the eval set, and a soft launch with no metrics learns nothing.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "tradeoff-communication"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "140",
+      "question": "A stakeholder wants to skip evals to hit a launch date. Your position as the architect?",
+      "options": [
+        "Agree, provided the stakeholder signs a written risk acceptance and the full evals run during the week after launch",
+        "Ship with production monitoring in place of evals, since live traffic is the more realistic test",
+        "Explain the risk concretely, offer a reduced-scope launch that keeps the eval gate, and document the decision",
+        "Hold the launch until the full eval suite passes, whatever that does to the date"
+      ],
+      "answers": "C",
+      "explanation": "Trade scope, not the safety gate. A signed risk acceptance is the strongest distractor, since it records the decision, but it still puts an untested system in front of users, and monitoring finds failures after they have happened.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "tradeoff-communication"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "141",
+      "question": "Which artifact keeps a long-running agent engagement healthy across team changes?",
+      "options": [
+        "A living runbook: architecture, gates, evals, known failure modes, and on-call procedures",
+        "The original proposal and statement of work, kept current through change orders",
+        "The chat history between the team and the client, archived and searchable",
+        "Recorded handover sessions from each departing engineer, stored with the project"
+      ],
+      "answers": "A",
+      "explanation": "Written operational knowledge that is kept current is what survives turnover. Handover recordings capture one person's view at one moment and go stale, and the statement of work describes what was promised rather than how the system runs.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "tradeoff-communication"
+        ],
+        "questionTypes": [
+          "troubleshooting"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "142",
+      "question": "When a model provider announces a deprecation, what is the lifecycle response?",
+      "options": [
+        "Switch to the successor in production at once, since the provider has already validated it",
+        "Plan the migration: run evals on the successor, compare, canary, cut over, and update docs",
+        "Stay on the deprecated model until the retirement date to avoid churn, then switch",
+        "Freeze the agent's scope and run both models in parallel for the foreseeable future"
+      ],
+      "answers": "B",
+      "explanation": "Planned migration with evidence. Waiting until the retirement date is the strongest distractor, since it avoids churn, but it turns a scheduled migration into a forced one with no time left to fix what the evals find.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "lifecycle-and-maintenance"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "evals"
+        ]
+      }
+    },
+    {
+      "id": "143",
+      "question": "How should success be reported to executives for an agent that handles support tickets?",
+      "options": [
+        "Tokens per day, cache hit rate, and average latency per response",
+        "The number of tickets the agent touched, the average handling time, and the uptime of the service",
+        "Prompt versions shipped and the eval pass rate per release",
+        "Resolution rate, customer satisfaction, cost per ticket, escalation rate, and incidents, trended"
+      ],
+      "answers": "D",
+      "explanation": "Business outcomes, trended, are what executives can act on. Tickets touched and uptime describe activity rather than results, and eval pass rate is an engineering signal that says nothing about customers.",
+      "topic": "Stakeholder Communication & Lifecycle Management",
+      "themes": {
+        "tasks": [
+          "tradeoff-communication"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "prompt-caching"
+        ]
+      }
     }
   ]
 }
