@@ -76,7 +76,6 @@ export const texts = {
   selectQuestionHint: 'Select a question to review its details.',
   themeGroupDisplay: (groupLabel: string, values: string[]) => `${groupLabel}: ${values.join(', ')}`,
   toCertsList: '← Certifications list',
-  allTimeScore: 'All-time score',
   quizzesTaken: 'Quizzes taken',
   overallAccuracy: 'Overall accuracy',
   correctAnswers: 'Correct answers',

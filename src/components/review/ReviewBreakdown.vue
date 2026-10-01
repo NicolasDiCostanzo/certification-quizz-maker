@@ -2,8 +2,8 @@
 import { computed, ref } from 'vue'
 import { texts } from '../../texts/en'
 import type { ThemeBreakdown, TopicBreakdown } from '../../utils/scoreBreakdown'
-import PrimaryButton from '../ui/PrimaryButton.vue'
 import ProgressBar from '../quiz/ProgressBar.vue'
+import PrimaryButton from '../ui/PrimaryButton.vue'
 
 const props = defineProps<{
   topicBreakdown: TopicBreakdown[]
@@ -125,7 +125,7 @@ const visibleThemeGroups = computed(() =>
 
 .breakdown__row {
   display: grid;
-  grid-template-columns: 1fr 80px 50px 200px;
+  grid-template-columns: 2fr 1fr 2fr;
   align-items: center;
   gap: 12px;
   margin-bottom: 8px;
