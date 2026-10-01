@@ -2,7 +2,6 @@
 import { texts } from '../../texts/en';
 import type { CertBundleMeta } from '../../types';
 import CertCard from './CertCard.vue';
-import RequestNotice from './RequestNotice.vue';
 
 defineProps<{ certs: CertBundleMeta[] }>()
 </script>
@@ -16,7 +15,6 @@ defineProps<{ certs: CertBundleMeta[] }>()
   <div v-else class="cert-grid">
     <CertCard v-for="cert in certs" :key="cert.exam.code" :cert="cert" />
   </div>
-  <RequestNotice />
 </template>
 
 <style scoped>

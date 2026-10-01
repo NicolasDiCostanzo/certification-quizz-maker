@@ -1,5 +1,5 @@
 <script setup lang="ts">
-withDefaults(defineProps<{ href: string; label: string; iconOnly?: boolean }>(), { iconOnly: false })
+withDefaults(defineProps<{ href: string; label?: string; iconOnly?: boolean }>(), { iconOnly: false })
 </script>
 
 <template>

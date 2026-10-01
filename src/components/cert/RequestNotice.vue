@@ -8,7 +8,6 @@ const ISSUES_URL = 'https://github.com/NicolasDiCostanzo/dva-c02-quizz/issues/ne
   <p class="request-notice">
     {{ texts.requestNoticeBefore }}
     <a :href="ISSUES_URL" target="_blank" rel="noopener noreferrer">{{ texts.requestNoticeLink }}</a>
-    {{ texts.requestNoticeAfter }}
   </p>
 </template>
 
