@@ -86,7 +86,8 @@ export function useQuizConfiguration(
       replayMode: replayMode.value,
       count: count.value,
     }
-    quizSessionStore.startSession(certCode.value, config, questions, cert.value?.exam.timeLimitMinutes, initialFlags)
+    const timeLimitMinutes = mode.value === 'exam' ? cert.value?.exam.timeLimitMinutes : undefined
+    quizSessionStore.startSession(certCode.value, config, questions, timeLimitMinutes, initialFlags)
     await router.push({ name: 'quiz-session', params: { certCode: certCode.value } })
   }
 
