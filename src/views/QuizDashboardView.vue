@@ -105,7 +105,6 @@ function reviewFlagged() {
     </header>
 
     <section class="all-time">
-      <h2>{{ texts.allTimeScore }}</h2>
       <div class="all-time-stats">
         <div class="stat">
           <span class="stat-value">{{ entries.length }}</span>
@@ -137,7 +136,7 @@ function reviewFlagged() {
 
     <section class="history-section">
       <div class="history-header">
-        <h2>{{ texts.quizHistory }}</h2>
+        <h2 v-if="entries.length > 0">{{ texts.quizHistory }}</h2>
         <SecondaryButton
           v-if="entries.length > 0"
           size="sm"
@@ -149,9 +148,6 @@ function reviewFlagged() {
       </div>
       <QuizHistoryList :entries="entries" @request-delete="requestDelete" @review="reviewEntry" />
     </section>
-
-    <footer class="dashboard__footer">
-    </footer>
 
     <ConfirmModal
       v-if="deleteTargetId"
@@ -177,18 +173,13 @@ function reviewFlagged() {
 
 <style scoped>
 .dashboard {
-  max-width: 800px;
-  margin: 0 auto;
   padding: 24px 16px 48px;
 }
 
 .dashboard__header {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 2rem;
 }
 
 .header-buttons {
@@ -206,7 +197,10 @@ function reviewFlagged() {
 }
 
 .all-time {
-  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 24px 0 24px 0;
 }
 
 .all-time h2,
