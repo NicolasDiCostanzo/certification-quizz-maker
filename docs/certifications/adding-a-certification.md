@@ -193,7 +193,7 @@ ecosystem, it belongs in that cert's own groups.
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
-| `id` | string | yes | Unique within the file. Reuse the source dump's question number as a string if there is one. |
+| `id` | string | yes | Unique within the file. Follow the bundle's own numbering: continue from the highest existing id rather than reusing the source dump's numbering (see the id rule below). |
 | `question` | string | yes | Full prompt, unicode preserved. |
 | `options` | string[] | yes | 2-5 entries, no `A. ` letter prefixes — the app renders letters itself. An image that belongs to a specific *option* (not the prompt) is embedded inline as markdown: `![alt](url)`. |
 | `answers` | string \| string[] | yes | A single letter (`"C"`) for single-select, an array (`["B","D"]`) for multi-select. The cardinality must match the source question's type: single-select questions use a string — never a one-item array like `["C"]`; multi-select questions use an array with one entry per correct answer, matching the number of answers the source states. Arrays must be non-empty with no duplicate letters. Every letter must be within the `options` range. Take the accepted answer from the source; if the source shows disagreement (e.g. community votes conflicting with a stated "most accepted answer") and no answer is clearly authoritative, stop and ask. |

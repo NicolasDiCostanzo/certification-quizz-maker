@@ -2002,6 +2002,1446 @@
           "output-evaluation"
         ]
       }
+    },
+    {
+      "id": "81",
+      "question": "Claude gives you a precise-sounding market statistic for a board deck. What do you do before using it?",
+      "options": [
+        "Ask Claude to restate the figure with a confidence rating and keep it if the rating is high",
+        "Ask the same question in a fresh conversation and keep the figure if both answers agree",
+        "Ask for the source, then confirm the number against that original before it goes in the deck",
+        "Label the slide as an AI-generated estimate so the board knows to treat the figure with caution"
+      ],
+      "answers": "C",
+      "explanation": "Models can be wrong while sounding certain, so the figure has to be checked against a source you can open yourself. A confidence rating or a second run from the same model is still the model grading itself, and a caution label puts an unverified number in front of the board anyway.",
+      "topic": "Output Evaluation and Validation",
+      "themes": {
+        "tasks": [
+          "fact-checking-verification"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "82",
+      "question": "You asked Claude to summarize a 30-page report. How do you check the summary is faithful?",
+      "options": [
+        "Ask for the supporting passage behind each key claim and spot-check a few against the report",
+        "Read the report's executive summary and confirm the two versions cover the same themes",
+        "Ask Claude to grade its own summary for accuracy and revise anything it rates below confident",
+        "Compare it with a summary from a different model and keep only the points the two share"
+      ],
+      "answers": "A",
+      "explanation": "Grounding each claim in a quoted passage makes the summary checkable in minutes. Matching themes against the executive summary only shows the topics line up, not that the specific claims are accurate, and two models agreeing is not evidence either was faithful.",
+      "topic": "Output Evaluation and Validation",
+      "themes": {
+        "tasks": [
+          "fact-checking-verification"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "83",
+      "question": "Which output is safe to send without a human review step?",
+      "options": [
+        "A termination letter for an employee, since the template language is standard",
+        "A short reply telling a customer whether their refund is required under your policy",
+        "A press statement about a service outage, if the facts in it came from the incident log",
+        "A first draft of an internal meeting agenda that you will edit before circulating it"
+      ],
+      "answers": "D",
+      "explanation": "A low-stakes internal draft you will edit anyway can go straight to use. The press statement is tempting because the facts are sourced, but public statements carry consequences that need a named person to sign off, and the HR and customer-policy items carry legal weight.",
+      "topic": "Output Evaluation and Validation",
+      "themes": {
+        "tasks": [
+          "human-in-the-loop-review"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "84",
+      "question": "Where does Claude fit best in a weekly reporting process?",
+      "options": [
+        "Drafting the narrative from the approved numbers, with a person reviewing before it is sent",
+        "Pulling the figures from source systems and deciding which ones are worth reporting this week",
+        "Signing off on the final report, since it can check the numbers faster than a person can",
+        "Writing and sending the report directly to stakeholders once the numbers have been approved"
+      ],
+      "answers": "A",
+      "explanation": "Drafting and formatting from approved inputs is the sweet spot, with a person reviewing before it goes out. Sending directly once numbers are approved skips the review of the narrative itself, and choosing what to report or signing off are judgment calls that stay with people.",
+      "topic": "Workflow Integration and Solution Design",
+      "themes": {
+        "tasks": [
+          "human-in-the-loop-review"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "85",
+      "question": "You connect Claude to your company's document store. What should you check first?",
+      "options": [
+        "Whether the connector supports write access so Claude can file its outputs back into the store",
+        "Whether search results come back quickly enough for the team to use it in daily work",
+        "Whether the document store vendor has published guidance on AI assistant integrations",
+        "Which folders the connector can read and whether that matches the data's classification"
+      ],
+      "answers": "D",
+      "explanation": "Integrations expose data, so the first question is what is reachable and whether policy allows it. Vendor guidance is useful background but does not tell you what your own connector can see, and write access or speed are secondary to scope.",
+      "topic": "Workflow Integration and Solution Design",
+      "themes": {
+        "tasks": [
+          "workflow-integration"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "projects"
+        ]
+      }
+    },
+    {
+      "id": "86",
+      "question": "A colleague wants to paste a customer's full medical file into a consumer chat account to summarize it. What is the right response?",
+      "options": [
+        "Remove the customer's name and date of birth, then paste the rest into the consumer account",
+        "Paste it, get the summary, and delete the conversation from the account history afterwards",
+        "Check the data policy first and use an approved workspace with the right settings, if one exists",
+        "Ask the customer for written consent by email first, then paste the file into the consumer account"
+      ],
+      "answers": "C",
+      "explanation": "Sensitive personal data is governed by policy and by the workspace's data handling, not by speed. Stripping the name still leaves a medical record that is often re-identifiable, consent from the customer does not change what the consumer account does with the data, and deleting afterwards is too late.",
+      "topic": "Governance, Risk, and Responsible Use",
+      "themes": {
+        "tasks": [
+          "data-privacy-sensitivity"
+        ],
+        "questionTypes": [
+          "configuration"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "87",
+      "question": "Claude drafts screening criteria for job applicants. What must happen before they are used?",
+      "options": [
+        "A trial run against last year's applicant pool to confirm the criteria produce a sensible shortlist",
+        "A review for bias and legality by the people who are accountable for the hiring decision",
+        "A check that each criterion appears in the job posting so applicants know how they are assessed",
+        "A comparison against the criteria a competitor lists publicly to make sure nothing is missing"
+      ],
+      "answers": "B",
+      "explanation": "Decisions about people carry bias and legal risk, so accountable people review before use. A trial run on past applicants sounds rigorous but only shows the criteria produce a shortlist, not that the shortlist is fair or lawful, and it processes real candidates' data for no decision.",
+      "topic": "Governance, Risk, and Responsible Use",
+      "themes": {
+        "tasks": [
+          "appropriate-use"
+        ],
+        "questionTypes": [
+          "behavior-identification"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "88",
+      "question": "The prompt \"write something about our product\" produced a vague result. What improves it most?",
+      "options": [
+        "Asking Claude to write three versions so you can pick the one closest to what you had in mind",
+        "Pasting the full product spec sheet and asking for a write-up that covers everything in it",
+        "Telling Claude the result was vague and asking it to try again with more concrete detail",
+        "Adding the audience, purpose, format, length, and an example of the tone you want"
+      ],
+      "answers": "D",
+      "explanation": "Context, constraints, and an example are what turn a vague ask into a usable draft. Pasting the spec sheet adds material but no purpose, so the result is a long version of the same vague piece; asking for concrete detail without saying which detail leaves Claude guessing.",
+      "topic": "Prompting and Task Execution",
+      "themes": {
+        "tasks": [
+          "effective-prompt-design"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "89",
+      "question": "The first draft is close but not right. What is the efficient next step?",
+      "options": [
+        "Give specific feedback on what to change and iterate on the same draft",
+        "Start a fresh conversation and rewrite the prompt with the lessons from the first attempt",
+        "Ask for ten alternative drafts and combine the best paragraphs from each yourself",
+        "Edit the draft by hand, since explaining the changes takes longer than making them"
+      ],
+      "answers": "A",
+      "explanation": "Iterating with specific feedback converges faster than restarting, because the draft already carries most of what you want. Rewriting the prompt from scratch throws that away, and hand-editing works once but teaches Claude nothing for the next draft.",
+      "topic": "Prompting and Task Execution",
+      "themes": {
+        "tasks": [
+          "effective-prompt-design"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "90",
+      "question": "You need to rename a field across 200 files in a code repository. Which tool fits?",
+      "options": [
+        "A chat conversation, pasting each file in turn and copying the edited version back",
+        "A Project with the repository files attached so Claude can see all of them at once",
+        "Claude Code, or a developer using it, working in the repository directly",
+        "A spreadsheet listing every file path so Claude can generate the edits row by row"
+      ],
+      "answers": "C",
+      "explanation": "Repository-wide changes are what Claude Code is for: it reads and edits the files in place. A Project with the files attached lets Claude read them but not change them in the repository, so every edit still has to be copied back by hand.",
+      "topic": "Product and Model Selection",
+      "themes": {
+        "tasks": [
+          "model-tradeoffs"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "projects"
+        ]
+      }
+    },
+    {
+      "id": "91",
+      "question": "For quick drafting of routine emails, what is the sensible model choice?",
+      "options": [
+        "The most capable model for every email, since consistency of quality matters most",
+        "A faster, cheaper model, saving the most capable one for deep analysis",
+        "Whichever model was released most recently, since newer models replace older ones",
+        "Rotate between models on each email so you can compare their tone over time"
+      ],
+      "answers": "B",
+      "explanation": "Match the model to the job: routine drafting does not need the heaviest model. Using the most capable model everywhere is not wrong on quality, but it spends time and cost on work that a faster model handles just as well.",
+      "topic": "Product and Model Selection",
+      "themes": {
+        "tasks": [
+          "model-tradeoffs"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "92",
+      "question": "Your team runs the same weekly task with the same standing instructions and reference files. What setup avoids re-explaining every time?",
+      "options": [
+        "A saved prompt template that each person pastes as the first message every week",
+        "A single long-running conversation that the whole team continues week after week",
+        "A Project with the standing instructions and reference files attached",
+        "A shared document of past outputs that Claude is asked to imitate each week"
+      ],
+      "answers": "C",
+      "explanation": "Projects hold standing instructions and knowledge so every conversation starts with the right context. A pasted template works but still re-sends everything each week and drifts as people edit their copies, and one endless conversation degrades as it grows.",
+      "topic": "Configuration and Knowledge Management",
+      "themes": {
+        "tasks": [
+          "project-instructions"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "projects"
+        ]
+      }
+    },
+    {
+      "id": "93",
+      "question": "Halfway through a long conversation Claude stops following an instruction you gave at the start. Most likely cause and fix?",
+      "options": [
+        "A model update changed its behavior mid-conversation; report the bug and switch to a different model",
+        "The conversation hit a length limit; keep going and the instruction will apply again shortly",
+        "The instruction conflicted with a later request; shorten your messages from here on",
+        "The instruction is buried in a long context; restate it, or move it into project instructions"
+      ],
+      "answers": "D",
+      "explanation": "Long contexts dilute early instructions, so restating them or moving them into standing instructions fixes it. A conflict with a later request is possible, but shortening messages does not resolve it; you would restate the rule either way.",
+      "topic": "Troubleshooting and Optimization",
+      "themes": {
+        "tasks": [
+          "prompt-diagnosis"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "94",
+      "question": "Claude declines a legitimate request about a sensitive topic. What is the productive move?",
+      "options": [
+        "Add context about who you are and the legitimate purpose, then rephrase the request",
+        "Split the request into smaller pieces that each look harmless and combine the answers yourself",
+        "Tell Claude that you accept full responsibility for how the answer will be used and retry",
+        "Move the request to a different model that is known to refuse fewer sensitive topics"
+      ],
+      "answers": "A",
+      "explanation": "Context about purpose resolves most false refusals. Splitting the request into harmless-looking pieces is a workaround that violates usage policies even when the underlying purpose is fine, and a blanket acceptance of responsibility gives Claude no information about the purpose.",
+      "topic": "Troubleshooting and Optimization",
+      "themes": {
+        "tasks": [
+          "prompt-diagnosis"
+        ],
+        "questionTypes": [
+          "most-secure"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "95",
+      "question": "You ask for a summary of a document you attached, and the answer includes facts not in the document. What do you do?",
+      "options": [
+        "Keep the extra facts if they are accurate, since they add useful context for the reader",
+        "Ask Claude to use only the attached document and cite where each point comes from, then verify",
+        "Remove the extra facts yourself and send the rest, since the document content is presumably fine",
+        "Re-upload the document in a new chat, since the extra facts suggest the upload was corrupted"
+      ],
+      "answers": "B",
+      "explanation": "Constrain the source and demand citations, then check them. Removing the additions by hand assumes the rest of the summary is grounded, which is exactly what you have not verified; the additions are a sign the whole summary needs checking.",
+      "topic": "Output Evaluation and Validation",
+      "themes": {
+        "tasks": [
+          "fact-checking-verification"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "projects"
+        ]
+      }
+    },
+    {
+      "id": "96",
+      "question": "Claude produced a legal-sounding clause for a contract. What is the right next step?",
+      "options": [
+        "Ask Claude to confirm the clause is enforceable in your jurisdiction before adding it",
+        "Compare it against a similar clause in a signed contract and use it if the wording matches",
+        "Add it to the contract with a note that it was AI-drafted so the other party can review it",
+        "Have counsel review it, treating the draft as a starting point rather than as advice"
+      ],
+      "answers": "D",
+      "explanation": "Drafts with legal consequences need a qualified reviewer. Matching the wording of a signed contract feels like a check, but that clause was reviewed for a different deal and a different context; only counsel can say whether this one fits yours.",
+      "topic": "Output Evaluation and Validation",
+      "themes": {
+        "tasks": [
+          "appropriate-use"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "97",
+      "question": "A calculation in Claude's answer looks off. What do you do?",
+      "options": [
+        "Re-run the arithmetic yourself or in a spreadsheet and correct the answer if needed",
+        "Ask Claude to show its working step by step and accept the result if the steps look sound",
+        "Ask the same question again in a new conversation and use whichever figure appears twice",
+        "Ask Claude to double-check its own calculation and flag anything it is not sure about"
+      ],
+      "answers": "A",
+      "explanation": "Verify numbers independently. Step-by-step working is easier to read but the model can present a wrong step just as confidently as a right one, and asking it to double-check or re-run is still the model grading itself.",
+      "topic": "Output Evaluation and Validation",
+      "themes": {
+        "tasks": [
+          "appropriate-use"
+        ],
+        "questionTypes": [
+          "configuration"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "98",
+      "question": "Which is the best signal that a summary is faithful to the source?",
+      "options": [
+        "It reuses the source's own terminology and section headings throughout",
+        "It was produced by the most capable model with the source attached to the chat",
+        "Every key claim can be traced back to a specific passage in the source",
+        "It reads as balanced and does not add opinions that the source did not state"
+      ],
+      "answers": "C",
+      "explanation": "Traceability is what faithfulness means: each claim has a passage behind it. Reusing the source's vocabulary makes a summary sound faithful without proving any claim, and the absence of added opinion says nothing about whether the facts were kept straight.",
+      "topic": "Output Evaluation and Validation",
+      "themes": {
+        "tasks": [
+          "appropriate-use"
+        ],
+        "questionTypes": [
+          "output-evaluation"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "99",
+      "question": "Claude answers a question about your company's Q3 revenue with a specific figure you never provided. What happened?",
+      "options": [
+        "It retrieved the figure from a public filing, so it is probably close to correct",
+        "It guessed; models fill gaps with plausible text unless grounded in provided data",
+        "It inferred the figure from earlier numbers in the conversation, so the math is checkable",
+        "It pulled the figure from a connected finance system that an admin set up earlier"
+      ],
+      "answers": "B",
+      "explanation": "Ungrounded specifics are guesses. A public filing is a tempting explanation, but unless you attached or connected one, the model had no such source and produced a plausible-looking number; treat it as unverified.",
+      "topic": "Output Evaluation and Validation",
+      "themes": {
+        "tasks": [
+          "fact-checking-verification"
+        ],
+        "questionTypes": [
+          "behavior-identification"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "100",
+      "question": "What is a practical way to check a translated customer email before sending?",
+      "options": [
+        "Ask Claude to rate the translation's accuracy on a scale of one to ten before you send it",
+        "Run the email through a second translation tool and send it if the two outputs match closely enough",
+        "Ask Claude to confirm the tone is polite and appropriate for a customer in that market",
+        "Ask for a back-translation into your language and compare meaning, or have a native speaker skim it"
+      ],
+      "answers": "D",
+      "explanation": "Back-translation exposes meaning drift in a language you can read. A second tool agreeing is weaker than it looks, because two tools can share the same misreading, and a tone check does not catch a sentence that says the wrong thing politely.",
+      "topic": "Output Evaluation and Validation",
+      "themes": {
+        "tasks": [
+          "appropriate-use"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "101",
+      "question": "Which output needs the most scrutiny?",
+      "options": [
+        "A list of medication interactions for a patient handout",
+        "A brainstorm of twenty blog titles for the marketing team",
+        "A draft tweet announcing a new feature to your followers",
+        "A meeting agenda for the weekly product sync"
+      ],
+      "answers": "A",
+      "explanation": "Consequence sets the review bar, and medical information that reaches patients sits at the top. The tweet is public and deserves a look, but a wrong feature announcement is embarrassing while a wrong interaction list can hurt someone.",
+      "topic": "Output Evaluation and Validation",
+      "themes": {
+        "tasks": [
+          "fact-checking-verification"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "102",
+      "question": "Claude gives two different answers to the same factual question on two runs. What does that tell you?",
+      "options": [
+        "The second answer is more likely right, since the model refined its response",
+        "The first answer is more likely right, since the context was cleaner at the start",
+        "The model is uncertain or the question is ambiguous; verify against a source",
+        "Both answers are probably partly right, so combine them into a single response"
+      ],
+      "answers": "C",
+      "explanation": "Inconsistency is a verification flag, not a tie-break puzzle. Neither run has a claim to being the refined one; the two runs are independent samples, so the disagreement tells you to go to a source rather than pick or merge.",
+      "topic": "Output Evaluation and Validation",
+      "themes": {
+        "tasks": [
+          "fact-checking-verification"
+        ],
+        "questionTypes": [
+          "behavior-identification"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "103",
+      "question": "Your team wants a rule of thumb for when to trust Claude's output without checking. Best rule?",
+      "options": [
+        "Trust output from the most capable model; verify output from faster, cheaper models",
+        "Trust drafts you will edit anyway; verify anything factual, numeric, legal, medical, or public-facing",
+        "Trust answers under 100 words; verify anything longer, since longer answers have more room for errors",
+        "Trust answers that cite a source; verify only the answers that come with no citation at all"
+      ],
+      "answers": "B",
+      "explanation": "Stakes and checkability decide, not model size or length. Citations are the strongest-looking distractor, but a cited answer still needs the citation opened, because models can produce plausible references that do not say what is claimed.",
+      "topic": "Output Evaluation and Validation",
+      "themes": {
+        "tasks": [
+          "fact-checking-verification"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "104",
+      "question": "Claude cites a study by name and year. What is the check?",
+      "options": [
+        "Check that the year is recent enough for the findings to still apply to your situation",
+        "Ask Claude for the DOI and journal name, which it can only supply if the study is real",
+        "Ask Claude whether it is confident the citation is accurate and keep it if it says yes",
+        "Confirm the study exists and says what is claimed, using the journal or a database"
+      ],
+      "answers": "D",
+      "explanation": "Citations can be fabricated, so confirm both existence and content outside the model. Asking for a DOI does not help, because a model can produce a well-formed DOI for a study that does not exist; the check has to happen in a database or the journal itself.",
+      "topic": "Output Evaluation and Validation",
+      "themes": {
+        "tasks": [
+          "fact-checking-verification"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "105",
+      "question": "A support team wants Claude to draft replies to tickets. Which design keeps quality high?",
+      "options": [
+        "Claude drafts from the ticket and knowledge base; an agent reviews and sends; wrong drafts feed back into instructions",
+        "Claude drafts from the ticket; agents send the draft unchanged and log any customer complaints for review each quarter",
+        "Claude answers tickets it rates as simple automatically and routes the rest to agents, with no review of the automated ones",
+        "Claude drafts from the ticket; a manager samples a fixed 5% of sent replies each week and updates instructions from the sample"
+      ],
+      "answers": "A",
+      "explanation": "Draft, review, learn: every reply is checked before it goes out and mistakes improve the instructions. Sampling 5% after sending has the learning loop but not the review, so 95% of errors reach customers unchecked.",
+      "topic": "Workflow Integration and Solution Design",
+      "themes": {
+        "tasks": [
+          "human-in-the-loop-review"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "projects"
+        ]
+      }
+    },
+    {
+      "id": "106",
+      "question": "Which task is a poor fit for Claude in a finance workflow?",
+      "options": [
+        "Extracting figures from scanned invoices for a person to review",
+        "Drafting a memo that explains the monthly results to leadership",
+        "Making the final approval decision on employee expense reports",
+        "Summarizing variance commentary from the business unit leads"
+      ],
+      "answers": "C",
+      "explanation": "Approval decisions stay with accountable people. Invoice extraction is the one candidates sometimes pick because the numbers matter, but extraction feeding a human review is exactly the pattern that works; it is the decision that is the poor fit.",
+      "topic": "Workflow Integration and Solution Design",
+      "themes": {
+        "tasks": [
+          "workflow-integration"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "107",
+      "question": "What should you map before adding Claude to a process?",
+      "options": [
+        "The list of available models and their costs, so you pick the cheapest one that works",
+        "The team's existing prompts and templates, so you can standardize them before rolling out anything new",
+        "The budget and timeline, so you know how much automation you can afford to build",
+        "The steps, inputs, outputs, and where judgment happens, so you know which steps are drafting and which are decisions"
+      ],
+      "answers": "D",
+      "explanation": "Process clarity precedes automation: you need to know which steps are drafting or extraction and which are decisions. Standardizing prompts is worthwhile later, but it assumes you already know which steps Claude should touch.",
+      "topic": "Workflow Integration and Solution Design",
+      "themes": {
+        "tasks": [
+          "workflow-integration"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "108",
+      "question": "A marketing team wants weekly competitor summaries. Which setup?",
+      "options": [
+        "A fresh chat each week where the analyst pastes the competitor list and the latest news links",
+        "A Project with standing instructions and the competitor list, run weekly with a person reviewing before circulation",
+        "An automated agent that gathers competitor news and posts the summary straight to the team channel each Monday",
+        "A shared conversation that the team keeps open all quarter so Claude retains the full history"
+      ],
+      "answers": "B",
+      "explanation": "Standing setup plus review: the Project holds the context and a person checks before circulation. The automated agent saves the most effort but drops the review, so a misread headline or a fabricated detail goes to the whole team.",
+      "topic": "Workflow Integration and Solution Design",
+      "themes": {
+        "tasks": [
+          "human-in-the-loop-review"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "projects"
+        ]
+      }
+    },
+    {
+      "id": "109",
+      "question": "Which is a sign that a task should stay manual for now?",
+      "options": [
+        "It runs weekly and the inputs arrive in slightly different formats each time",
+        "It involves judgment calls that the team currently makes based on experience",
+        "It takes under an hour and the team already has a template that works well",
+        "Errors are costly, the inputs are inconsistent, and there is no quick way to check outputs"
+      ],
+      "answers": "D",
+      "explanation": "Hard-to-verify, high-cost tasks wait. Judgment calls sound like a stop sign, but many judgment-heavy tasks still benefit from Claude drafting options for the person deciding; it is the combination of costly errors and no quick check that rules a task out.",
+      "topic": "Workflow Integration and Solution Design",
+      "themes": {
+        "tasks": [
+          "workflow-integration"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "110",
+      "question": "How do you measure whether Claude improved a workflow?",
+      "options": [
+        "Compare time, error rate, and rework before and after on the same kind of work",
+        "Survey the team after a month on whether the work feels faster and less tedious",
+        "Track how many prompts the team writes per week as a proxy for adoption",
+        "Compare the tool's monthly cost against the hours the team estimates it saved"
+      ],
+      "answers": "A",
+      "explanation": "Measure outcomes on comparable work: time, errors, and rework, before and after. The cost-versus-estimated-hours comparison looks quantitative, but estimated savings are an opinion with a number on it and it ignores whether quality held.",
+      "topic": "Workflow Integration and Solution Design",
+      "themes": {
+        "tasks": [
+          "workflow-integration"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "111",
+      "question": "When connecting Claude to a shared drive, which question comes first?",
+      "options": [
+        "Whether Claude can write files back to the drive or only read them",
+        "How quickly it returns results when searching across a large folder tree",
+        "Which folders it may read and whether the data classification allows it",
+        "Which team members should get access to the connected assistant first"
+      ],
+      "answers": "C",
+      "explanation": "Access scope and policy come first, because a connector exposes whatever it can reach. Deciding who gets access is a real question, but it comes after you know what data the connector can see; scoping the folders is what limits the exposure.",
+      "topic": "Workflow Integration and Solution Design",
+      "themes": {
+        "tasks": [
+          "workflow-integration"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "112",
+      "question": "A colleague builds a workflow where Claude's output goes straight into a customer-facing form. What is missing?",
+      "options": [
+        "A more detailed prompt so the output matches the form's fields exactly",
+        "A review or validation step before anything reaches the customer",
+        "A more capable model so the output is accurate enough to send directly",
+        "A log of every output so problems can be traced after customers report them"
+      ],
+      "answers": "B",
+      "explanation": "Customer-facing output needs a check before it goes out. Logging is good practice, but it only finds problems after a customer has seen them; a better prompt or model lowers the error rate without catching the errors that remain.",
+      "topic": "Workflow Integration and Solution Design",
+      "themes": {
+        "tasks": [
+          "workflow-integration"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "113",
+      "question": "Which content should not be pasted into a tool your organization has not approved for it?",
+      "options": [
+        "Your own meeting notes from an internal planning session",
+        "Product descriptions that are already on the public website",
+        "Press releases the company published in the last quarter",
+        "Customer personal data, health records, or confidential financials"
+      ],
+      "answers": "D",
+      "explanation": "Sensitive classes need approved tools and settings. Internal meeting notes are the closest call, since they are not public, but ordinary planning notes are a policy question for your organization; personal, health, and confidential financial data are the classes that are governed everywhere.",
+      "topic": "Governance, Risk, and Responsible Use",
+      "themes": {
+        "tasks": [
+          "data-privacy-sensitivity"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "114",
+      "question": "Why does responsible use require a named person accountable for AI-assisted decisions?",
+      "options": [
+        "Because the model cannot be accountable; a person must be able to explain and stand behind the outcome",
+        "Because regulators require a named AI officer to be listed for every automated decision",
+        "Because it gives the organization a single person to hold responsible when the model makes a costly error",
+        "Because the vendor's terms of service transfer liability for outputs to the customer"
+      ],
+      "answers": "A",
+      "explanation": "Accountability stays human because a model cannot explain or defend an outcome. Having someone to blame is a distortion of the same idea: the point is that a person can understand and stand behind the decision, not that there is a name to point at afterwards.",
+      "topic": "Governance, Risk, and Responsible Use",
+      "themes": {
+        "tasks": [
+          "appropriate-use"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "115",
+      "question": "Claude drafts performance review language for an employee. Which risk is highest?",
+      "options": [
+        "Formatting that does not match the HR system's review template and has to be redone by hand",
+        "Language so generic that it gives the employee nothing concrete to act on in the coming year",
+        "Bias in the language or reasoning affecting a person's career, so it needs careful human review",
+        "Length that runs well past what managers are expected to write for an annual review"
+      ],
+      "answers": "C",
+      "explanation": "People decisions carry bias risk, and a review shapes someone's career. Generic language is a real quality problem, but it is visible and easy to fix; biased framing can look polished and still be unfair, which is why a person has to read it carefully.",
+      "topic": "Governance, Risk, and Responsible Use",
+      "themes": {
+        "tasks": [
+          "data-privacy-sensitivity"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "116",
+      "question": "What does an acceptable use policy typically prohibit?",
+      "options": [
+        "Sharing outputs with anyone outside the team that produced them",
+        "Using the tool for harmful, deceptive, or otherwise prohibited purposes",
+        "Using the tool for any task that involves customer names or contact details",
+        "Asking questions about topics that are unrelated to your job role"
+      ],
+      "answers": "B",
+      "explanation": "Acceptable use policies define forbidden purposes: harm, deception, and listed prohibited uses. Customer data handling is governed by data policy and workspace settings rather than a blanket ban in the AUP, and sharing outputs or off-topic questions are not what it covers.",
+      "topic": "Governance, Risk, and Responsible Use",
+      "themes": {
+        "tasks": [
+          "appropriate-use"
+        ],
+        "questionTypes": [
+          "most-secure"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "117",
+      "question": "A vendor claims its AI tool 'never makes mistakes'. Your response?",
+      "options": [
+        "Ask the vendor for the accuracy benchmarks behind the claim and accept it if they look strong",
+        "Run a two-week pilot and drop the review steps once the pilot shows no errors",
+        "Include the claim in the contract so the vendor bears the cost of any mistakes",
+        "Treat the claim as false and design review steps into the workflow anyway"
+      ],
+      "answers": "D",
+      "explanation": "All models err, so design for it. A pilot is sensible but two clean weeks do not prove the tool is error-free, only that the errors did not show up yet; removing review on that basis is the mistake the claim was inviting you to make.",
+      "topic": "Governance, Risk, and Responsible Use",
+      "themes": {
+        "tasks": [
+          "data-privacy-sensitivity"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "118",
+      "question": "What should you do if Claude produces content that seems to reproduce a copyrighted text at length?",
+      "options": [
+        "Do not use it verbatim; rewrite or source it properly, and flag the case",
+        "Cite Claude as the author so the original rights holder is not misrepresented",
+        "Shorten the passage so that it falls under what fair use typically allows",
+        "Use it, since content produced by an AI tool is not subject to copyright"
+      ],
+      "answers": "A",
+      "explanation": "Avoid reproducing protected text. Trimming to a length you believe is fair use is the strongest distractor, but fair use depends on purpose and context, not word count, and you would still be publishing someone else's text; rewrite or source it and flag the case.",
+      "topic": "Governance, Risk, and Responsible Use",
+      "themes": {
+        "tasks": [
+          "appropriate-use"
+        ],
+        "questionTypes": [
+          "configuration"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "119",
+      "question": "Which practice supports transparency when AI helped produce a document?",
+      "options": [
+        "Keeping AI-assisted drafts out of the document history so reviewers see only the final",
+        "Adding a footnote naming the model version used on every document you produce",
+        "Disclosing AI assistance where your organization's policy or the audience expects it",
+        "Publishing under a team name rather than an individual so no one is misattributed"
+      ],
+      "answers": "C",
+      "explanation": "Disclose according to policy and audience expectation. A footnote on every document sounds maximally transparent, but blanket labels are noise on routine drafts and do not reflect where disclosure matters; policy and audience decide where it belongs.",
+      "topic": "Governance, Risk, and Responsible Use",
+      "themes": {
+        "tasks": [
+          "appropriate-use"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "120",
+      "question": "Which prompt is most likely to produce a usable customer apology email?",
+      "options": [
+        "'Write an apology to a customer for a late order. Keep it professional and make sure they feel heard.'",
+        "'Draft a customer apology email. Use our standard tone. Include a credit. Do not make it too long.'",
+        "'Write a sincere apology for a shipping delay from a customer service manager, with a goodwill gesture.'",
+        "'Write a 120-word apology to a customer whose order arrived a week late, warm but not groveling, offering a 15% credit; here is our tone guide.'"
+      ],
+      "answers": "D",
+      "explanation": "Specifics win: audience, length, tone, the exact offer, and a tone reference. The second option mentions tone and a credit but names neither, so Claude has to invent both; 'our standard tone' means nothing unless the guide is attached.",
+      "topic": "Prompting and Task Execution",
+      "themes": {
+        "tasks": [
+          "effective-prompt-design"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "121",
+      "question": "You want three distinct options rather than three variations of one idea. What do you say?",
+      "options": [
+        "'Give me three options that differ in approach, for example one conservative, one bold, one unconventional'",
+        "'Give me three options and make sure they are genuinely different from each other, not variations'",
+        "'Give me three options, then rank them by how creative each one is so I can see the range'",
+        "'Give me three options. Be as creative as possible and avoid repeating yourself across them.'"
+      ],
+      "answers": "A",
+      "explanation": "Define the axis of difference. Saying 'genuinely different, not variations' states the goal but not what different means, so you often get the same idea in three tones; naming the spread (conservative, bold, unconventional) gives Claude something to differ on.",
+      "topic": "Prompting and Task Execution",
+      "themes": {
+        "tasks": [
+          "effective-prompt-design"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "122",
+      "question": "Claude's draft uses jargon your audience will not understand. Best fix?",
+      "options": [
+        "Ask for a shorter draft, since cutting length usually forces out the technical terms",
+        "Tell it the audience and ask for plain language with an example of the level you want",
+        "Ask it to add a glossary at the end so readers can look up the terms they do not know",
+        "Replace the jargon yourself before sending, since you know the audience best"
+      ],
+      "answers": "B",
+      "explanation": "Name the audience and show the level. A glossary keeps the jargon and pushes the work onto the reader, and replacing terms by hand fixes this draft without changing the next one.",
+      "topic": "Prompting and Task Execution",
+      "themes": {
+        "tasks": [
+          "audience-adaptation"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "123",
+      "question": "What is the value of giving Claude the raw material (notes, data, previous versions) with your request?",
+      "options": [
+        "It lets Claude verify its own claims against your documents before answering",
+        "It shortens the conversation, since Claude can skip the clarifying questions",
+        "Grounded requests produce specific, accurate drafts instead of generic ones",
+        "It lets the model learn your company's style for future conversations"
+      ],
+      "answers": "C",
+      "explanation": "Material grounds the output. The verification framing overstates it: attached material makes the draft specific and accurate, but it does not make the model check itself, and you still verify the result.",
+      "topic": "Prompting and Task Execution",
+      "themes": {
+        "tasks": [
+          "effective-prompt-design"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "124",
+      "question": "When a task is large, what approach works better?",
+      "options": [
+        "Write one detailed prompt that covers every section so the output is consistent",
+        "Ask for the full deliverable twice and merge the stronger parts of each version",
+        "Start with the hardest section so the remaining ones can follow its pattern",
+        "Break it into steps: outline first, then sections, reviewing between steps"
+      ],
+      "answers": "D",
+      "explanation": "Stepwise work is easier to steer, because each review catches drift before it spreads. One giant prompt gives consistency in theory but a mistake in the framing shows up everywhere at once; starting with the hardest section is a sequencing choice, not a structure.",
+      "topic": "Prompting and Task Execution",
+      "themes": {
+        "tasks": [
+          "effective-prompt-design"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "125",
+      "question": "Claude keeps adding a closing paragraph you do not want. What is the efficient instruction?",
+      "options": [
+        "'End after the final bullet; do not add a closing paragraph'",
+        "'Keep it brief and skip anything that is not essential'",
+        "'Rewrite this without the fluff at the end'",
+        "'Match the length of the previous version exactly'"
+      ],
+      "answers": "A",
+      "explanation": "State the exact boundary. 'Without the fluff at the end' points at the problem but leaves Claude to decide what counts as fluff, so the closing often comes back shorter rather than gone.",
+      "topic": "Prompting and Task Execution",
+      "themes": {
+        "tasks": [
+          "effective-prompt-design"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "126",
+      "question": "For a long, careful analysis of a 60-page report, which is the better choice?",
+      "options": [
+        "The fastest model, since it can be run several times and the answers compared",
+        "The most capable model, accepting slower responses for the depth of analysis",
+        "A smaller model with the report split into chunks so each fits in a short prompt",
+        "Whichever model the team used last time, so results are comparable across reports"
+      ],
+      "answers": "B",
+      "explanation": "Depth favors capability. Chunking the report for a smaller model is the strongest alternative, but it loses the cross-references between sections that a careful analysis depends on.",
+      "topic": "Product and Model Selection",
+      "themes": {
+        "tasks": [
+          "model-tradeoffs"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "127",
+      "question": "Which feature lets a whole team share standing instructions and files?",
+      "options": [
+        "A saved conversation that each team member opens and continues",
+        "A shared browser bookmark to a chat with the instructions pinned at the top",
+        "A shared Project with the instructions and files attached",
+        "A team email thread that holds the latest version of the instructions"
+      ],
+      "answers": "C",
+      "explanation": "Projects share context. A saved conversation looks similar but mixes everyone's messages into one growing thread, and it has no place for instructions that apply to every new conversation.",
+      "topic": "Product and Model Selection",
+      "themes": {
+        "tasks": [
+          "feature-selection"
+        ],
+        "questionTypes": [
+          "feature-selection"
+        ],
+        "tools": [
+          "projects"
+        ]
+      }
+    },
+    {
+      "id": "128",
+      "question": "A colleague asks whether to use the consumer chat app or an organization workspace for client work. Deciding factor?",
+      "options": [
+        "Data handling and admin controls: the organization workspace governs what happens to client data",
+        "Response speed and rate limits, since client work is time-sensitive and volume can be high",
+        "Which one has access to the newest model, since client deliverables should use the best output",
+        "Cost per seat, since the consumer app is cheaper and client budgets are tight"
+      ],
+      "answers": "A",
+      "explanation": "Data handling and admin controls decide; client work belongs in the governed workspace. Model access is a real difference between plans, but a better model in an ungoverned account does not fix where the client's data goes.",
+      "topic": "Product and Model Selection",
+      "themes": {
+        "tasks": [
+          "model-tradeoffs"
+        ],
+        "questionTypes": [
+          "most-secure"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "129",
+      "question": "Which task fits Claude Code rather than the chat app?",
+      "options": [
+        "Drafting a newsletter that goes out to the engineering team each month",
+        "Summarizing a recorded architecture review call for the people who missed it",
+        "Writing a job post for a senior developer role from the hiring manager's notes",
+        "Making the same change across dozens of files in a code repository"
+      ],
+      "answers": "D",
+      "explanation": "Repository work is Claude Code's job. The other three are about engineers but are still drafting and summarizing tasks, which the chat app handles well; what matters is whether the work happens inside a codebase.",
+      "topic": "Product and Model Selection",
+      "themes": {
+        "tasks": [
+          "model-tradeoffs"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "claude-app"
+        ]
+      }
+    },
+    {
+      "id": "130",
+      "question": "When would a smaller, faster model be the right pick?",
+      "options": [
+        "For legal or medical analysis, where a concise answer is safer than a long one",
+        "For high-volume, simple tasks like tagging or short drafts where speed and cost matter more than depth",
+        "When the team is new to AI tools, since simpler models are easier to prompt well",
+        "When the conversation is going to run long, since smaller models hold context more reliably over time"
+      ],
+      "answers": "B",
+      "explanation": "Match model to task: volume and simplicity favor speed and cost. Legal and medical analysis is the trap, because concise is not the same as careful, and those are the tasks where depth matters most.",
+      "topic": "Product and Model Selection",
+      "themes": {
+        "tasks": [
+          "model-tradeoffs"
+        ],
+        "questionTypes": [
+          "most-cost-effective"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "131",
+      "question": "What belongs in a Project's instructions?",
+      "options": [
+        "Every document the team has produced on the topic, so Claude has the fullest possible picture",
+        "A log of past conversations that went well, so Claude can reproduce the pattern",
+        "Standing context: who the audience is, tone, formats, and rules that apply to every conversation",
+        "The specific request for this week, updated each time the task changes"
+      ],
+      "answers": "C",
+      "explanation": "Standing rules, not everything. This week's request belongs in the conversation, not the instructions, because it changes; documents belong in knowledge files rather than instructions, and even then only the ones the project regularly needs.",
+      "topic": "Configuration and Knowledge Management",
+      "themes": {
+        "tasks": [
+          "project-instructions"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "projects"
+        ]
+      }
+    },
+    {
+      "id": "132",
+      "question": "Your Project's knowledge files are out of date and answers reflect old policy. Fix?",
+      "options": [
+        "Add the new policy document alongside the old ones so Claude can see both versions",
+        "Add a line to the instructions telling Claude to prefer the most recent file when they conflict",
+        "Start a new Project from scratch and move the team over once it is set up",
+        "Replace the outdated files and tell the team that the source of truth has changed"
+      ],
+      "answers": "D",
+      "explanation": "Maintain the knowledge base: remove what is wrong and tell people. Keeping both versions with a 'prefer the newest' rule leaves the old policy available to be quoted, and Claude cannot reliably tell which file is newer from the content.",
+      "topic": "Configuration and Knowledge Management",
+      "themes": {
+        "tasks": [
+          "project-knowledge"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "projects"
+        ]
+      }
+    },
+    {
+      "id": "133",
+      "question": "What is a good way to keep a team's prompts consistent?",
+      "options": [
+        "Shared templates or skills with the agreed structure, stored where the team can find them",
+        "One designated person who writes every prompt and sends it to the rest of the team",
+        "A weekly review where the team compares the prompts each person wrote that week",
+        "A rule that everyone uses the same model so the outputs come out in a similar style"
+      ],
+      "answers": "A",
+      "explanation": "Shared, findable templates keep structure consistent without a bottleneck. A single prompt writer gives consistency but does not scale and stops the moment that person is away; a weekly review compares prompts after the inconsistent work is already done.",
+      "topic": "Configuration and Knowledge Management",
+      "themes": {
+        "tasks": [
+          "project-knowledge"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "134",
+      "question": "Which is a reason to split work into several Projects?",
+      "options": [
+        "The knowledge files are large and splitting them spreads the storage across Projects",
+        "Different audiences, tones, or confidentiality levels that should not mix",
+        "Projects perform better when each one holds fewer than ten conversations",
+        "Each team member should own a Project so their conversations stay private"
+      ],
+      "answers": "B",
+      "explanation": "Separate contexts that should not blend. One Project per person is the common misuse: it splits by owner instead of by context, so the shared instructions and files that make a Project useful end up duplicated or missing.",
+      "topic": "Configuration and Knowledge Management",
+      "themes": {
+        "tasks": [
+          "project-knowledge"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "projects"
+        ]
+      }
+    },
+    {
+      "id": "135",
+      "question": "How much should a knowledge file contain?",
+      "options": [
+        "Everything the team has written on the topic, so nothing relevant is left out",
+        "A single summary page, since longer files make answers slower and less focused",
+        "Only finalized documents; drafts and working notes should stay out of the Project",
+        "What conversations in that Project regularly need, kept current"
+      ],
+      "answers": "D",
+      "explanation": "Relevant and current is the rule. 'Only finalized documents' sounds disciplined, but a current working draft is often exactly what conversations need; the test is whether the content is used and up to date, not its approval status.",
+      "topic": "Configuration and Knowledge Management",
+      "themes": {
+        "tasks": [
+          "project-knowledge"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "projects"
+        ]
+      }
+    },
+    {
+      "id": "136",
+      "question": "What should you record when a prompt template works well?",
+      "options": [
+        "The template, the inputs it expects, and an example output, so others can reuse it",
+        "The model version and the date, so the team knows when it may need to be re-tested",
+        "The name of the person who wrote it, so colleagues know who to ask about it",
+        "The number of times it has been used, so the team can see which templates matter"
+      ],
+      "answers": "A",
+      "explanation": "Document reusable assets so others can pick them up. Model version and date are worth noting alongside, but on their own they do not let anyone reuse the template; the inputs and an example output are what make it usable.",
+      "topic": "Configuration and Knowledge Management",
+      "themes": {
+        "tasks": [
+          "project-knowledge"
+        ],
+        "questionTypes": [
+          "architecture-decision"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "137",
+      "question": "Claude's answer ignores an attached document. First thing to check?",
+      "options": [
+        "Whether the model you selected supports file attachments of that size and type",
+        "Whether the document contains text or only scanned images, which need conversion first",
+        "That the document uploaded correctly and that your prompt refers to it explicitly",
+        "Whether the conversation is too long and the document has dropped out of context"
+      ],
+      "answers": "C",
+      "explanation": "Confirm the input and the reference before anything else. Scanned images and context length are real causes, but they are second-line checks; most cases are a failed upload or a prompt that never mentions the document.",
+      "topic": "Troubleshooting and Optimization",
+      "themes": {
+        "tasks": [
+          "prompt-diagnosis"
+        ],
+        "questionTypes": [
+          "troubleshooting"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "138",
+      "question": "A conversation has drifted and answers are worse. What helps?",
+      "options": [
+        "Ask Claude to summarize the conversation so far and continue from that summary in the same chat",
+        "Shorten your messages so the model has less new text to process each turn",
+        "Switch to a more capable model mid-conversation so it can recover the thread",
+        "Start a new conversation with a concise summary of the task and decisions so far"
+      ],
+      "answers": "D",
+      "explanation": "Reset with a clean brief. Summarizing inside the same chat is the near miss: the summary helps, but the drifted history is still in the context and keeps pulling answers off course.",
+      "topic": "Troubleshooting and Optimization",
+      "themes": {
+        "tasks": [
+          "prompt-diagnosis"
+        ],
+        "questionTypes": [
+          "troubleshooting"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "139",
+      "question": "Claude says it cannot access a link you pasted. Why?",
+      "options": [
+        "The link is too long for the model to parse; shorten it with a URL shortener and try again",
+        "It may not be able to browse, or the page may be restricted; paste the content instead",
+        "The page needs a login; sign in yourself first and paste the link again, since the session carries over",
+        "The link is broken; check it in your browser and resend it once it loads"
+      ],
+      "answers": "B",
+      "explanation": "Provide the content directly. Signing in yourself does nothing, because your browser session does not carry over to the model; if the page is behind a login or the model cannot browse, pasting the text is the only reliable route.",
+      "topic": "Troubleshooting and Optimization",
+      "themes": {
+        "tasks": [
+          "prompt-diagnosis"
+        ],
+        "questionTypes": [
+          "troubleshooting"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
+    },
+    {
+      "id": "140",
+      "question": "Output is in the wrong format despite instructions. Fastest fix?",
+      "options": [
+        "Repeat the same instruction more firmly and put it at the very end of the prompt",
+        "Switch to a more capable model, since format compliance improves with model size",
+        "Show a short example of the exact format you want",
+        "Ask Claude to explain why it chose that format before trying again"
+      ],
+      "answers": "C",
+      "explanation": "Examples fix format faster than any description. Repeating the instruction more firmly sometimes works, but an example removes the ambiguity that caused the miss in the first place.",
+      "topic": "Troubleshooting and Optimization",
+      "themes": {
+        "tasks": [
+          "prompt-diagnosis"
+        ],
+        "questionTypes": [
+          "most-performant"
+        ],
+        "tools": [
+          "models"
+        ]
+      }
     }
   ]
 }

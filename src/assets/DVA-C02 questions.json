@@ -2288,36 +2288,6 @@
       }
     },
     {
-      "id": "75",
-      "question": "A developer is writing unit tests for a new application that will be deployed on AWS. The developer wants to validate all pull requests with unit tests and merge the code with the main branch only when all tests pass. The developer stores the code in AWS CodeCommit and sets up AWS CodeBuild to run the unit tests. The developer creates an AWS Lambda function to start the CodeBuild task. The developer needs to identify the CodeCommit events in an Amazon EventBridge event that can invoke the Lambda function when a pull request is created or updated. Which CodeCommit event will meet these requirements?",
-      "options": [
-        "",
-        "",
-        "",
-        ""
-      ],
-      "answers": "C",
-      "explanation": "The 'pullRequestCreated' and 'pullRequestSourceBranchUpdated' CodeCommit events (surfaced through EventBridge) are what fire when a pull request is opened or updated, letting an EventBridge rule filter on these specific event types to invoke the Lambda function that starts the CodeBuild test run only for those actions. (The source data for this question is missing the actual event-name option text, so only the general principle, filtering EventBridge on CodeCommit pull-request-specific event types, can be confirmed here.)",
-      "topic": "Deployment",
-      "url": "https://www.examtopics.com/discussions/amazon/view/106717-exam-aws-certified-developer-associate-dva-c02-topic-1-question-75-discussion/",
-      "themes": {
-        "services": [
-          "lambda",
-          "codecommit",
-          "codebuild",
-          "eventbridge"
-        ],
-        "concepts": [
-          "testing",
-          "serverless",
-          "cicd-pipeline"
-        ],
-        "questionTypes": [
-          "multi-step-scenario"
-        ]
-      }
-    },
-    {
       "id": "76",
       "question": "A developer deployed an application to an Amazon EC2 instance. The application needs to know the public IPv4 address of the instance. How can the application find this information?",
       "options": [
@@ -4159,33 +4129,6 @@
         ],
         "questionTypes": [
           "troubleshooting"
-        ]
-      }
-    },
-    {
-      "id": "139",
-      "question": "A developer is creating an application for a company. The application needs to read the file doc.txt that is placed in the root folder of an Amazon S3 bucket that is named DOC-EXAMPLE-BUCKET. The company’s security team requires the principle of least privilege to be applied to the application’s IAM policy. Which IAM policy statement will meet these security requirements?",
-      "options": [
-        "",
-        "",
-        "",
-        ""
-      ],
-      "answers": "A",
-      "explanation": "Applying least privilege here means scoping the policy's Resource element to the exact object (arn:aws:s3:::DOC-EXAMPLE-BUCKET/doc.txt) and the Action to s3:GetObject only, granting nothing broader such as bucket-level listing or write access the application does not need. (The source data for this question is missing the actual policy JSON option text, so only the general least-privilege principle it tests can be confirmed here.)",
-      "topic": "Security",
-      "url": "https://www.examtopics.com/discussions/amazon/view/117476-exam-aws-certified-developer-associate-dva-c02-topic-1-question-139-discussion/",
-      "themes": {
-        "services": [
-          "iam",
-          "s3"
-        ],
-        "concepts": [
-          "least-privilege",
-          "authorization"
-        ],
-        "questionTypes": [
-          "architecture-decision"
         ]
       }
     },
@@ -6974,32 +6917,6 @@
         "questionTypes": [
           "most-performant",
           "multi-step-scenario"
-        ]
-      }
-    },
-    {
-      "id": "235",
-      "question": "A company has an online web application that includes a product catalog. The catalog is stored in an Amazon S3 bucket that is named DOC-EXAMPLE-BUCKET. The application must be able to list the objects in the S3 bucket and must be able to download objects through an IAM policy. Which policy allows MINIMUM access to meet these requirements?",
-      "options": [
-        "",
-        "",
-        "",
-        ""
-      ],
-      "answers": "A",
-      "explanation": "The intended policy grants s3:ListBucket on the bucket resource and s3:GetObject scoped to the bucket's objects, matching exactly the two actions the application needs (listing and downloading) and nothing broader, following least privilege. (The source data for this question is missing the actual policy JSON option text, so only the general least-privilege principle it tests can be confirmed here.)",
-      "topic": "Development with AWS Services",
-      "url": "https://www.examtopics.com/discussions/amazon/view/124825-exam-aws-certified-developer-associate-dva-c02-topic-1-question-236-discussion/",
-      "themes": {
-        "services": [
-          "s3",
-          "iam"
-        ],
-        "concepts": [
-          "authorization"
-        ],
-        "questionTypes": [
-          "architecture-decision"
         ]
       }
     },
@@ -13116,31 +13033,6 @@
       }
     },
     {
-      "id": "441",
-      "question": "A gaming application stores scores for players in an Amazon DynamoDB table that has four attributes: user_id, user_name, user_score, and user_rank. The users are allowed to update their names only. A user is authenticated by web identity federation. Which set of conditions should be added in the policy attached to the role for the dynamodb:PutItem API call?",
-      "options": [
-        "",
-        "",
-        "",
-        ""
-      ],
-      "answers": "A",
-      "explanation": "The intended policy uses a DynamoDB fine-grained access control condition (dynamodb:LeadingKeys combined with a condition restricting the writable attributes) so that a federated user's PutItem call can update only their own item's user_name attribute, leaving user_score and user_rank untouched by that user. (The source data for this question is missing the actual policy JSON option text, so only the general fine-grained-access-control principle it tests can be confirmed here.)",
-      "topic": "Development with AWS Services",
-      "url": "https://www.examtopics.com/discussions/amazon/view/148960-exam-aws-certified-developer-associate-dva-c02-topic-1-question-443-discussion/",
-      "themes": {
-        "services": [
-          "dynamodb"
-        ],
-        "concepts": [
-          "authentication"
-        ],
-        "questionTypes": [
-          "architecture-decision"
-        ]
-      }
-    },
-    {
       "id": "442",
       "question": "A developer is creating a database of products. Queries for frequently accessed products must have retrieval times of microseconds. To ensure data consistency, the application cache must be updated whenever products are added, changed, or deleted. Which solution will meet these requirements?",
       "options": [
@@ -13450,33 +13342,6 @@
           "configuration",
           "architecture-decision",
           "multi-step-scenario"
-        ]
-      }
-    },
-    {
-      "id": "452",
-      "question": "A developer built an application that uses AWS Lambda functions to process images. The developer wants to improve image processing times throughout the day. The developer needs to create an Amazon CloudWatch Logs Insights query that shows the average, slowest, and fastest processing time in 1-minute intervals. Which query will meet these requirements?",
-      "options": [
-        "",
-        "",
-        "",
-        ""
-      ],
-      "answers": "A",
-      "explanation": "The expected Logs Insights pattern filters to REPORT lines and aggregates the auto-discovered duration field into average, maximum, and minimum grouped into one-minute bins, which yields the average, slowest, and fastest processing time per minute. The option texts for this question are still empty in the bundle, so the query choices themselves need to be authored before this question can enter the quiz pool.",
-      "topic": "Troubleshooting and Optimization",
-      "url": "https://www.examtopics.com/discussions/amazon/view/157514-exam-aws-certified-developer-associate-dva-c02-topic-1-question-454-discussion/",
-      "themes": {
-        "services": [
-          "cloudwatch",
-          "lambda"
-        ],
-        "concepts": [
-          "observability",
-          "logging"
-        ],
-        "questionTypes": [
-          "most-performant"
         ]
       }
     },
@@ -14286,32 +14151,6 @@
       }
     },
     {
-      "id": "481",
-      "question": "A developer is updating an Amazon API Gateway REST API to have a mock endpoint. The developer wants to update the integration request mapping template so the endpoint will respond to mock integration requests with specific HTTP status codes based on various conditions. Which statement will meet these requirements?",
-      "options": [
-        "",
-        "",
-        "",
-        ""
-      ],
-      "answers": "B",
-      "explanation": "The intended mapping template statement uses the #set directive and $context or $input variables in Velocity Template Language to conditionally choose an integration.response.statuscode value based on the incoming request's parameters, letting the mock endpoint branch its response HTTP status code by condition. (The source data for this question is missing the actual mapping template option text, so only the general 'use VTL conditional logic in the mapping template to set the status code' principle it tests can be confirmed here.)",
-      "topic": "Deployment",
-      "url": "https://www.examtopics.com/discussions/amazon/view/156656-exam-aws-certified-developer-associate-dva-c02-topic-1-question-483-discussion/",
-      "themes": {
-        "services": [
-          "api-gateway"
-        ],
-        "concepts": [
-          "api-design",
-          "testing"
-        ],
-        "questionTypes": [
-          "architecture-decision"
-        ]
-      }
-    },
-    {
       "id": "482",
       "question": "A large company has its application components distributed across multiple AWS accounts. The company needs to collect and visualize trace data across these accounts. What should be used to meet these requirements?",
       "options": [
@@ -14871,34 +14710,6 @@
         "questionTypes": [
           "configuration",
           "multi-step-scenario"
-        ]
-      }
-    },
-    {
-      "id": "501",
-      "question": "A developer has an AWS Lambda function that needs to access an Amazon DynamoDB table named DailyOrders. The Lambda function must be able to perform read operations on the table. The Lambda function must not be able to perform write operations on the table. The developer needs to create an IAM policy to associate with the Lambda function's execution role. Which IAM policy statement will meet these requirements?",
-      "options": [
-        "",
-        "",
-        "",
-        ""
-      ],
-      "answers": "D",
-      "explanation": "The intended policy grants only DynamoDB read actions, such as GetItem, Query, and Scan, scoped to the DailyOrders table's ARN, and explicitly omits any write actions such as PutItem, UpdateItem, or DeleteItem, matching least-privilege read-only access. (The source data for this question is missing the actual policy JSON option text, so only the general read-only least-privilege principle it tests can be confirmed here.)",
-      "topic": "Security",
-      "url": "https://www.examtopics.com/discussions/amazon/view/152775-exam-aws-certified-developer-associate-dva-c02-topic-1-question-503-discussion/",
-      "themes": {
-        "services": [
-          "lambda",
-          "iam",
-          "dynamodb"
-        ],
-        "concepts": [
-          "serverless",
-          "authorization"
-        ],
-        "questionTypes": [
-          "architecture-decision"
         ]
       }
     },
@@ -16029,31 +15840,6 @@
         ],
         "questionTypes": [
           "most-performant",
-          "architecture-decision"
-        ]
-      }
-    },
-    {
-      "id": "541",
-      "question": "A company has an AWS Step Functions state machine named myStateMachine. The company configured a service role for Step Functions. The developer must ensure that only the myStateMachine state machine can assume the service role. Which statement should the developer add to the trust policy to meet this requirement?",
-      "options": [
-        "",
-        "",
-        "",
-        ""
-      ],
-      "answers": "A",
-      "explanation": "The trust policy on the service role must include a condition, using aws:SourceArn scoped to the specific state machine's ARN, so that sts:AssumeRole from the Step Functions service principal is restricted to requests originating from that exact state machine rather than trusting any state machine in the account by default. (The source data for this question is missing the actual policy statement option text, so only the general 'restrict the trust policy to a specific source ARN' principle it tests can be confirmed here.)",
-      "topic": "Security",
-      "url": "https://www.examtopics.com/discussions/amazon/view/157498-exam-aws-certified-developer-associate-dva-c02-topic-1-question-543-discussion/",
-      "themes": {
-        "services": [
-          "step-functions"
-        ],
-        "concepts": [
-          "authorization"
-        ],
-        "questionTypes": [
           "architecture-decision"
         ]
       }
