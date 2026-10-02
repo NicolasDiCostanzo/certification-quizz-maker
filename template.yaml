@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: certification-quizz-maker backend - Phase 1 identity (Cognito User Pool)
+Description: opencertcraft backend - Phase 1 identity (Cognito User Pool)
 
 Parameters:
   SiteCustomDomain:

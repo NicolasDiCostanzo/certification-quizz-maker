@@ -1,6 +1,6 @@
 # OpenCertCraft
 
-[![CI](https://github.com/NicolasDiCostanzo/dva-c02-quizz/actions/workflows/ci.yml/badge.svg)](https://github.com/NicolasDiCostanzo/dva-c02-quizz/actions/workflows/ci.yml)
+[![CI](https://github.com/NicolasDiCostanzo/opencertcraft/actions/workflows/ci.yml/badge.svg)](https://github.com/NicolasDiCostanzo/opencertcraft/actions/workflows/ci.yml)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)](./LICENSE)
 
 A certification-agnostic quiz web app for exam preparation. Ships with several certification question banks built in; other certifications are added as new built-in bundles — request one via a GitHub issue.
@@ -23,7 +23,7 @@ Built with **Vue 3 + TypeScript + Vite**, pinned with **Pinia**. The frontend is
 
 The **question text and answer keys** come from the community-shared sources themselves, and were taken from the most-accepted community answer, corroborated against vote counts where available — and flagged for review when the source was ambiguous. That part is *not* LLM-generated, but it is still only as good as those sources.
 
-Because the generated parts can be wrong, **if you spot a bad explanation, a mis-tagged question, a wrong answer key, or a question that no longer matches the official exam, please [open an issue](https://github.com/NicolasDiCostanzo/dva-c02-quizz/issues).** That's the single most useful contribution you can make, and corrections are merged the same way as any other change. Quote the question id, and say what it should say instead.
+Because the generated parts can be wrong, **if you spot a bad explanation, a mis-tagged question, a wrong answer key, or a question that no longer matches the official exam, please [open an issue](https://github.com/NicolasDiCostanzo/opencertcraft/issues).** That's the single most useful contribution you can make, and corrections are merged the same way as any other change. Quote the question id, and say what it should say instead.
 
 ## Features
 
@@ -68,10 +68,10 @@ The frontend is fully static — `npm run build` emits a `dist/` directory you c
 To deploy to the project's own S3 + CloudFront setup:
 
 ```bash
-npm run deploy   # build + S3 sync + CloudFront invalidation
+npm run deploy:front   # build + S3 sync + CloudFront invalidation
 ```
 
-Defaults to stack `cert-quiz-maker`; override with `STACK_NAME=<stack>`. `template.yaml` (SAM) defines the optional AWS backend — Cognito user pool, HTTP API, two Lambdas, DynamoDB, and the S3 + CloudFront layer with Origin Access Control and ACM.
+Defaults to stack `sam-app` (the stack `samconfig.toml` deploys to); override with `STACK_NAME=<stack>`. `template.yaml` (SAM) defines the optional AWS backend — Cognito user pool, HTTP API, two Lambdas, DynamoDB, and the S3 + CloudFront layer with Origin Access Control and ACM.
 
 ## Adding a new certification
 

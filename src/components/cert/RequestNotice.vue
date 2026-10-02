@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { links } from '../../config';
 import { texts } from '../../texts/en';
 
-const ISSUES_URL = 'https://github.com/NicolasDiCostanzo/dva-c02-quizz/issues/new'
+const ISSUES_URL = `${links.repo}/issues/new`
 </script>
 
 <template>

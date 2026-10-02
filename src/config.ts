@@ -6,7 +6,7 @@ export interface AwsConfig {
 }
 
 export const links = {
-  repo: 'https://github.com/NicolasDiCostanzo/certification-quizz-maker',
+  repo: 'https://github.com/NicolasDiCostanzo/opencertcraft',
   sponsor: 'https://github.com/sponsors/NicolasDiCostanzo',
 } as const
 
