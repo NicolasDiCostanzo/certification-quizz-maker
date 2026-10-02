@@ -4,7 +4,7 @@ This file gives any LLM / coding agent (Claude Code, Codex, Cursor, Cline, Gemin
 
 ## What this project is
 
-**certification-quizz-maker** — a cert-agnostic quiz web app for exam preparation. Fully static (no backend, no accounts), local-first: progress lives in the browser's localStorage.
+**opencertcraft** — a cert-agnostic quiz web app for exam preparation. Fully static (no backend, no accounts), local-first: progress lives in the browser's localStorage.
 
 ## Tech stack
 
